@@ -11,9 +11,9 @@ var general = "246190532949180417" // TpF general channel
 var botstuff = "335767575973593099" // TpF botstuff channel
 var information = "```This bot is running on a modified version of York's code. See website for details.\nhttps://anidiots.guide/```"
 
-var feedparser = require('ortoo-feedparser');
+//var feedparser = require('ortoo-feedparser');
 
-var url = "https://www.reddit.com/r/TransportFever/new/.rss?sort=new";
+//var url = "https://www.reddit.com/r/TransportFever/new/.rss?sort=new";
 
 
 
@@ -412,6 +412,7 @@ client.on("message", (message) => {
     sql.get(`SELECT * FROM links WHERE userId = "${personid}"`).then(row => {
       twitch = row.twitch
     })
+    let rolearray = (message.guild.roles.get(personid))
 
 
 
@@ -450,7 +451,7 @@ client.on("message", (message) => {
                 "value": (level),
                 "inline": true
               },
-              {
+              {              
                 "name": (person) + "'s Youtube",
                 "value": (youtube)
               },
