@@ -1,8 +1,0 @@
-{ 
-    "embed": { 
-        "title": "{{Title}}",
-        "author": "{{Author}}",
-        "description": "{{Content}}"
-    
-    }
-}
