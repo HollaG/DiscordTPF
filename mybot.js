@@ -9,7 +9,7 @@ var welcome = "246190912315719680" //TpF wlc channel
 var announcements = "327046901520400404" // TpF annc channel
 var general = "246190532949180417" // TpF general channel
 var botstuff = "335767575973593099" // TpF botstuff channel
-var information = "```This bot is running on a modified version of York's code. See website for details.\nhttps://anidiots.guide/```"
+var information = "```This bot is running on a modified version of York's code. See website for details.\nhttps://anidiots.guide/. \n\nSource code for this bot is available on Github at https://github.com/HollaG/DiscordTPF```"
 
 //var feedparser = require('ortoo-feedparser');
 
