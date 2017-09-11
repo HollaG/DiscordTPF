@@ -1,9 +1,9 @@
 const Discord = require("discord.js");
 const client = new Discord.Client();
-const config = require("./config.json");
+const config = require("./configuration/config.json");
 const fs = require("fs");
 const sql = require("sqlite");
-sql.open("./scores.sqlite");
+sql.open("./scoring/scores.sqlite");
 
 var welcome = "246190912315719680" //TpF wlc channel
 var announcements = "327046901520400404" // TpF annc channel
