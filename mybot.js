@@ -17,7 +17,7 @@ client.login(config.token);
 
 client.on("ready", () => {
     console.log("I am ready!");
-    client.channels.get(botstuff).send("Bot has restarted on " + new Date().toString())
+    client.channels.get(testBotStuff).send("Bot has restarted on " + new Date().toString())
     //client.user.setGame("transportfever.com");
     client.user.setPresence({
         game: {
@@ -402,7 +402,7 @@ client.on("message", (message) => {
     var mclength = message.content.split(' ')
     switch (mclength.length) {
         case 1:
-            console.log(mclength.length)
+            
             switch (message.content) {
                 case config.prefix + "twitch":
                     sql.get(`SELECT * FROM links WHERE userId ="${message.author.id}"`).then(row => {
