@@ -83,10 +83,9 @@ client.on("message", message => {
 
     // if (new Date().getDate() == 1) 
     if (message.content == "!temp") {
-        sql.get(`SELECT ALL * FROM scores ORDER BY points DESC LIMIT 3`).then(row => {
-            for (var i = 0; i < 3; i++) {
-                console.log(row.username)
-            }
+        var Top5User = sql.get(`SELECT userId FROM scores ORDER BY points DESC LIMIT 5`).then(row => {
+            console.log(row[2].userId)
+            console.log(Top5User)
         }).catch((e) => console.log(e))
 
     }
