@@ -102,6 +102,7 @@ client.on("message", message => {
     if (new Date().getDate() == 1 || message.author.id == config.ownerID && message.content === "!updateRoles") {
         client.channels.get(audit_log).send("Updating user roles for " + Month())
         client.channels.get(announcements).send("Active user roles have been updated for " + Month())
+        console.log("updating role")
 
         retrieveData()
         setTimeout(clearDatabase, 1000)
