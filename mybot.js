@@ -23,7 +23,7 @@ client.login(tokenId.token);
 
 client.on("ready", () => {
     console.log("I am ready!");
-    client.channels.get(testBotStuff).send("Bot has restarted on " + new Date().toString())
+    client.channels.get(botstuff).send("Bot has restarted on " + new Date().toString())
     //client.user.setGame("transportfever.com");
     client.user.setPresence({
         game: {
