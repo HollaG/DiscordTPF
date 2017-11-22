@@ -97,54 +97,56 @@ client.on("message", message => {
 });
 
 // Updating of scores
-client.on("message", message => {
+// client.on("message", message => {
 
-    if (new Date().getDate() == 1 || message.author.id == config.ownerID && message.content === "!updateRoles") {
-        client.channels.get(audit_log).send("Updating user roles for " + Month())
-        client.channels.get(announcements).send("Active user roles have been updated for " + Month())
-        console.log("updating role")
+//     if (new Date().getDate() == 1 || message.author.id == config.ownerID && message.content === "!updateRoles") {
+//         client.channels.get(audit_log).send("Updating user roles for " + Month())
+//         client.channels.get(announcements).send("Active user roles have been updated for " + Month())
+//         console.log("updating role")
+//         var role = message.guild.roles.find("name", "This is a test role to check if my bot is working correctly")
+//         member.removeRole(role).catch(console.error)
+        
+//         setTimeout(retrieveData, 500)
 
-        retrieveData()
-        setTimeout(clearDatabase, 1000)
+//         setTimeout(clearDatabase, 1000)
 
-        function retrieveData() {
-            sql.all(`SELECT userId, username, points FROM scores ORDER BY points DESC LIMIT 6`).then(rows => { // select each column
-                //var firstP; var secondP; var thirdP; var fourthP; var fifthP
-                var role = message.guild.roles.find("name", "This is a test role to check if my bot is working correctly")
-                for (var i = 0; i < 6; i++) {
-                    //console.log(`${rows[i].userId}`)
-                    let person = message.guild.members.get(rows[i].userId)
-                    let points = rows[i].points
-                    let NameOfUser = rows[i].username
-                    if (typeof person === "undefined") {
-                        client.channels.get(audit_log).send(NameOfUser + " is not in the guild, not updating")
-                    } else {
-                        person.addRole(role).catch(console.error)
-                        // console.log(typeof person)
-                        client.channels.get(announcements).send("User " + NameOfUser + " now has the role with " + points + " points!")
-                    }
-                }
-            })
-        }
+//         function retrieveData() {
+//             sql.all(`SELECT userId, username, points FROM scores ORDER BY points DESC LIMIT 6`).then(rows => { // select each column               
+                
+//                 for (var i = 0; i < 6; i++) {
+//                     //console.log(`${rows[i].userId}`)
+//                     let person = message.guild.members.get(rows[i].userId)
+//                     let points = rows[i].points
+//                     let NameOfUser = rows[i].username
+//                     if (typeof person === "undefined") {
+//                         client.channels.get(audit_log).send(NameOfUser + " is not in the guild, not updating")
+//                     } else {
+//                         person.addRole(role).catch(console.error)
+//                         // console.log(typeof person)
+//                         client.channels.get(announcements).send("User " + NameOfUser + " now has the role with " + points + " points!")
+//                     }
+//                 }
+//             })
+//         }
 
-        //     /* 
-        //         1. add columns total_score and date of year, check if exists, if already, do nothing
-        //         2. set date of year to points
-        //         3. Add points to total score 
-        //         4. set points to zero
-        //     */
+//         //     /* 
+//         //         1. add columns total_score and date of year, check if exists, if already, do nothing
+//         //         2. set date of year to points
+//         //         3. Add points to total score 
+//         //         4. set points to zero
+//         //     */
 
-        let table_name = Month() + "_" + Year() // add String() ? 
-        console.log(table_name)
-        function delRecords() { sql.run(`UPDATE scores SET points ='0', level = '0'`).catch((e) => console.log(e)) }
-        function clearDatabase() {
-            sql.run(`ALTER TABLE scores ADD COLUMN '${table_name}'`).then(() => { // Add New_Month column (delete this)
-                sql.run(`UPDATE scores SET '${table_name}' = points`).then(() => delRecords())
-            }).catch(e => console.log(e))
-        }
+//         let table_name = Month() + "_" + Year() // add String() ? 
+//         console.log(table_name)
+//         function delRecords() { sql.run(`UPDATE scores SET points ='0', level = '0'`).catch((e) => console.log(e)) }
+//         function clearDatabase() {
+//             sql.run(`ALTER TABLE scores ADD COLUMN '${table_name}'`).then(() => { // Add New_Month column (delete this)
+//                 sql.run(`UPDATE scores SET '${table_name}' = points`).then(() => delRecords())
+//             }).catch(e => console.log(e))
+//         }
 
-    }
-})
+//     }
+// })
 
 // Controls the updating of points
 client.on("message", message => {
