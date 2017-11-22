@@ -1,0 +1,20 @@
+{
+    "!help": " ",
+    "!addbot": "Test-adding...",
+    "!ssl": " ",
+    "!syl": " ",
+    "!stl": " ",
+    "!mcount": " ",
+    "!status": "If I didn't reply to you I wouldn't be online, now would I?",
+    "!information": "```This bot is running on a modified version of York's code. See website for details.\nhttps://anidiots.guide/. \n\nSource code for this bot is available on Github at https://github.com/HollaG/DiscordTPF```",
+    "!level": " ",
+    "!uptime": " ",
+    "!server": " ",
+    "!twitch": " ",
+    "!steam": " ",
+    "!youtube": " ",
+    "!profile": " ",
+    "!ping": "pong!",
+    "!foo": "bar",
+    "!setlinks": " "
+}

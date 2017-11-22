@@ -1,6 +1,8 @@
 const Discord = require("discord.js");
 const client = new Discord.Client();
 const config = require("./configuration/config.json");
+const commands = require("./commands/commands.json");
+const tokenId = require("./configuration/tokenId.json");
 const fs = require("fs");
 const sql = require("sqlite");
 sql.open("./scoring/scores.sqlite");
@@ -10,14 +12,18 @@ var announcements = "327046901520400404" // TpF annc channel
 var general = "246190532949180417" // TpF general channel
 var botstuff = "335767575973593099" // TpF botstuff channel 
 var information = "```This bot is running on a modified version of York's code. See website for details.\nhttps://anidiots.guide/. \n\nSource code for this bot is available on Github at https://github.com/HollaG/DiscordTPF```"
-var server = 335619483018461194
+var server = "335619483018461194"
 var testBotStuff = "335619483018461194" // testserver 
+var audit_log = "382371100690219028"
 
-client.login(config.token);
+var BotStuff_audit = "382372304619044865"
+var BotStuff_ann = "382372383421628417"
+
+client.login(tokenId.token);
 
 client.on("ready", () => {
     console.log("I am ready!");
-    client.channels.get('335767575973593099').send("Bot has restarted on " + new Date().toString())
+    client.channels.get(testBotStuff).send("Bot has restarted on " + new Date().toString())
     //client.user.setGame("transportfever.com");
     client.user.setPresence({
         game: {
@@ -51,11 +57,23 @@ function ignore() {
 }
 
 function Month() {
-    return new Date().getMonth()
+    var monthNames = ["January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ];
+    var d = new Date()
+    return monthNames[d.getMonth()]
+
+
+
+
 }
 
 function Year() {
     return new Date().getFullYear()
+}
+
+function DateInMonth() {
+    return new Date().getDate()
 }
 
 // eval 
@@ -78,18 +96,53 @@ client.on("message", message => {
     }
 });
 
-// temp command for testing
+// Updating of scores
 client.on("message", message => {
 
-    // if (new Date().getDate() == 1) 
-    if (message.content == "!temp") {
-        var Top5User = sql.get(`SELECT userId FROM scores ORDER BY points DESC LIMIT 5`).then(row => {
-            console.log(row[2].userId)
-            console.log(Top5User)
-        }).catch((e) => console.log(e))
+    if (new Date().getDate() == 1 || message.author.id == config.ownerID && message.content === "!updateRoles") {
+        client.channels.get(audit_log).send("Updating user roles for " + Month())
+        client.channels.get(announcements).send("Active user roles have been updated for " + Month())
+
+        retrieveData()
+        setTimeout(clearDatabase, 1000)
+
+        function retrieveData() {
+            sql.all(`SELECT userId, username, points FROM scores ORDER BY points DESC LIMIT 6`).then(rows => { // select each column
+                //var firstP; var secondP; var thirdP; var fourthP; var fifthP
+                var role = message.guild.roles.find("name", "This is a test role to check if my bot is working correctly")
+                for (var i = 0; i < 6; i++) {
+                    //console.log(`${rows[i].userId}`)
+                    let person = message.guild.members.get(rows[i].userId)
+                    let points = rows[i].points
+                    let NameOfUser = rows[i].username
+                    if (typeof person === "undefined") {
+                        client.channels.get(audit_log).send(NameOfUser + " is not in the guild, not updating")
+                    } else {
+                        person.addRole(role).catch(console.error)
+                        // console.log(typeof person)
+                        client.channels.get(announcements).send("User " + NameOfUser + " now has the role with " + points + " points!")
+                    }
+                }
+            })
+        }
+
+        //     /* 
+        //         1. add columns total_score and date of year, check if exists, if already, do nothing
+        //         2. set date of year to points
+        //         3. Add points to total score 
+        //         4. set points to zero
+        //     */
+
+        let table_name = Month() + "_" + Year() // add String() ? 
+        console.log(table_name)
+        function delRecords() { sql.run(`UPDATE scores SET points ='0', level = '0'`).catch((e) => console.log(e)) }
+        function clearDatabase() {
+            sql.run(`ALTER TABLE scores ADD COLUMN '${table_name}'`).then(() => { // Add New_Month column (delete this)
+                sql.run(`UPDATE scores SET '${table_name}' = points`).then(() => delRecords())
+            }).catch(e => console.log(e))
+        }
 
     }
-
 })
 
 // Controls the updating of points
@@ -163,7 +216,7 @@ client.on("message", (message) => {
 
         var nameofuser = (message.mentions.users.first());
     if (!message.mentions.users.first()) {
-        return 
+        return
     }
     var usernumber = (message.mentions.users.first().id);
     if (message.content.startsWith(config.prefix + "mcount")) {
@@ -196,28 +249,9 @@ client.on("message", (message) => {
         }
     }
 
-    let commands = {
-        "!help": " ",
-        "!addbot": "Test-adding...",
-        "!ssl": " ",
-        "!syl": " ",
-        "!stl": " ",
-        "!mcount": "Retrieving message count for " + `${message.author.username}` + "...",
-        "!status": "If I didn't reply to you I wouldn't be online, now would I?",
-        "!information": `${information}`,
-        "!level": "Retrieving level count for " + `${message.author.username}` + "...",
-        "!uptime": " ",
-        "!server": "Retrieving server info...",
-        "!twitch": " ",
-        "!steam": " ",
-        "!youtube": " ",
-        "!profile": " ",
-        "!ping": "pong!",
-        "!foo": "bar",
-        "!setlinks": " "
-    }
+
     if (!message.content.startsWith(config.prefix) || message.author.bot) return; //if message does not start with ! or is sent from a bot, return
-   
+
 
 
 
@@ -258,7 +292,7 @@ client.on("message", (message) => {
 
 
 
-    
+
 
 
 
@@ -277,11 +311,12 @@ client.on("message", (message) => {
         "bye": "Aww, goodbye :(",
         "gn": "Goodnight, " + `${message.author.username}` + "!",
         "thanks": "you're welcome :)",
-        "what is the answer to the universe?": "42"
+        "what is the answer to the universe?": "42",
+        "gm": "good morning!"
     }
     if (wordResponse[message.content]) {
         message.channel.send(wordResponse[message.content]);
-        
+
     }
 
 });
@@ -291,24 +326,23 @@ client.on("message", (message) => {
     if (message.content == config.prefix + "server") {
 
 
-
-        let totalMembers = (message.guild.memberCount + " members")
+        var totalMembers = (message.guild.memberCount + " members")
         var allchannellist = message.guild.channels
-        let DateofCreation = new Date(message.guild.createdAt).toDateString()
-        let GuildOwner = message.guild.owner.user.username
-        let GuildDefaultChannel = message.guild.defaultChannel.name
-        let serverIcon = message.guild.iconURL
-        let serverName = message.guild.name
-        let region = message.guild.region
-        let rolelist = message.guild.roles.array().toString()
-        let channelcount = message.guild.channels.array().length
+        var DateofCreation = new Date(message.guild.createdAt).toDateString()
+        var GuildOwner = message.guild.owner.user.username
+        var GuildDefaultChannel = message.guild.defaultChannel.name
+        var serverIcon = message.guild.iconURL
+        var serverName = message.guild.name
+        var region = message.guild.region
+        var rolelist = message.guild.roles.array().toString()
+        var channelcount = message.guild.channels.array().length
 
-        let textChannel = allchannellist.findAll("type", "text").toString()
-        let voiceChannel = allchannellist.findAll("type", "voice").toString()
-        
+        var textChannel = allchannellist.findAll("type", "text").toString()
+        var voiceChannel = allchannellist.findAll("type", "voice").toString()
 
-        setTimeout(function () {
 
+
+        function embed() {
             message.channel.send({
                 "embed": {
                     "title": "Stats for " + (serverName),
@@ -372,7 +406,9 @@ client.on("message", (message) => {
                 console.error(e)
             })
 
-        }, 250);
+        }
+
+        setTimeout(embed, 250);
 
         function test() {
             message.channel.send("testing")
@@ -401,7 +437,7 @@ client.on("message", (message) => {
     var mclength = message.content.split(' ')
     switch (mclength.length) {
         case 1:
-            
+
             switch (message.content) {
                 case config.prefix + "twitch":
                     sql.get(`SELECT * FROM links WHERE userId ="${message.author.id}"`).then(row => {
@@ -424,8 +460,8 @@ client.on("message", (message) => {
                         };
                     });
                     break;
-                
-                
+
+
 
             }
         case 2:
@@ -552,92 +588,91 @@ client.on("message", (message) => {
         })
         //let rolearray = (message.guild.roles.get(personid))
         let role;
-        if (message.mentions.users.size >= 1) { 
-            if (message.mentions.members.first().highestRole.name == "@everyone") { 
+        if (message.mentions.users.size >= 1) {
+            if (message.mentions.members.first().highestRole.name == "@everyone") {
                 role = "No role for this user!"
-            } else { 
+            } else {
                 role = message.mentions.members.first().highestRole.name
             }
-        } else { 
+        } else {
             if (message.member.highestRole.name == "@everyone") {
                 role = "No role for this user!"
             } else {
                 role = message.member.highestRole.name
             }
         }
-        
+
         let joinDate;
         if (message.mentions.users.size >= 1) {
             joinDate = new Date(message.mentions.members.first().joinedAt).toDateString()
         } else {
             joinDate = new Date(message.member.joinedAt).toDateString()
         }
+        let userIcon;
+        if (message.mentions.users.size >= 1) {
+            userIcon = message.mentions.users.first().displayAvatarURL
+        } else {
+            userIcon = message.client.user.displayAvatarURL
+        }
 
 
-        embedProfile()
+        setTimeout(embedProfile, 150)
         function embedProfile() {
-            if (typeof points !== "undefined" && typeof level !== "undefined" && typeof youtube !== "undefined" && typeof twitch !== "undefined" && typeof steam !== "undefined") {
-                message.channel.send({
-                    "embed": {
+            message.channel.send({
+                "embed": {
 
-                        "description": "Customize your profile! To see how, type `!help profile`",
+                    "description": "Customize your profile! To see how, type `!help profile`",
 
-                        "color": 11161093,
-                        "timestamp": (message.createdAt),
-                        "footer": {
-                            "text": "Requested by " + (message.author.username)
-                        },
-                        "thumbnail": {
-                            "url": "https://cdn.discordapp.com/attachments/353555990815440897/355673097434824704/actualtpflogo.png"
-                        },
+                    "color": 11161093,
+                    "timestamp": (message.createdAt),
+                    "footer": {
+                        "text": "Requested by " + (message.author.username)
+                    },
+                    "thumbnail": {
+                        "url": (userIcon)
+                    },
 
-                        "author": {
-                            "name": (person) + "'s profile",
-                            "icon_url": (person.avatarURL)
-                        },
-                        "fields": [{
-                            "name": "Sent messages",
-                            "value": (points),
-                            "inline": true
-                        },
-                        {
-                            "name": "Current level",
-                            "value": (level),
-                            "inline": true
-                        },
-                        {
-                            "name": "Current highest role, if any",
-                            "value": (role),
-                            "inline": true,
-                        },
-                        {
-                            "name": "Join date",
-                            "value": (joinDate),
-                            "inline": true,
-                        },
-                        {
-                            "name": (person) + "'s Youtube",
-                            "value": (youtube)
-                        },
-                        {
-                            "name": (person) + "'s Steam",
-                            "value": (steam)
+                    "author": {
+                        "name": (person) + "'s profile",
+                        "icon_url": (userIcon)
+                    },
+                    "fields": [{
+                        "name": "Sent messages",
+                        "value": (points),
+                        "inline": true
+                    },
+                    {
+                        "name": "Current level",
+                        "value": (level),
+                        "inline": true
+                    },
+                    {
+                        "name": "Current highest role, if any",
+                        "value": (role),
+                        "inline": true,
+                    },
+                    {
+                        "name": "Join date",
+                        "value": (joinDate),
+                        "inline": true,
+                    },
+                    {
+                        "name": (person) + "'s Youtube",
+                        "value": (youtube)
+                    },
+                    {
+                        "name": (person) + "'s Steam",
+                        "value": (steam)
 
-                        },
-                        {
-                            "name": (person) + "'s Twitch",
-                            "value": (twitch),
+                    },
+                    {
+                        "name": (person) + "'s Twitch",
+                        "value": (twitch),
 
-                        }
-                        ]
                     }
-                })
-
-            } else {
-                setTimeout(embedProfile, 250);
-
-            }
-
+                    ]
+                }
+            })
         }
     }
 })

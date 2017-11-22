@@ -1,0 +1,5 @@
+{  
+  "prefix": "!",
+  "ownerID": "188192190705434624",  
+  "commandlist": "```!ping \n\n!status \n\n!foo \n\n!help \n\n!twitch \n\n!youtube \n\n!steam \n\n!mcount : Check message count. \n\n!status \n\n!stl : Set Twitch link. Usage: !stl (link) \n\n!syl : Set Youtube link. Usage: !syl (link) \n\n!ssl : Set Steam link. Usage : !ssl (link) \n\n!setlinks : Set all links in one message. Usage : !setlinks (Twitch) (Youtube) (Steam) \n\n!profile : View your profile!```"
+}
