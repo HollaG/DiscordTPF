@@ -16,5 +16,7 @@
     "!profile": " ",
     "!ping": "pong!",
     "!foo": "bar",
-    "!setlinks": " "
+    "!setlinks": " ",
+    "!top": " ",
+    "!eval": " "
 }
