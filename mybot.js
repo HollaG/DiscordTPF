@@ -7,15 +7,20 @@ const fs = require("fs");
 const sql = require("sqlite");
 sql.open("./scoring/scores.sqlite");
 const activeUser = "I am active!";
+const ontime = require("ontime")
 
+
+
+
+var TpF = "246190532949180417"
 var welcome = "246190912315719680" //TpF wlc channel
-var announcements = "327046901520400404" // TpF annc channel
+var announcements = "386091548388884480" // TpF annc channel
 var general = "246190532949180417" // TpF general channel
 var botstuff = "335767575973593099" // TpF botstuff channel 
 var information = "```This bot is running on a modified version of York's code. See website for details.\nhttps://anidiots.guide/. \n\nSource code for this bot is available on Github at https://github.com/HollaG/DiscordTPF```"
 var server = "335619483018461194"
 var testBotStuff = "335619483018461194" // testserver 
-var audit_log = "382371100690219028" 
+var audit_log = "382371100690219028"
 
 var BotStuff_audit = "382372304619044865"
 var BotStuff_ann = "382372383421628417"
@@ -77,6 +82,90 @@ function DateInMonth() {
     return new Date().getDate()
 }
 
+
+//Updating of scores
+
+ontime({
+    cycle: [ '4T13:00:00',]
+}, function (ot, message) {
+    console.log("running program");
+    updateRole(message);
+    ot.done();
+    return
+})
+
+
+function updateRole(message) {
+    
+    client.channels.get(/*BotStuff_audit*/audit_log).send("Updating user roles for " + Month())
+    client.channels.get(/*BotStuff_ann*/announcements).send("Active user roles have been updated for " + Month())
+    console.log("updating role")
+    let guild = client.guilds.find("name", "Transport Fever")
+    var role = guild.roles.find("name", activeUser)
+    if (!role) { console.log("role doesn't exist") } else { role.delete() }
+
+    setTimeout(function () {
+        guild.createRole({
+            name: activeUser,
+            color: "GOLD",
+            hoist: true,
+            position: 4,
+        })
+    }, 200)
+    setTimeout(retrieveData, 1000)
+
+    setTimeout(clearDatabase, 3000)
+
+    //retrieve who is top
+    function retrieveData() {
+        sql.all(`SELECT userId, username, points FROM scores ORDER BY points DESC LIMIT 6`).then(rows => { // select each column               
+
+            for (var i = 0; i < 6; i++) {
+                console.log(`${rows[i].userId}`)
+                let person = guild.members.get(rows[i].userId)
+                let points = rows[i].points
+                let NameOfUser = rows[i].username
+                if (typeof person === "undefined") {
+                    client.channels.get(/*BotStuff_audit*/audit_log).send(NameOfUser + " is not in the guild, not updating. " + new Date().toString())
+                } else {
+                    //person is not undefined
+
+                    var myRole = guild.roles.find("name", activeUser)
+                    //console.log(myRole)
+                    person.addRole(myRole).catch(console.error)
+                    // console.log(typeof person)
+                    client.channels.get(/*BotStuff_ann*/announcements).send("User " + NameOfUser + " now has the role with " + points + " points!")
+                }
+                if (i === 5) {
+                    client.channels.get(/*BotStuff_ann*/announcements).send("Roles have been updated on " + new Date().toString())
+                }
+
+            }
+        })
+    }
+
+    /* 
+        1. add columns total_score and date of year, check if exists, if already, do nothing
+        2. set date of year to points
+        3. Add points to total score 
+        4. set points to zero
+    */
+
+
+    //add new column   
+    let table_name = Month() + "_" + Year() // add String() ? 
+    console.log(table_name)
+    function delRecords() { sql.run(`UPDATE scores SET points ='0', level = '0'`).catch((e) => console.log(e)) }
+    function clearDatabase() {
+        sql.run(`ALTER TABLE scores ADD COLUMN '${table_name}'`).then(() => { // Add New_Month column (delete this)
+            sql.run(`UPDATE scores SET '${table_name}' = points`).then(() => delRecords())
+        }).catch(e => console.log(e))
+    }
+
+
+
+}
+
 // eval 
 client.on("message", message => {
     const args = message.content.split(" ").slice(1);
@@ -97,88 +186,33 @@ client.on("message", message => {
     }
 });
 
-//Updating of scores
 client.on("message", message => {
 
-    if (new Date().getDate() == 1 || message.author.id == config.ownerID && message.content === "!updateRoles") {
-        client.channels.get(/*BotStuff_audit*/audit_log).send("Updating user roles for " + Month())
-        client.channels.get(/*BotStuff_ann*/announcements).send("Active user roles have been updated for " + Month())
-        console.log("updating role")
-        var role = message.guild.roles.find("name", activeUser)
-        if (!role) { console.log("role doesn't exist") } else { role.delete()}
-        
-        setTimeout(function() { 
-            message.guild.createRole({ 
-                name: activeUser,
-                color: "GOLD",
-                hoist: true,
-                position: 4,
-            })
-        }, 200)
-        
-
-
-
-        setTimeout(retrieveData, 1000)
-
-        setTimeout(clearDatabase, 3000)
-
-        //retrieve who is top
-        function retrieveData() {
-            sql.all(`SELECT userId, username, points FROM scores ORDER BY points DESC LIMIT 6`).then(rows => { // select each column               
-                
-                for (var i = 0; i < 6; i++) {
-                    console.log(`${rows[i].userId}`)
-                    let person = message.guild.members.get(rows[i].userId)
-                    let points = rows[i].points
-                    let NameOfUser = rows[i].username
-                    if (typeof person === "undefined") {
-                        client.channels.get(/*BotStuff_audit*/audit_log).send(NameOfUser + " is not in the guild, not updating. " + new Date().toString())
-                    } else {
-                        //person is not undefined
-
-                        var myRole = message.guild.roles.find("name", activeUser)
-                        //console.log(myRole)
-                        person.addRole(myRole).catch(console.error)
-                        // console.log(typeof person)
-                        client.channels.get(/*BotStuff_ann*/announcements).send("User " + NameOfUser + " now has the role with " + points + " points!")
-                    }
-                    if (i === 5) { 
-                        client.channels.get(/*BotStuff_ann*/announcements).send("Roles have been updated on " + new Date().toString())
-                    }
-                
-                }
-            })
-        }
-
-            /* 
-                1. add columns total_score and date of year, check if exists, if already, do nothing
-                2. set date of year to points
-                3. Add points to total score 
-                4. set points to zero
-            */
-        
-            
-        //add new column   
-        let table_name = Month() + "_" + Year() // add String() ? 
-        console.log(table_name)
-        function delRecords() { sql.run(`UPDATE scores SET points ='0', level = '0'`).catch((e) => console.log(e)) }
-        function clearDatabase() {
-            sql.run(`ALTER TABLE scores ADD COLUMN '${table_name}'`).then(() => { // Add New_Month column (delete this)
-                sql.run(`UPDATE scores SET '${table_name}' = points`).then(() => delRecords())
-            }).catch(e => console.log(e))
-        }
-
-       
-
+    if (message.content === "!shutdown") {
+        //updateRole(message)
+        process.exit()
     }
+    if (message.content === "!test") { 
+        updateRole(message)
+    }
+
+
 })
+
+
+
+
+
+
+
+
+
 
 // Controls the updating of points
 client.on("message", message => {
 
 
-    if (message.content.startsWith(config.prefix) || message.channel.type === "dm") {
+    if (message.content.startsWith(config.prefix) || message.channel.type === "dm" || message.author.id === "354834684234170378") {
         return
     } else {
 
@@ -211,16 +245,20 @@ client.on("message", message => {
     }
 })
 
-client.on("message", message => { 
-    if (message.content === "!top") { 
+//check top
+client.on("message", message => {
+    if (message.content === config.prefix + "top") {
         var firstP; var secondP; var thirdP; var fourthP; var fifthP
-        sql.all(`SELECT username, points FROM scores ORDER BY points DESC LIMIT 10`).then(rows => { 
-            for (var i = 0; i < 10; i++) { 
+        sql.all(`SELECT username, points FROM scores ORDER BY points DESC LIMIT 10`).then(rows => {
+            for (var i = 0; i < 10; i++) {
                 let NameOfUser = rows[i].username
                 let points = rows[i].points
-                !message.channel.send(`${i+1}` + "." + " " + NameOfUser + " with " + points + " points." )
+                !message.channel.send(`${i + 1}` + "." + " " + NameOfUser + " with " + points + " points.")
             }
         })
+    }
+    if (message.content === config.prefix + "test") { 
+        console.log(message.guild.roles)
     }
 })
 
