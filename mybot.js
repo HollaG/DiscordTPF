@@ -7,15 +7,17 @@ const fs = require("fs");
 const sql = require("sqlite");
 sql.open("./scoring/scores.sqlite");
 const activeUser = "I am active!";
-const ontime = require("ontime")
+const ontime = require("ontime");
 
-
-
+//modules!
+const leveling = require("./updates/points.js");
+const roleUpdates = require("./updates/roles.js")
+const getInfo = require("./information/about.js")
 
 var TpF = "246190532949180417"
 var welcome = "246190912315719680" //TpF wlc channel
 var announcements = "386091548388884480" // TpF annc channel
-var general = "246190532949180417" // TpF general channel
+var general = "272094615434166272" // TpF general channel
 var botstuff = "335767575973593099" // TpF botstuff channel 
 var information = "```This bot is running on a modified version of York's code. See website for details.\nhttps://anidiots.guide/. \n\nSource code for this bot is available on Github at https://github.com/HollaG/DiscordTPF```"
 var server = "335619483018461194"
@@ -29,7 +31,7 @@ client.login(tokenId.token);
 
 client.on("ready", () => {
     console.log("I am ready!");
-    client.channels.get(/*testBotStuff*/botstuff).send("Bot has restarted on " + new Date().toString())
+    client.channels.get(/*botstuff*/testBotStuff).send("Bot has restarted on " + new Date().toString())
     //client.user.setGame("transportfever.com");
     client.user.setPresence({
         game: {
@@ -69,9 +71,6 @@ function Month() {
     var d = new Date()
     return monthNames[d.getMonth()]
 
-
-
-
 }
 
 function Year() {
@@ -86,85 +85,15 @@ function DateInMonth() {
 //Updating of scores
 
 ontime({
-    cycle: [ '4T13:00:00',]
+    cycle: ['4T13:00:00',]
 }, function (ot, message) {
     console.log("running program");
-    updateRole(message);
+    roleUpdates.updateRoleTestVersion(message);
     ot.done();
     return
 })
 
 
-function updateRole(message) {
-    
-    client.channels.get(/*BotStuff_audit*/audit_log).send("Updating user roles for " + Month())
-    client.channels.get(/*BotStuff_ann*/announcements).send("Active user roles have been updated for " + Month())
-    console.log("updating role")
-    let guild = client.guilds.find("name", "Transport Fever")
-    var role = guild.roles.find("name", activeUser)
-    if (!role) { console.log("role doesn't exist") } else { role.delete() }
-
-    setTimeout(function () {
-        guild.createRole({
-            name: activeUser,
-            color: "GOLD",
-            hoist: true,
-            position: 4,
-        })
-    }, 200)
-    setTimeout(retrieveData, 1000)
-
-    setTimeout(clearDatabase, 3000)
-
-    //retrieve who is top
-    function retrieveData() {
-        sql.all(`SELECT userId, username, points FROM scores ORDER BY points DESC LIMIT 6`).then(rows => { // select each column               
-
-            for (var i = 0; i < 6; i++) {
-                console.log(`${rows[i].userId}`)
-                let person = guild.members.get(rows[i].userId)
-                let points = rows[i].points
-                let NameOfUser = rows[i].username
-                if (typeof person === "undefined") {
-                    client.channels.get(/*BotStuff_audit*/audit_log).send(NameOfUser + " is not in the guild, not updating. " + new Date().toString())
-                } else {
-                    //person is not undefined
-
-                    var myRole = guild.roles.find("name", activeUser)
-                    //console.log(myRole)
-                    person.addRole(myRole).catch(console.error)
-                    // console.log(typeof person)
-                    client.channels.get(/*BotStuff_ann*/announcements).send("User " + NameOfUser + " now has the role with " + points + " points!")
-                }
-                if (i === 5) {
-                    client.channels.get(/*BotStuff_ann*/announcements).send("Roles have been updated on " + new Date().toString())
-                }
-
-            }
-        })
-    }
-
-    /* 
-        1. add columns total_score and date of year, check if exists, if already, do nothing
-        2. set date of year to points
-        3. Add points to total score 
-        4. set points to zero
-    */
-
-
-    //add new column   
-    let table_name = Month() + "_" + Year() // add String() ? 
-    console.log(table_name)
-    function delRecords() { sql.run(`UPDATE scores SET points ='0', level = '0'`).catch((e) => console.log(e)) }
-    function clearDatabase() {
-        sql.run(`ALTER TABLE scores ADD COLUMN '${table_name}'`).then(() => { // Add New_Month column (delete this)
-            sql.run(`UPDATE scores SET '${table_name}' = points`).then(() => delRecords())
-        }).catch(e => console.log(e))
-    }
-
-
-
-}
 
 // eval 
 client.on("message", message => {
@@ -179,7 +108,7 @@ client.on("message", message => {
             if (typeof evaled !== "string")
                 evaled = require("util").inspect(evaled);
 
-            message.channel.send(clean(evaled), { code: "xl" });
+            message.channel.send(clean(evaled), { code: "xl", split: "true" });
         } catch (err) {
             message.channel.send(`\`ERROR\` \`\`\`xl\n${clean(err)}\n\`\`\``);
         }
@@ -187,139 +116,51 @@ client.on("message", message => {
 });
 
 client.on("message", message => {
-
-    if (message.content === "!shutdown") {
-        //updateRole(message)
-        process.exit()
-    }
-    if (message.content === "!test") { 
-        updateRole(message)
-    }
-
-
-})
-
-
-
-
-
-
-
-
-
-
-// Controls the updating of points
-client.on("message", message => {
-
-
-    if (message.content.startsWith(config.prefix) || message.channel.type === "dm" || message.author.id === "354834684234170378") {
-        return
-    } else {
-
-        sql.get(`SELECT * FROM scores WHERE userId ='${message.author.id}'`).then(row => {
-            if (!row) {
-                sql.run('INSERT INTO scores (userId, username, points, level) VALUES (?, ?, ?, ?)', [message.author.id, message.author.username, 1, 0]);
-            } else {
-                let curLevel = Math.floor(0.1 * Math.sqrt(row.points + 1));
-                if (curLevel > row.level) {
-                    row.level = curLevel;
-                    sql.run(`UPDATE scores SET username = '${message.author.username}', points = '${row.points + 1}', level = '${row.level}' WHERE userId = '${message.author.id}'`);
-                    message.reply(`You've leveled up to level **${curLevel}**! Ain't that dandy?`);
-                }
-                sql.run(`UPDATE scores SET points = ${row.points + 1} WHERE userId = ${message.author.id}`);
-            }
-        }).catch(() => {
-            console.error;
-            sql.run('CREATE TABLE IF NOT EXISTS scores (userId TEXT, username TEXT, points INTEGER, level INTEGER)').then(() => {
-                sql.run('INSERT INTO scores (userId, username, points, level) VALUES (?, ?, ?, ?)', [message.author.id, message.author.username, 1, 0]);
-            });
-
-        });
-        sql.get(`SELECT * FROM links WHERE userId ='${message.author.id}'`).then(row => {
-            if (!row) {
-                sql.run('INSERT INTO links (userId, username, twitch, youtube, steam) VALUES (?, ?, ?, ?, ?)', [message.author.id, message.author.username, "`Nothing here :(`", "`Nothing here :(`", "`Nothing here :(`"]);
-            } else {
-                return
-            }
-        })
-    }
-})
-
-//check top
-client.on("message", message => {
-    if (message.content === config.prefix + "top") {
-        var firstP; var secondP; var thirdP; var fourthP; var fifthP
-        sql.all(`SELECT username, points FROM scores ORDER BY points DESC LIMIT 10`).then(rows => {
-            for (var i = 0; i < 10; i++) {
-                let NameOfUser = rows[i].username
-                let points = rows[i].points
-                !message.channel.send(`${i + 1}` + "." + " " + NameOfUser + " with " + points + " points.")
-            }
-        })
-    }
-    if (message.content === config.prefix + "test") { 
-        console.log(message.guild.roles)
-    }
-})
-
-// check message and level 
-client.on("message", message => {
-    var mclength = (message.content.split(' '))
-    if (mclength.length === 2) return;
-
-    if (message.content.startsWith(config.prefix + 'level')) {
-        sql.get(`SELECT level FROM scores WHERE userId = '${message.author.id}'`).then(row => {
-            if (!row) return message.reply("Your current level is 0");
-            message.reply(`Your current level is \`${row.level}\`.`);
-        });
-    } else
-
-        if (message.content.startsWith(config.prefix + "mcount")) {
-            sql.get(`SELECT points FROM scores WHERE userId ='${message.author.id}'`).then(row => {
-                if (!row) return message.reply("sadly you do not have any messages yet!");
-                message.reply(`you have sent \`${row.points}\` messages to date.`);
-            });
-        }
-});
-
-// check message and level of others
-client.on("message", (message) => {
-    if (message.author.bot) return;
-    var mclength = (message.content.split(' '))
+    var mclength = message.content.split(" ")
     console.log(`${message.author.username}` + " has sent a message that is " + mclength.length + " words long.");
-    if (mclength.length !== 2) return;
-    if (!message.content.startsWith(config.prefix)) return
-    else
-
-
-
-
-        var nameofuser = (message.mentions.users.first());
-    if (!message.mentions.users.first()) {
-        return
+    if (!message.content.startsWith(config.prefix) && message.channel.type !== "dm" && message.author.id !== "354834684234170378") {
+        leveling.update(message) // this adds the points for each message     
     }
-    var usernumber = (message.mentions.users.first().id);
-    if (message.content.startsWith(config.prefix + "mcount")) {
-        sql.get(`SELECT * FROM scores WHERE userId ="${usernumber}"`).then(row => {
-            if (!row) return message.channel.send("Sadly no messages have been sent by them yet!");
-            message.channel.send(`${nameofuser} has sent \`${row.points}\` messages to date.`);
-        });
-
+    if (message.content.startsWith(config.prefix)) {
+        leveling.checkInfo(message) // this checks message count / level
     }
-    if (message.content.startsWith(config.prefix + 'level')) {
-        sql.get(`SELECT level FROM scores WHERE userId = '${usernumber}'`).then(row => {
-            if (!row) return message.reply("Your current level is 0");
-            message.channel.send(`${nameofuser}'s current level is \`${row.level}\`. `);
-        })
-    };
-});
-
-// Command list and help section, uptime
-client.on("message", (message) => {
-    if (message.author.bot) return;
-    var messageArray = (message.content.split(' '))
-
-    //if (`${mclength.length} !== 1`); return;
+    var args = message.content.slice(config.prefix.length).trim().split(/ +/g);
+    var command = args.shift().toLowerCase()
+    switch (command) {
+        case "help":
+            if (mclength.length == 1) {
+                message.channel.send(config.commandlist, { code: ""} )
+            }
+            if (mclength.length == 2) {
+                help(mclength[1])
+            }
+            break;
+        case "shutdown":
+            process.exit()
+            break;
+        case "server":
+            getInfo.server(message)
+            break;
+        case "profile":
+            getInfo.profile(message)
+            break;
+        case "uptime":
+            if (client.uptime / 60000 > 600) {
+                message.channel.send(Math.round(client.uptime / 3600000) + " hours since restart")
+            } else {
+                message.channel.send(Math.round(client.uptime / 60000) + " minutes since restart")
+            }
+            break;
+        case "top":
+            sql.all(`SELECT username, points FROM scores ORDER BY points DESC LIMIT 10`).then(rows => {
+                for (var i = 0; i < 10; i++) {
+                    let NameOfUser = rows[i].username
+                    let points = rows[i].points
+                    !message.channel.send(`${i + 1}` + "." + " " + NameOfUser + " with " + points + " points.")
+                }
+            })
+            break;
+    }
 
     function help(args) {
         if (args == "profile") {
@@ -328,20 +169,19 @@ client.on("message", (message) => {
             message.channel.send("No such command, type `!help` for more information")
         }
     }
+})
 
-
+// Command list 
+client.on("message", (message) => {
+    if (message.author.bot) return;
+    var mclength = (message.content.split(' '))
+    //if (`${mclength.length} !== 1`); return;
     if (!message.content.startsWith(config.prefix) || message.author.bot) return; //if message does not start with ! or is sent from a bot, return
-
-
-
-
-
-
     if (commands[message.content]) {
         message.channel.send(commands[message.content]).catch(() => {
         })
     } else {
-        if (messageArray.length !== 2 && messageArray.length !== 4) {
+        if (mclength.length !== 2 && mclength.length !== 4) {
             if (message.content.startsWith(config.prefix) && (message.author.id == config.ownerID)) {
                 message.reply("There is no such command. Type `!help` for list of commands.");
 
@@ -352,154 +192,38 @@ client.on("message", (message) => {
                 //console.log("Not the owner")
             }
         }
-
     }
-    if (message.content.startsWith(config.prefix + "help")) {
-        if (messageArray.length == 1) {
-            message.channel.send(config.commandlist)
-        }
-        if (messageArray.length == 2) {
-            help(messageArray[1])
-        }
-    }
-    if (message.content.startsWith(config.prefix + "uptime")) {
-        if (client.uptime / 60000 > 600) {
-            message.channel.send(Math.round(client.uptime / 3600000) + " hours since restart")
-        } else {
-            message.channel.send(Math.round(client.uptime / 60000) + " minutes since restart")
-        }
-    }
-
-
-
-
-
-
-
-
 });
 
 // For actions that do not need config.prefix to function
 client.on("message", (message) => {
     if (message.author.bot) return;
+    let args = message.content.split(" ").reverse().pop().toLocaleLowerCase()
 
     let wordResponse = {
         "X.X": "Why that face?",
         ":frowning:": "Don't be sad...",
         "hi": "hello!",
-        "Hi": "hello!",
         "bye": "Aww, goodbye :(",
         "gn": "Goodnight, " + `${message.author.username}` + "!",
         "thanks": "you're welcome :)",
         "what is the answer to the universe?": "42",
         "gm": "good morning!"
     }
-    if (wordResponse[message.content]) {
-        message.channel.send(wordResponse[message.content]);
+    if (wordResponse[args]) {
+        message.channel.send(wordResponse[args]);
 
     }
-
+    if (message.mentions.everyone) {
+        message.channel.send("```Please do NOT use @everyone or @here!```")
+    }
 });
-
-// !server command
-client.on("message", (message) => {
-    if (message.content == config.prefix + "server") {
-
-
-        var totalMembers = (message.guild.memberCount + " members")
-        var allchannellist = message.guild.channels
-        var DateofCreation = new Date(message.guild.createdAt).toDateString()
-        var GuildOwner = message.guild.owner.user.username
-        var GuildDefaultChannel = message.guild.defaultChannel.name
-        var serverIcon = message.guild.iconURL
-        var serverName = message.guild.name
-        var region = message.guild.region
-        var rolelist = message.guild.roles.array().toString()
-        var channelcount = message.guild.channels.array().length
-
-        var textChannel = allchannellist.findAll("type", "text").toString()
-        var voiceChannel = allchannellist.findAll("type", "voice").toString()
-
-
-
-        function embed() {
-            message.channel.send({
-                "embed": {
-                    "title": "Stats for " + (serverName),
-                    // "description": ".",
-                    "color": 149684,
-                    "timestamp": (message.createdAt),
-                    "footer": {
-                        "icon_url": (message.author.username.avatarURL),
-                        "text": "Requested by " + (message.author.username)
-                    },
-                    "thumbnail": {
-                        "url": (serverIcon)
-                    },
-                    "author": {
-                        "name": (serverName),
-                        "url": "",
-                        "icon_url": (serverIcon)
-                    },
-                    "fields": [
-                        {
-                            "name": "Server Owner",
-                            "value": (GuildOwner),
-                            "inline": true,
-                        },
-                        {
-                            "name": "Server created on: ",
-                            "value": (DateofCreation),
-                            "inline": true,
-                        },
-                        {
-                            "name": "Number of members: ",
-                            "value": (totalMembers),
-                            "inline": true,
-                        },
-                        {
-                            "name": "Server region: ",
-                            "value": (capitalizeFirstLetter(region)),
-                            "inline": true,
-                        },
-                        {
-                            "name": "List of roles: ",
-                            "value": (rolelist),
-                        },
-                        {
-                            "name": "Available text channels: ",
-                            "value": (textChannel),
-                        },
-                        {
-                            "name": "Available voice channels: ",
-                            "value": (voiceChannel),
-                        },
-                        {
-                            "name": "Total channel count: ",
-                            "value": (channelcount),
-                            "inline": true,
-                        },
-
-                    ]
-                }
-            }).catch((e) => {
-                console.error(e)
-            })
-
-        }
-
-        setTimeout(embed, 250);
-
-        function test() {
-            message.channel.send("testing")
-        }
-    }
-})
 
 // Member join welcome message
 client.on("guildMemberAdd", (member) => {
     console.log(`${member.user.username} has joined TFDiscord`);
     member.guild.defaultChannel.send(`Welcome ${member.user.username} to the server! Please read the rules in <#${welcome}>!`);
+    //client.channels.get(general).send(`Welcome ${member.user.username} to the server! Please read the rules in <#${welcome}>!`)
 });
 
 // Member leave console message
@@ -517,7 +241,6 @@ client.on("message", (message) => {
     var mclength = message.content.split(' ')
     switch (mclength.length) {
         case 1:
-
             switch (message.content) {
                 case config.prefix + "twitch":
                     sql.get(`SELECT * FROM links WHERE userId ="${message.author.id}"`).then(row => {
@@ -623,136 +346,3 @@ client.on("message", (message) => {
     }
 })
 
-// !profile 
-client.on("message", (message) => {
-    if (message.content.startsWith(config.prefix + "profile")) {
-
-
-
-        var mclength = (message.content.split(' '))
-
-
-
-
-        let person;
-        if (message.mentions.users.size >= 1) {
-            person = message.mentions.users.first().username
-        } else {
-            person = message.author.username
-        }
-        let personid;
-        if (message.mentions.users.size >= 1) {
-            personid = message.mentions.users.first().id
-        } else {
-            personid = message.author.id
-        }
-        let points;
-        sql.get(`SELECT * FROM scores WHERE userId = "${personid}"`).then(row => {
-            points = row.points
-        });
-        let level;
-        sql.get(`SELECT * FROM scores WHERE userId = "${personid}"`).then(row => {
-            level = row.level
-        })
-        let youtube;
-        sql.get(`SELECT * FROM links WHERE userId = "${personid}"`).then(row => {
-            youtube = row.youtube
-        })
-        let steam;
-        sql.get(`SELECT * FROM links WHERE userId = "${personid}"`).then(row => {
-            steam = row.steam
-        })
-        let twitch;
-        sql.get(`SELECT * FROM links WHERE userId = "${personid}"`).then(row => {
-            twitch = row.twitch
-        })
-        //let rolearray = (message.guild.roles.get(personid))
-        let role;
-        if (message.mentions.users.size >= 1) {
-            if (message.mentions.members.first().highestRole.name == "@everyone") {
-                role = "No role for this user!"
-            } else {
-                role = message.mentions.members.first().highestRole.name
-            }
-        } else {
-            if (message.member.highestRole.name == "@everyone") {
-                role = "No role for this user!"
-            } else {
-                role = message.member.highestRole.name
-            }
-        }
-
-        let joinDate;
-        if (message.mentions.users.size >= 1) {
-            joinDate = new Date(message.mentions.members.first().joinedAt).toDateString()
-        } else {
-            joinDate = new Date(message.member.joinedAt).toDateString()
-        }
-        let userIcon;
-        if (message.mentions.users.size >= 1) {
-            userIcon = message.mentions.users.first().displayAvatarURL
-        } else {
-            userIcon = message.client.user.displayAvatarURL
-        }
-
-
-        setTimeout(embedProfile, 150)
-        function embedProfile() {
-            message.channel.send({
-                "embed": {
-
-                    "description": "Customize your profile! To see how, type `!help profile`",
-
-                    "color": 11161093,
-                    "timestamp": (message.createdAt),
-                    "footer": {
-                        "text": "Requested by " + (message.author.username)
-                    },
-                    "thumbnail": {
-                        "url": (userIcon)
-                    },
-
-                    "author": {
-                        "name": (person) + "'s profile",
-                        "icon_url": (userIcon)
-                    },
-                    "fields": [{
-                        "name": "Sent messages",
-                        "value": (points),
-                        "inline": true
-                    },
-                    {
-                        "name": "Current level",
-                        "value": (level),
-                        "inline": true
-                    },
-                    {
-                        "name": "Current highest role, if any",
-                        "value": (role),
-                        "inline": true,
-                    },
-                    {
-                        "name": "Join date",
-                        "value": (joinDate),
-                        "inline": true,
-                    },
-                    {
-                        "name": (person) + "'s Youtube",
-                        "value": (youtube)
-                    },
-                    {
-                        "name": (person) + "'s Steam",
-                        "value": (steam)
-
-                    },
-                    {
-                        "name": (person) + "'s Twitch",
-                        "value": (twitch),
-
-                    }
-                    ]
-                }
-            })
-        }
-    }
-})
