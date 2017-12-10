@@ -33,6 +33,8 @@ module.exports.update = (message) => {
 
 module.exports.checkInfo = (message) => {
     var mclength = (message.content.split(' '))
+    var args = message.content.slice(config.prefix.length).trim().split(/ +/g);    
+    var command = args.shift().toLowerCase()
     let nameofuser;
     let usernumber;
     if (message.mentions.users.first()) {
@@ -43,13 +45,13 @@ module.exports.checkInfo = (message) => {
         nameofuser = message.author.username
     }
 
-    if (message.content.startsWith(config.prefix + "mcount")) {
+    if (command === "mcount") {
         sql.get(`SELECT * FROM scores WHERE userId ="${usernumber}"`).then(row => {
             if (!row) return message.channel.send("Sadly no messages have been sent by them yet!");
             message.channel.send(`${nameofuser} has sent \`${row.points}\` messages to date.`);
         });
     }
-    if (message.content.startsWith(config.prefix + 'level')) {
+    if (command === "level") {
         sql.get(`SELECT level FROM scores WHERE userId = '${usernumber}'`).then(row => {
             if (!row) return message.reply("Your current level is 0");
             message.channel.send(`${nameofuser}'s current level is \`${row.level}\`. `);

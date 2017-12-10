@@ -13,6 +13,7 @@ const ontime = require("ontime");
 const leveling = require("./updates/points.js");
 const roleUpdates = require("./updates/roles.js")
 const getInfo = require("./information/about.js")
+const positions = require("./information/positions.js")
 
 var TpF = "246190532949180417"
 var welcome = "246190912315719680" //TpF wlc channel
@@ -31,7 +32,7 @@ client.login(tokenId.token);
 
 client.on("ready", () => {
     console.log("I am ready!");
-    client.channels.get(/*botstuff*/testBotStuff).send("Bot has restarted on " + new Date().toString())
+    client.channels.get(/*botstuff*/botstuff).send("Bot has restarted on " + new Date().toString())
     //client.user.setGame("transportfever.com");
     client.user.setPresence({
         game: {
@@ -85,15 +86,74 @@ function DateInMonth() {
 //Updating of scores
 
 ontime({
-    cycle: ['4T13:00:00',]
+    cycle: '1T12:00:00',
 }, function (ot, message) {
     console.log("running program");
-    roleUpdates.updateRoleTestVersion(message);
+    updateRole(message);
     ot.done();
     return
 })
 
+function updateRole(message) {
+    client.channels.get(audit_log).send("Updating user roles for " + Month())
+    client.channels.get(announcements).send("Active user roles have been updated for " + Month())
+    console.log("updating role")
+    let guild = client.guilds.find("name", "Transport Fever")
+    var role = guild.roles.find("name", activeUser)
+    if (!role) { console.log("role doesn't exist") } else { role.delete() }
 
+    setTimeout(function () {
+        guild.createRole({
+            name: activeUser,
+            color: "GOLD",
+            hoist: true,
+            position: 4,
+        })
+    }, 200)
+    setTimeout(retrieveData, 1000)
+
+    setTimeout(clearDatabase, 3000)
+
+    //retrieve who is top
+    function retrieveData() {
+        sql.all(`SELECT userId, username, points FROM scores ORDER BY points DESC LIMIT 6`).then(rows => { // select each column               
+
+            for (var i = 0; i < 6; i++) {
+                console.log(`${rows[i].userId}`)
+                let person = guild.members.get(rows[i].userId)
+                let points = rows[i].points
+                let NameOfUser = rows[i].username
+                if (typeof person === "undefined") {
+                    client.channels.get(audit_log).send(NameOfUser + " is not in the guild, not updating. " + new Date().toString())
+                } else {
+                    //person is not undefined
+                    var myRole = guild.roles.find("name", activeUser)
+                    person.addRole(myRole).catch(console.error)
+                    client.channels.get(announcements).send("User " + NameOfUser + " now has the role with " + points + " points!")
+                }
+                if (i === 5) {
+                    client.channels.get(announcements).send("Roles have been updated on " + new Date().toString())
+                }
+
+            }
+        })
+    }
+    //add new column   
+    let table_name = Month() + "_" + Year()
+    console.log(table_name)
+    function delRecords() { sql.run(`UPDATE scores SET points ='0', level = '0'`).catch((e) => console.log(e)) }
+    function clearDatabase() {
+        sql.run(`ALTER TABLE scores ADD COLUMN '${table_name}'`).then(() => {
+            sql.run(`UPDATE scores SET '${table_name}' = points`).then(() => delRecords())
+        }).catch(e => console.log(e))
+    }
+}
+
+
+const secondaryHelp = {
+    "profile": "Here are the list of available commands relating to [profile] \n\n!stl : Set Twitch link. Usage: !stl (link) \n\n!syl : Set Youtube link. Usage: !syl (link) \n\n!ssl : Set Steam link. Usage : !ssl (link) \n\n!setlinks : Set all links in one message. Usage : !setlinks (Twitch) (Youtube) (Steam) \n\n!profile : View your profile! \n\n!top: Check top 10 in the server.",
+    "top": "!top [argument] [argument] \nAvailable arguments: Date, Page \nDate: MMM\_YYYY. Example: dec\_2017 or feb\_2016 \nPage: Page number.\nArguments need not be in order.\nIt is not necessary to specify both arguments."
+}
 
 // eval 
 client.on("message", message => {
@@ -124,12 +184,12 @@ client.on("message", message => {
     if (message.content.startsWith(config.prefix)) {
         leveling.checkInfo(message) // this checks message count / level
     }
-    var args = message.content.slice(config.prefix.length).trim().split(/ +/g);
+    var args = message.content.slice(config.prefix.length).trim().split(/ +/g);    
     var command = args.shift().toLowerCase()
     switch (command) {
         case "help":
             if (mclength.length == 1) {
-                message.channel.send(config.commandlist, { code: ""} )
+                message.channel.send(config.commandlist, { code: "asciidoc" })
             }
             if (mclength.length == 2) {
                 help(mclength[1])
@@ -152,38 +212,53 @@ client.on("message", message => {
             }
             break;
         case "top":
-            sql.all(`SELECT username, points FROM scores ORDER BY points DESC LIMIT 10`).then(rows => {
-                for (var i = 0; i < 10; i++) {
-                    let NameOfUser = rows[i].username
-                    let points = rows[i].points
-                    !message.channel.send(`${i + 1}` + "." + " " + NameOfUser + " with " + points + " points.")
+            var page; var date
+            console.log(args.length)
+            if (args.length === 1) {
+                page = Number(args[0])
+                if (isNaN(page)) { // if page is not a number
+                    date = String(args[0]).toLowerCase()
                 }
-            })
+            }
+            if (args.length === 2) {
+                page = Number(args[0])
+                if (isNaN(page)) {
+                    date = String(args[0]).toLowerCase()
+                    page = Number(args[1])
+                } else {
+                    date = String(args[1]).toLowerCase()
+                }
+            }
+            positions.getTop(message, page, date)
             break;
     }
 
     function help(args) {
-        if (args == "profile") {
-            message.channel.send("Here are the list of available commands relating to `profile` ```!stl : Set Twitch link. Usage: !stl (link) \n\n!syl : Set Youtube link. Usage: !syl (link) \n\n!ssl : Set Steam link. Usage : !ssl (link) \n\n!setlinks : Set all links in one message. Usage : !setlinks (Twitch) (Youtube) (Steam) \n\n!profile : View your profile! \n\n!top: Check top 10 in the server.```")
+        if (secondaryHelp[args]) {
+            message.channel.send(secondaryHelp[args], { code: "css" })
+
         } else {
             message.channel.send("No such command, type `!help` for more information")
         }
     }
 })
 
+
 // Command list 
 client.on("message", (message) => {
     if (message.author.bot) return;
-    var mclength = (message.content.split(' '))
+    //var mclength = (message.content.split(' '))
+    var args = message.content.slice(config.prefix.length).trim().split(/ +/g);    
+    var command = args.shift().toLowerCase()
     //if (`${mclength.length} !== 1`); return;
     if (!message.content.startsWith(config.prefix) || message.author.bot) return; //if message does not start with ! or is sent from a bot, return
-    if (commands[message.content]) {
-        message.channel.send(commands[message.content]).catch(() => {
+    if (commands[command]) {
+        message.channel.send(commands[command]).catch(() => {
         })
     } else {
-        if (mclength.length !== 2 && mclength.length !== 4) {
+        if (args.length !== 2 && args.length !== 4 && !message.content.startsWith(config.prefix + "top")) {
             if (message.content.startsWith(config.prefix) && (message.author.id == config.ownerID)) {
-                message.reply("There is no such command. Type `!help` for list of commands.");
+                message.reply("there is no such command. Type `!help` for list of commands.");
 
             } else {
                 message.reply("I ain't heard of such a thing in my life, dumbass. Perhaps `!help` will sort you out.")
