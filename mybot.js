@@ -284,7 +284,7 @@ client.on("message", (message) => {
         "thanks": "you're welcome :)",
         "what is the answer to the universe?": "42",
         "gm": "good morning!",
-        "bad bot": ":("
+        "bad": ":("
     }
     if (wordResponse[args]) {
         message.channel.send(wordResponse[args]);
