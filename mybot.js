@@ -283,7 +283,8 @@ client.on("message", (message) => {
         "gn": "Goodnight, " + `${message.author.username}` + "!",
         "thanks": "you're welcome :)",
         "what is the answer to the universe?": "42",
-        "gm": "good morning!"
+        "gm": "good morning!",
+        "bad bot": ":("
     }
     if (wordResponse[args]) {
         message.channel.send(wordResponse[args]);
