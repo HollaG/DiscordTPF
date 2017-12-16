@@ -1,19 +1,38 @@
+
 const Discord = require("discord.js");
+const sql = require("sqlite")
+sql.open("./scoring/scores.sqlite")
+const fs = require("fs");
+
+const mysql = require("mysql");
+const connection = mysql.createConnection({
+    host: '127.0.0.1',
+    user: "root",
+
+    database: "scores",
+    charset: "utf8"
+
+})
+
 const client = new Discord.Client();
+
+
+
+// required JSON files 
 const config = require("./configuration/config.json");
 const commands = require("./commands/commands.json");
 const tokenId = require("./configuration/tokenId.json");
-const fs = require("fs");
-const sql = require("sqlite");
-sql.open("./scoring/scores.sqlite");
-const activeUser = "I am active!";
-const ontime = require("ontime");
+const wordResponse = require("./commands/wordResponse.json")
 
 //modules!
-const leveling = require("./updates/points.js");
-const roleUpdates = require("./updates/roles.js")
-const getInfo = require("./information/about.js")
-const positions = require("./information/positions.js")
+const roleUpdates = require("./updates/roles.js");
+const getInfo = require("./information/about.js");
+const positions = require("./information/positions.js");
+const pointsSQL = require("./updates/points-sql.js");
+const conversion = require("./commands/conversion.js");
+const links = require("./information/links.js");
+const updateLinks = require("./updates/update-links.js")
+//const leveling = require("./updates/points.js");
 
 var TpF = "246190532949180417"
 var welcome = "246190912315719680" //TpF wlc channel
@@ -24,9 +43,12 @@ var information = "```This bot is running on a modified version of York's code. 
 var server = "335619483018461194"
 var testBotStuff = "335619483018461194" // testserver 
 var audit_log = "382371100690219028"
-
 var BotStuff_audit = "382372304619044865"
 var BotStuff_ann = "382372383421628417"
+
+const activeUser = "I am active!";
+const ontime = require("ontime");
+
 
 client.login(tokenId.token);
 
@@ -83,6 +105,16 @@ function DateInMonth() {
 }
 
 
+function commitSQL() {
+    connection.commit(function (err) {
+        if (err) {
+            return connection.rollback(function () {
+                return console.log(err);
+            });
+        }        
+    });
+}
+
 //Updating of scores
 
 ontime({
@@ -110,19 +142,21 @@ function updateRole(message) {
             position: 4,
         })
     }, 200)
-    setTimeout(retrieveData, 1000)
+    setTimeout(retrieveData, 500)
+    setTimeout(retrieveClear, 1000)
 
-    setTimeout(clearDatabase, 3000)
+
 
     //retrieve who is top
     function retrieveData() {
-        sql.all(`SELECT userId, username, points FROM scores ORDER BY points DESC LIMIT 6`).then(rows => { // select each column               
+        connection.query("SELECT userId, username, points FROM points ORDER BY points DESC LIMIT 6", function (err, results) {
+
 
             for (var i = 0; i < 6; i++) {
-                console.log(`${rows[i].userId}`)
-                let person = guild.members.get(rows[i].userId)
-                let points = rows[i].points
-                let NameOfUser = rows[i].username
+                console.log(`${results[i].userId}`)
+                let person = guild.members.get(results[i].userId)
+                let points = results[i].points
+                let NameOfUser = results[i].username
                 if (typeof person === "undefined") {
                     client.channels.get(audit_log).send(NameOfUser + " is not in the guild, not updating. " + new Date().toString())
                 } else {
@@ -136,17 +170,48 @@ function updateRole(message) {
                 }
 
             }
+
         })
+
     }
     //add new column   
     let table_name = Month() + "_" + Year()
     console.log(table_name)
-    function delRecords() { sql.run(`UPDATE scores SET points ='0', level = '0'`).catch((e) => console.log(e)) }
-    function clearDatabase() {
-        sql.run(`ALTER TABLE scores ADD COLUMN '${table_name}'`).then(() => {
-            sql.run(`UPDATE scores SET '${table_name}' = points`).then(() => delRecords())
-        }).catch(e => console.log(e))
+    function retrieveClear() {
+        connection.beginTransaction(function (err) {
+            connection.query(`ALTER TABLE points ADD ${table_name} int`, function (err, results) {
+                if (err) {
+                    return connection.rollback(function () {
+                        throw err + "adding column";
+                    })
+                }
+                connection.query(`UPDATE points SET ${table_name} = points`, function (err, results) {
+                    if (err) {
+                        return connection.rollback(function () {
+                            throw err + "setting score";
+                        })
+
+                    }
+                    connection.query(`UPDATE points SET points = 0, level = '0'`, function (err) {
+                        if (err) {
+                            return connection.rollback(function () {
+                                throw err;
+                            })
+                        }
+                    })
+                })
+            })
+            commitSQL()
+
+
+        })
     }
+
+
+
+
+
+
 }
 
 
@@ -179,121 +244,192 @@ client.on("message", message => {
     var mclength = message.content.split(" ")
     console.log(`${message.author.username}` + " has sent a message that is " + mclength.length + " words long.");
     if (!message.content.startsWith(config.prefix) && message.channel.type !== "dm" && message.author.id !== "354834684234170378") {
-        leveling.update(message) // this adds the points for each message     
+        pointsSQL.updatePoints(message) // this adds the points for each message     
     }
+    if (message.author.bot) return
     if (message.content.startsWith(config.prefix)) {
-        leveling.checkInfo(message) // this checks message count / level
+        pointsSQL.checkInformation(message) // this checks message count / level
     }
-    var args = message.content.slice(config.prefix.length).trim().split(/ +/g);    
+    var args = message.content.slice(config.prefix.length).trim().split(/ +/g);
     var command = args.shift().toLowerCase()
-    switch (command) {
-        case "help":
-            if (mclength.length == 1) {
-                message.channel.send(config.commandlist, { code: "asciidoc" })
-            }
-            if (mclength.length == 2) {
-                help(mclength[1])
-            }
-            break;
-        case "shutdown":
-            process.exit()
-            break;
-        case "server":
-            getInfo.server(message)
-            break;
-        case "profile":
-            getInfo.profile(message)
-            break;
-        case "uptime":
-            if (client.uptime / 60000 > 600) {
-                message.channel.send(Math.round(client.uptime / 3600000) + " hours since restart")
-            } else {
-                message.channel.send(Math.round(client.uptime / 60000) + " minutes since restart")
-            }
-            break;
-        case "top":
-            var page; var date
-            console.log(args.length)
-            if (args.length === 1) {
-                page = Number(args[0])
-                if (isNaN(page)) { // if page is not a number
-                    date = String(args[0]).toLowerCase()
-                }
-            }
-            if (args.length === 2) {
-                page = Number(args[0])
-                if (isNaN(page)) {
-                    date = String(args[0]).toLowerCase()
-                    page = Number(args[1])
-                } else {
-                    date = String(args[1]).toLowerCase()
-                }
-            }
-            positions.getTop(message, page, date)
-            break;
+    var acceptedLinks = {
+        "twitch": "twitch",
+        "steam": "steam",
+        "youtube": "youtube",
     }
 
-    function help(args) {
-        if (secondaryHelp[args]) {
-            message.channel.send(secondaryHelp[args], { code: "css" })
-
-        } else {
-            message.channel.send("No such command, type `!help` for more information")
-        }
+    if (acceptedLinks[command]) {
+        links.checkLinks(message, command)
     }
-})
 
-
-// Command list 
-client.on("message", (message) => {
-    if (message.author.bot) return;
-    //var mclength = (message.content.split(' '))
-    var args = message.content.slice(config.prefix.length).trim().split(/ +/g);    
-    var command = args.shift().toLowerCase()
-    //if (`${mclength.length} !== 1`); return;
-    if (!message.content.startsWith(config.prefix) || message.author.bot) return; //if message does not start with ! or is sent from a bot, return
-    if (commands[command]) {
-        message.channel.send(commands[command]).catch(() => {
-        })
-    } else {
-        if (args.length !== 2 && args.length !== 4 && !message.content.startsWith(config.prefix + "top")) {
-            if (message.content.startsWith(config.prefix) && (message.author.id == config.ownerID)) {
-                message.reply("there is no such command. Type `!help` for list of commands.");
-
-            } else {
-                message.reply("I ain't heard of such a thing in my life, dumbass. Perhaps `!help` will sort you out.")
-                //client.setTimeout(3000)
-                message.channel.send("Just kidding, no hard feelings :)")
-                //console.log("Not the owner")
-            }
-        }
-    }
-});
-
-// For actions that do not need config.prefix to function
-client.on("message", (message) => {
-    if (message.author.bot) return;
-    let args = message.content.split(" ").reverse().pop().toLocaleLowerCase()
-
-    let wordResponse = {
-        "X.X": "Why that face?",
-        ":frowning:": "Don't be sad...",
-        "hi": "hello!",
-        "bye": "Aww, goodbye :(",
-        "gn": "Goodnight, " + `${message.author.username}` + "!",
-        "thanks": "you're welcome :)",
-        "what is the answer to the universe?": "42",
-        "gm": "good morning!",
-        "bad": ":("
-    }
-    if (wordResponse[args]) {
-        message.channel.send(wordResponse[args]);
-
-    }
     if (message.mentions.everyone) {
         message.channel.send("```Please do NOT use @everyone or @here!```")
     }
-});
+    if (message.content === "!copyDB" && message.author.id === config.ownerID) {
+        var numberOfUsers_scores = 0
+        sql.all(`SELECT * FROM scores`).then((row) => {
+            while (row[numberOfUsers_scores]) {
+                numberOfUsers_scores++
+                console.log(numberOfUsers_scores)
+            }
+            setTimeout(function () {
+                for (var i = 0; i < numberOfUsers_scores; i++) {
+                    connection.query('INSERT INTO points VALUES (?, ?, ?, ?, ?, ?)', [row[i].userId, row[i].username, row[i].points, row[i].level, row[i].November_2017, row[i].December_2017])
+                }
+            }, 4000)
+        })
+        var numberOfUsers_links = 0
+        sql.all(`SELECT * FROM links`).then((rows) => {
+            while (rows[numberOfUsers_links]) {
+                numberOfUsers_links++
+                console.log(numberOfUsers_links)
+            }
+            setTimeout(function () {
+                for (var i = 0; i < numberOfUsers_links; i++) {
+                    connection.query('INSERT INTO links VALUES (?, ?, ?, ?, ?)', [rows[i].userId, rows[i].username, rows[i].twitch, rows[i].youtube, rows[i].steam])
+                }
+            }, 4000)
+        })
+    }
+    var selector;
+    if (message.content.startsWith(config.prefix)) {
+        if (commands[command]) {
+            message.channel.send(commands[command]).catch(() => {
+            })
+        } else {
+            if (args.length !== 2 && args.length !== 4 && !message.content.startsWith(config.prefix + "top")) {
+                if (message.content.startsWith(config.prefix) && (message.author.id == config.ownerID)) {
+                    message.reply("there is no such command. Type `!help` for list of commands.");
+
+                } else {
+                    message.reply("I ain't heard of such a thing in my life, dumbass. Perhaps `!help` will sort you out.")
+                    //client.setTimeout(3000)
+                    message.channel.send("Just kidding, no hard feelings :)")
+                    //console.log("Not the owner")
+                }
+            }
+        }
+        switch (command) {
+            case "help":
+                if (mclength.length == 1) {
+                    message.channel.send(config.commandlist, { code: "asciidoc" })
+                }
+                if (mclength.length == 2) {
+                    help(mclength[1])
+                }
+                break;
+            case "shutdown":
+                process.exit()
+                break;
+            case "server":
+                getInfo.server(message)
+                break;
+            case "profile":
+                getInfo.profile(message)
+                break;
+            case "uptime":
+                if (client.uptime / 60000 > 600) {
+                    message.channel.send(Math.round(client.uptime / 3600000) + " hours since restart")
+                } else {
+                    message.channel.send(Math.round(client.uptime / 60000) + " minutes since restart")
+                }
+                break;
+            case "top":
+                var page; var date
+                console.log(args.length)
+                if (args.length === 1) {
+                    page = Number(args[0])
+                    if (isNaN(page)) { // if page is not a number
+                        date = String(args[0]).toLowerCase()
+                    }
+                }
+                if (args.length === 2) {
+                    page = Number(args[0])
+                    if (isNaN(page)) {
+                        date = String(args[0]).toLowerCase()
+                        page = Number(args[1])
+                    } else {
+                        date = String(args[1]).toLowerCase()
+                    }
+                }
+                positions.getTop(message, page, date)
+                break;
+            case "ping":
+                message.channel.send(`Ping is \`${client.ping} ms\``)
+                break;
+            case "roll":
+                message.channel.send(`You rolled a ${Math.round(Math.random() * 100)}!`)
+                break;
+            case "convert":
+                if (message.author.id !== config.ownerID) {
+                    return message.channel.send("You're not allowed to use ths command!")
+                } else {
+                    if (!args || args.length !== 3) {
+                        return message.channel.send("Please specify valid units and values!")
+                    } else {
+                        conversion.convertUnits(message, args[0], args[1], args[2])
+                    }
+
+                }
+                break;
+            case "ssl":
+                if (!args || args.length !== 1) {
+                    return message.channel.send("Please indicate the link to set! Make sure there are no spaces. Example: `https://steamcommunity.com/id/notarealuser`")
+                } else {
+                    selector = "steam"
+                    updateLinks.updateLink(message, args, selector)
+                    message.reply(` Steam link has been set as **${args}**`, { code: "" })
+                }
+                break;
+            case "stl":
+                if (!args || args.length !== 1) {
+                    return message.channel.send("Please indicate the link to set! Make sure there are no spaces. Example: `https://twitch.tv/notarealuser`")
+                } else {
+                    selector = "twitch"
+                    updateLinks.updateLink(message, args, selector)
+                    message.reply(` Twitch link has been set as **${args}**`, { code: "" })
+                }
+                break;
+            case "syl":
+                if (!args || args.length !== 1) {
+                    return message.channel.send("Please indicate the link to set! Make sure there are no spaces. Example: `https://youtube.com/channel/notarealuser`")
+                } else {
+                    selector = "youtube"
+                    updateLinks.updateLink(message, args, selector)
+                    message.reply(` Youtube link has been set as **${args}**`, { code: "" })
+                }
+                break;
+            case "setlinks":
+                if (!args || args.length !== 3) {
+                    return message.channel.send("Please indicate the links to set! There must be 3 links in total. See `!help profile` for more information.")
+                } else {
+                    updateLinks.updateAll(message, args)
+                    message.reply(`Twitch link has been set as **${args[0]}**\nYoutube link has been set as **${args[1]}**\nSteam link has been set as **${args[2]}**`, { code: "" })
+                }
+        }
+
+        function help(args) {
+            if (secondaryHelp[args]) {
+                message.channel.send(secondaryHelp[args], { code: "css" })
+
+            } else {
+                message.channel.send("No such command, type `!help` for more information")
+            }
+        }
+    } else {
+        let responses = message.content.split(" ").reverse().pop().toLocaleLowerCase()
+        if (wordResponse[responses]) {
+            message.channel.send(wordResponse[responses])
+        }
+    }
+
+})
+
+
+// delete message spam prevention
+client.on("messageDelete", (message) => {
+    message.guild.channels.find("name", "audit-log").send(`A message whose content was \`${message.cleanContent}\` sent by \`${message.author.username}\` in <#${message.channel.id}> was deleted on \`${new Date().toString()}\` `)
+})
 
 // Member join welcome message
 client.on("guildMemberAdd", (member) => {
@@ -306,119 +442,5 @@ client.on("guildMemberAdd", (member) => {
 client.on("guildMemberRemove", (member) => {
     console.log(`${member.user.username} has left TFDiscord`);
 
-})
-
-// !profile and related commands
-client.on("message", (message) => {
-    if (message.author.bot) {
-        return;
-    }
-
-    var mclength = message.content.split(' ')
-    switch (mclength.length) {
-        case 1:
-            switch (message.content) {
-                case config.prefix + "twitch":
-                    sql.get(`SELECT * FROM links WHERE userId ="${message.author.id}"`).then(row => {
-                        if (!row) return message.channel.send("no twitch link set"); {
-                            message.reply(` your link to Twitch is ${row.twitch}`)
-                        };
-                    });
-                    break;
-                case config.prefix + "youtube":
-                    sql.get(`SELECT * FROM links WHERE userId ="${message.author.id}"`).then(row => {
-                        if (!row) return message.channel.send("no youtube link set"); {
-                            message.reply(` your link to your Youtube channel is ${row.youtube}`);
-                        };
-                    });
-                    break;
-                case config.prefix + "steam":
-                    sql.get(`SELECT * FROM links WHERE userId ="${message.author.id}"`).then(row => {
-                        if (!row) return message.channel.send("no steam link set"); {
-                            message.reply(` your link to your Steam is ${row.steam}`);
-                        };
-                    });
-                    break;
-
-
-
-            }
-        case 2:
-            switch (mclength[0]) {
-                case config.prefix + "stl":
-                    sql.get(`SELECT * FROM links WHERE userId ='${message.author.id}'`).then(row => {
-                        if (!row) {
-                            sql.run('INSERT INTO links (userId, username, twitch, youtube, steam) VALUES (?, ?, ?, ?, ?)', [message.author.id, message.author.username, mclength[1], "set link", "set link"]);
-
-                        } else {
-                            sql.run(`UPDATE links SET username ='${message.author.username}', twitch ='${mclength[1]}' WHERE userId ='${message.author.id}'`);
-                        }
-                    }).catch(() => {
-                        console.error;
-                        console.log("no table found")
-                        sql.run('CREATE TABLE IF NOT EXISTS links (userId TEXT, username TEXT, twitch TEXT, youtube TEXT, steam TEXT)').then(() => {
-                            sql.run('INSERT INTO links (userId, username, twitch, youtube, steam) VALUES (?, ?, ?, ?, ?)', [message.author.id, message.author.username, mclength[1], "set link", "set link"]);
-                        });
-                    });
-                    message.reply(" Twitch link has been set as " + `${mclength[1]}`)
-                    break;
-                case config.prefix + "syl":
-                    sql.get(`SELECT * FROM links WHERE userId ='${message.author.id}'`).then(row => {
-                        if (!row) {
-                            sql.run('INSERT INTO links (userId, username, twitch, youtube, steam) VALUES (?, ?, ?, ?, ?)', [message.author.id, message.author.username, "set link", mclength[1], "set link"]);
-
-                        } else {
-                            sql.run(`UPDATE links SET username ='${message.author.username}', youtube ='${mclength[1]}' WHERE userId ='${message.author.id}'`);
-                        }
-                    }).catch(() => {
-                        console.error;
-                        console.log("no table found")
-                        sql.run('CREATE TABLE IF NOT EXISTS links (userId TEXT, username TEXT, twitch TEXT, youtube TEXT, steam TEXT)').then(() => {
-                            sql.run('INSERT INTO links (userId, username, twitch, youtube, steam) VALUES (?, ?, ?, ?, ?)', [message.author.id, message.author.username, "set link", mclength[1], "set link"]);
-                        });
-                    });
-                    message.reply(" Youtube link has been set as " + `${mclength[1]}`)
-                    break;
-                case config.prefix + "ssl":
-                    sql.get(`SELECT * FROM links WHERE userId ='${message.author.id}'`).then(row => {
-                        if (!row) {
-                            sql.run('INSERT INTO links (userId, username, twitch, youtube, steam) VALUES (?, ?, ?, ?, ?)', [message.author.id, message.author.username, "set link", "set link", mclength[1]]);
-
-                        } else {
-                            sql.run(`UPDATE links SET username ='${message.author.username}', steam ='${mclength[1]}' WHERE userId ='${message.author.id}'`);
-                        }
-                    }).catch(() => {
-                        console.error;
-                        console.log("no table found")
-                        sql.run('CREATE TABLE IF NOT EXISTS links (userId TEXT, username TEXT, twitch TEXT, youtube TEXT, steam TEXT)').then(() => {
-                            sql.run('INSERT INTO links (userId, username, twitch, youtube, steam) VALUES (?, ?, ?, ?, ?)', [message.author.id, message.author.username, "set link", "set link", mclength[1]]);
-                        });
-                    });
-                    message.reply(" Steam link has been set as " + `${mclength[1]}`)
-                    break;
-
-            }
-        case 4:
-            switch (mclength[0]) {
-                case config.prefix + "setlinks":
-                    sql.get(`SELECT * FROM links WHERE userId ='${message.author.id}'`).then(row => {
-                        if (!row) {
-                            sql.run('INSERT INTO links (userId, username, twitch, youtube, steam) VALUES (?, ?, ?, ?, ?)', [message.author.id, message.author.username, mclength[1], mclength[2], mclength[3]]);
-
-                        } else {
-                            sql.run(`UPDATE links SET username ='${message.author.username}', twitch ='${mclength[1]}', youtube = '${mclength[2]}', steam = '${mclength[3]}' WHERE userId ='${message.author.id}'`);
-                        }
-                    }).catch(() => {
-                        console.error;
-                        console.log("no table found")
-                        sql.run('CREATE TABLE IF NOT EXISTS links (userId TEXT, username TEXT, twitch TEXT, youtube TEXT, steam TEXT)').then(() => {
-                            sql.run('INSERT INTO links (userId, username, twitch, youtube, steam) VALUES (?, ?, ?, ?, ?)', [message.author.id, message.author.username, mclength[1], mclength[2], mclength[3]]);
-                        });
-                    });
-                    message.reply(" Twitch, Youtube and Steam links have been set as " + mclength[1] + ", " + mclength[2] + ", " + mclength[3] + ", respectively.")
-                    break;
-            }
-            break;
-    }
 })
 

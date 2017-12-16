@@ -3,6 +3,16 @@
 const sql = require("sqlite");
 sql.open("./scoring/scores.sqlite");
 
+const mysql = require("mysql");
+const connection = mysql.createConnection({
+    host: '127.0.0.1',
+    user: "root",
+     
+    database: "scores"
+
+})
+const config = require("../configuration/config.json");
+
 function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
@@ -109,26 +119,28 @@ module.exports.profile = (message) => {
     } else {
         personid = message.author.id
     }
-    let points;
-    sql.get(`SELECT * FROM scores WHERE userId = "${personid}"`).then(row => {
-        points = row.points
-    });
-    let level;
-    sql.get(`SELECT * FROM scores WHERE userId = "${personid}"`).then(row => {
-        level = row.level
+    
+    var youtube;
+    var steam; 
+    var twitch;
+    connection.query('SELECT * FROM links WHERE userId = ?', [personid], function(err, results, fields) {         
+        youtube = results[0].youtube
+        steam = results[0].steam
+        twitch = results[0].twitch
     })
-    let youtube;
-    sql.get(`SELECT * FROM links WHERE userId = "${personid}"`).then(row => {
-        youtube = row.youtube
+    var points;
+    var level;
+    connection.query('SELECT * FROM points WHERE userId = ?', [personid], function (err, results, fields) { 
+        points = results[0].points
+        level = results[0].level
     })
-    let steam;
-    sql.get(`SELECT * FROM links WHERE userId = "${personid}"`).then(row => {
-        steam = row.steam
-    })
-    let twitch;
-    sql.get(`SELECT * FROM links WHERE userId = "${personid}"`).then(row => {
-        twitch = row.twitch
-    })
+    
+    
+
+
+
+
+
     //let rolearray = (message.guild.roles.get(personid))
     let role;
     if (message.mentions.users.size >= 1) {

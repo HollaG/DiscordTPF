@@ -3,7 +3,7 @@ const sql = require("sqlite");
 const config = require("../configuration/config.json");
 sql.open("./scoring/scores.sqlite");
 module.exports.update = (message) => {
-    sql.get(`SELECT * FROM scores WHERE userId ='${message.author.id}'`).then(row => {
+    sql.get(`SELECT * FROM scores WHERE userId ="${message.author.id}"`).then(row => {
         if (!row) {
             sql.run('INSERT INTO scores (userId, username, points, level) VALUES (?, ?, ?, ?)', [message.author.id, message.author.username, 1, 0]);
         } else {
@@ -45,18 +45,18 @@ module.exports.checkInfo = (message) => {
         nameofuser = message.author.username
     }
 
-    if (command === "mcount") {
-        sql.get(`SELECT * FROM scores WHERE userId ="${usernumber}"`).then(row => {
-            if (!row) return message.channel.send("Sadly no messages have been sent by them yet!");
-            message.channel.send(`${nameofuser} has sent \`${row.points}\` messages to date.`);
-        });
-    }
-    if (command === "level") {
-        sql.get(`SELECT level FROM scores WHERE userId = '${usernumber}'`).then(row => {
-            if (!row) return message.reply("Your current level is 0");
-            message.channel.send(`${nameofuser}'s current level is \`${row.level}\`. `);
-        })
-    } 
+    // if (command === "mcount") {
+    //     sql.get(`SELECT * FROM scores WHERE userId ="${usernumber}"`).then(row => {
+    //         if (!row) return message.channel.send("Sadly no messages have been sent by them yet!");
+    //         message.channel.send(`${nameofuser} has sent \`${row.points}\` messages to date.`);
+    //     });
+    // }
+    // if (command === "level") {
+    //     sql.get(`SELECT level FROM scores WHERE userId = '${usernumber}'`).then(row => {
+    //         if (!row) return message.reply("Your current level is 0");
+    //         message.channel.send(`${nameofuser}'s current level is \`${row.level}\`. `);
+    //     })
+    // } 
 }
 
 
