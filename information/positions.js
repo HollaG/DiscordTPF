@@ -7,7 +7,7 @@
 
 
 const config = require("../configuration/config.json");
-const tokenId = require("./configuration/tokenId.json");
+const tokenId = require("../configuration/tokenId.json");
 const mysql = require("mysql");
 const connection = mysql.createConnection({
     host: '127.0.0.1',

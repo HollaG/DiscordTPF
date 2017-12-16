@@ -1,5 +1,5 @@
 const mysql = require("mysql");
-const tokenId = require("./configuration/tokenId.json");
+const tokenId = require("../configuration/tokenId.json");
 const connection = mysql.createConnection({
     host: '127.0.0.1',
     user: "holla",
