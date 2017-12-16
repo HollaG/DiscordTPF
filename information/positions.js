@@ -11,7 +11,8 @@ const config = require("../configuration/config.json");
 const mysql = require("mysql");
 const connection = mysql.createConnection({
     host: '127.0.0.1',
-    user: "root",
+    user: "holla",
+    password: tokenId.pass,
      
     database: "scores"
 
