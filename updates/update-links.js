@@ -1,4 +1,5 @@
 const config = require("../configuration/config.json");
+const tokenId = require("./configuration/tokenId.json");
 const mysql = require("mysql");
 const connection = mysql.createConnection({
     user: "holla",

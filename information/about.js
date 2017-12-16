@@ -2,7 +2,7 @@
 
 const sql = require("sqlite");
 sql.open("./scoring/scores.sqlite");
-
+const tokenId = require("./configuration/tokenId.json");
 const mysql = require("mysql");
 const connection = mysql.createConnection({
     host: '127.0.0.1',

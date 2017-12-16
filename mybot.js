@@ -4,16 +4,7 @@ const sql = require("sqlite")
 sql.open("./scoring/scores.sqlite")
 const fs = require("fs");
 
-const mysql = require("mysql");
-const connection = mysql.createConnection({
-    host: '127.0.0.1',
-    user: "holla",
-    password: tokenId.pass,
 
-    database: "scores",
-    charset: "utf8"
-
-})
 
 const client = new Discord.Client();
 
@@ -34,6 +25,17 @@ const conversion = require("./commands/conversion.js");
 const links = require("./information/links.js");
 const updateLinks = require("./updates/update-links.js")
 //const leveling = require("./updates/points.js");
+
+const mysql = require("mysql");
+const connection = mysql.createConnection({
+    host: '127.0.0.1',
+    user: "holla",
+    password: tokenId.pass,
+
+    database: "scores",
+    charset: "utf8"
+
+})
 
 var TpF = "246190532949180417"
 var welcome = "246190912315719680" //TpF wlc channel
