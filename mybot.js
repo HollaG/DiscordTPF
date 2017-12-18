@@ -15,20 +15,21 @@ const config = require("./configuration/config.json");
 const commands = require("./commands/commands.json");
 const tokenId = require("./configuration/tokenId.json");
 const wordResponse = require("./commands/wordResponse.json")
+const secondaryHelp = require("./commands/help.json")
 
 //modules!
 const roleUpdates = require("./updates/roles.js");
 const getInfo = require("./information/about.js");
 const positions = require("./information/positions.js");
 const pointsSQL = require("./updates/points-sql.js");
-const conversion = require("./commands/conversion.js");
+const conversion = require("./utility/conversion.js");
 const links = require("./information/links.js");
 const updateLinks = require("./updates/update-links.js")
 //const leveling = require("./updates/points.js");
 
 const mysql = require("mysql");
 const connection = mysql.createConnection({
-    host: '127.0.0.1',
+    host: tokenId.host,
     user: "holla",
     password: tokenId.pass,
 
@@ -36,6 +37,17 @@ const connection = mysql.createConnection({
     charset: "utf8"
 
 })
+
+// setInterval(function () {
+//     connection.query('SELECT 1');
+// }, 5000);
+
+connection.on('error', function(err) { 
+    console.log(err.code) 
+    connection.query('SELECT 1')
+})
+
+
 
 var TpF = "246190532949180417"
 var welcome = "246190912315719680" //TpF wlc channel
@@ -218,10 +230,6 @@ function updateRole(message) {
 }
 
 
-const secondaryHelp = {
-    "profile": "Here are the list of available commands relating to [profile] \n\n!stl : Set Twitch link. Usage: !stl (link) \n\n!syl : Set Youtube link. Usage: !syl (link) \n\n!ssl : Set Steam link. Usage : !ssl (link) \n\n!setlinks : Set all links in one message. Usage : !setlinks (Twitch) (Youtube) (Steam) \n\n!profile : View your profile! \n\n!top: Check top 10 in the server.",
-    "top": "!top [argument] [argument] \nAvailable arguments: Date, Page \nDate: MMM\_YYYY. Example: dec\_2017 or feb\_2016 \nPage: Page number.\nArguments need not be in order.\nIt is not necessary to specify both arguments."
-}
 
 // eval 
 client.on("message", message => {
@@ -247,7 +255,7 @@ client.on("message", message => {
     var mclength = message.content.split(" ")
     console.log(`${message.author.username}` + " has sent a message that is " + mclength.length + " words long.");
     if (!message.content.startsWith(config.prefix) && message.channel.type !== "dm" && message.author.id !== "354834684234170378") {
-        pointsSQL.updatePoints(message) // this adds the points for each message     
+        // pointsSQL.updatePoints(message) // this adds the points for each message     
     }
     if (message.author.bot) return
     if (message.content.startsWith(config.prefix)) {
@@ -314,11 +322,13 @@ client.on("message", message => {
         }
         switch (command) {
             case "help":
-                if (mclength.length == 1) {
+                if (args.length == 0) {
                     message.channel.send(config.commandlist, { code: "asciidoc" })
                 }
-                if (mclength.length == 2) {
-                    help(mclength[1])
+                if (args.length == 1) {
+                    help(args[0].toLowerCase())
+                } else { 
+                    message.channel.send(`No such command, type \`!help\` for more information`)
                 }
                 break;
             case "shutdown":
@@ -370,9 +380,16 @@ client.on("message", message => {
                     if (!args || args.length !== 3) {
                         return message.channel.send("Please specify valid units and values!")
                     } else {
-                        conversion.convertUnits(message, args[0], args[1], args[2])
+                        
+                        conversion.convertUnits(message, args[0].toLowerCase(), args[1].toLowerCase(), args[2].toLowerCase())
                     }
-
+                }
+                break;
+            case "contype": 
+                if (!args || args.length !== 1) { 
+                    return message.channel.send("Specify only one unit to show possible types!")
+                } else { 
+                    conversion.showTypes(message, args[0].toLowerCase())
                 }
                 break;
             case "ssl":
@@ -447,3 +464,6 @@ client.on("guildMemberRemove", (member) => {
 
 })
 
+client.on("error", error => { 
+    console.log(error)
+})

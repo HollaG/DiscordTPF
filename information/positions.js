@@ -17,6 +17,11 @@ const connection = mysql.createConnection({
     database: "scores"
 
 })
+connection.on('error', function(err) { 
+    console.log(err.code) 
+    connection.query('SELECT 1')
+})
+
 
 
 module.exports.capitalizeFirstLetter = (string) => {
@@ -211,7 +216,7 @@ module.exports.getTop = (message, page, date) => {
                             // }
                             console.log(`collected ${r.emoji.name}`)
                         })
-                    }, 1500)
+                    }, 1700)
                     const collector = message.createReactionCollector(
                         (reaction, user) => reaction.emoji.name === "◀" || "▶",
                         { time: deleteTime }

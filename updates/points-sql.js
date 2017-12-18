@@ -1,7 +1,7 @@
 const mysql = require("mysql");
 const tokenId = require("../configuration/tokenId.json");
 const connection = mysql.createConnection({
-    host: '127.0.0.1',
+    host: tokenId.host,
     user: "holla",
     password: tokenId.pass,
     database: "scores"
@@ -19,12 +19,17 @@ function commitSQL() {
         
     });
 }
+connection.on('error', function(err) { 
+    console.log(err.code) 
+    connection.query('SELECT 1')
+})
+
 
 module.exports.updatePoints = (message) => {
 
     //connection.connect();
     connection.query('SELECT * FROM points WHERE userId = ?', [message.author.id], function (error, results, fields) {
-        if (results.length === 0) { // if no row
+        if (!results.length) { // if no row
             //console.log(error);
             
 

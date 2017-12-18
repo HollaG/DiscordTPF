@@ -5,7 +5,7 @@ sql.open("./scoring/scores.sqlite");
 const tokenId = require("../configuration/tokenId.json");
 const mysql = require("mysql");
 const connection = mysql.createConnection({
-    host: '127.0.0.1',
+    host: tokenId.host,
     user: "holla",
     password: tokenId.pass,
     database: "scores"
@@ -16,6 +16,12 @@ const config = require("../configuration/config.json");
 function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
+
+connection.on('error', function(err) { 
+    console.log(err.code) 
+    connection.query('SELECT 1')
+})
+
 
 module.exports.server = (message) => {
     var totalMembers = (message.guild.memberCount + " members")
@@ -105,21 +111,9 @@ module.exports.server = (message) => {
 }
 
 module.exports.profile = (message) => {
-    var mclength = (message.content.split(' '))
-
-    let person;
-    if (message.mentions.users.size >= 1) {
-        person = message.mentions.users.first().username
-    } else {
-        person = message.author.username
-    }
-    let personid;
-    if (message.mentions.users.size >= 1) {
-        personid = message.mentions.users.first().id
-    } else {
-        personid = message.author.id
-    }
-    
+    var mclength = (message.content.split(' '))   
+    var person = message.mentions.users.size === 0 ? message.author.username : message.mentions.users.first().username
+    var personid = message.mentions.users.size === 0 ? message.author.id : message.mentions.users.first().id
     var youtube;
     var steam; 
     var twitch;
@@ -133,42 +127,29 @@ module.exports.profile = (message) => {
     connection.query('SELECT * FROM points WHERE userId = ?', [personid], function (err, results, fields) { 
         points = results[0].points
         level = results[0].level
-    })
+    })    
+
     
-    
-
-
-
-
-
-    //let rolearray = (message.guild.roles.get(personid))
-    let role;
+    var role; var joinDate; var userIcon;
     if (message.mentions.users.size >= 1) {
         if (message.mentions.members.first().highestRole.name == "@everyone") {
             role = "No role for this user!"
         } else {
             role = message.mentions.members.first().highestRole.name
         }
+        joinDate = new Date(message.mentions.members.first().joinedAt).toDateString()
+        userIcon = message.mentions.users.first().displayAvatarURL
+
+
     } else {
         if (message.member.highestRole.name == "@everyone") {
             role = "No role for this user!"
         } else {
             role = message.member.highestRole.name
         }
-    }
-
-    let joinDate;
-    if (message.mentions.users.size >= 1) {
-        joinDate = new Date(message.mentions.members.first().joinedAt).toDateString()
-    } else {
         joinDate = new Date(message.member.joinedAt).toDateString()
-    }
-    let userIcon;
-    if (message.mentions.users.size >= 1) {
-        userIcon = message.mentions.users.first().displayAvatarURL
-    } else {
         userIcon = message.client.user.displayAvatarURL
-    }
+    }   
 
 
     setTimeout(embedProfile, 150)

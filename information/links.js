@@ -4,7 +4,7 @@ const config = require("../configuration/config.json");
 const mysql = require("mysql");
 const tokenId = require("../configuration/tokenId.json");
 const connection = mysql.createConnection({
-    host: '127.0.0.1',
+    host: tokenId.host,
     user: "holla",
     password: tokenId.pass,
     database: "scores",
@@ -23,3 +23,8 @@ module.exports.checkLinks = (message, command) => {
     })
     
 }
+
+connection.on('error', function(err) { 
+    console.log(err.code) 
+    connection.query('SELECT 1')
+})
