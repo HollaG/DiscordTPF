@@ -42,8 +42,8 @@ const connection = mysql.createConnection({
 //     connection.query('SELECT 1');
 // }, 5000);
 
-connection.on('error', function(err) { 
-    console.log(err.code) 
+connection.on('error', function (err) {
+    console.log(err.code)
     connection.query('SELECT 1')
 })
 
@@ -126,7 +126,7 @@ function commitSQL() {
             return connection.rollback(function () {
                 return console.log(err);
             });
-        }        
+        }
     });
 }
 
@@ -327,7 +327,7 @@ client.on("message", message => {
                 }
                 if (args.length == 1) {
                     help(args[0].toLowerCase())
-                } else { 
+                } else {
                     message.channel.send(`No such command, type \`!help\` for more information`)
                 }
                 break;
@@ -374,21 +374,18 @@ client.on("message", message => {
                 message.channel.send(`You rolled a ${Math.round(Math.random() * 100)}!`)
                 break;
             case "convert":
-                if (message.author.id !== config.ownerID) {
-                    return message.channel.send("You're not allowed to use ths command!")
+                if (!args || args.length !== 3) {
+                    return message.channel.send("Please specify valid units and values!")
                 } else {
-                    if (!args || args.length !== 3) {
-                        return message.channel.send("Please specify valid units and values!")
-                    } else {
-                        
-                        conversion.convertUnits(message, args[0].toLowerCase(), args[1].toLowerCase(), args[2].toLowerCase())
-                    }
+
+                    conversion.convertUnits(message, args[0].toLowerCase(), args[1].toLowerCase(), args[2].toLowerCase())
+
                 }
                 break;
-            case "contype": 
-                if (!args || args.length !== 1) { 
+            case "contype":
+                if (!args || args.length !== 1) {
                     return message.channel.send("Specify only one unit to show possible types!")
-                } else { 
+                } else {
                     conversion.showTypes(message, args[0].toLowerCase())
                 }
                 break;
@@ -464,6 +461,6 @@ client.on("guildMemberRemove", (member) => {
 
 })
 
-client.on("error", error => { 
+client.on("error", error => {
     console.log(error)
 })
