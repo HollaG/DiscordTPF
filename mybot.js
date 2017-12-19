@@ -324,12 +324,13 @@ client.on("message", message => {
             case "help":
                 if (args.length == 0) {
                     message.channel.send(config.commandlist, { code: "asciidoc" })
-                }
-                if (args.length == 1) {
+                } else if (args.length == 1) {
                     help(args[0].toLowerCase())
                 } else {
                     message.channel.send(`No such command, type \`!help\` for more information`)
                 }
+
+
                 break;
             case "shutdown":
                 process.exit()
