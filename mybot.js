@@ -255,7 +255,7 @@ client.on("message", message => {
     var mclength = message.content.split(" ")
     console.log(`${message.author.username}` + " has sent a message that is " + mclength.length + " words long.");
     if (!message.content.startsWith(config.prefix) && message.channel.type !== "dm" && message.author.id !== "354834684234170378") {
-        // pointsSQL.updatePoints(message) // this adds the points for each message     
+        pointsSQL.updatePoints(message) // this adds the points for each message     
     }
     if (message.author.bot) return
     if (message.content.startsWith(config.prefix)) {
