@@ -72,7 +72,7 @@ client.login(tokenId.token);
 
 client.on("ready", () => {
     console.log("I am ready!");
-    client.channels.get(/*botstuff*/testBotStuff).send("Bot has restarted on " + new Date().toString())
+    client.channels.get(/*botstuff*/botstuff).send("Bot has restarted on " + new Date().toString())
     //client.user.setGame("transportfever.com");
     client.user.setPresence({
         game: {
@@ -135,24 +135,6 @@ function commitSQL() {
         }
     });
 }
-
-client.on("message", message => {
-    var args = message.content.slice(config.prefix.length).trim().split(/ +/g);
-    if (message.author.bot) return
-    console.log(args)
-    var command = args.shift().toLowerCase()
-    if (command === "test") {
-        workshop.testFunction(message, args.join("+"), args.join(" "))
-    }
-})
-
-
-
-
-
-
-
-
 
 ontime({
     cycle: '1T12:00:00',
