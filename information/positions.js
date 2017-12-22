@@ -2,10 +2,7 @@
 
 
 
-
 // !top command
-
-
 const config = require("../configuration/config.json");
 const tokenId = require("../configuration/tokenId.json");
 const mysql = require("mysql");
@@ -134,7 +131,7 @@ module.exports.getTop = (message, page, date) => {
                                 } else k = 0
                                 // Insert array values here
                                 arr.push("-------------------------------------------------------")
-                                arr.push(`Your points: ${row[pointValue]}`)
+                                arr.push(`Your points: ${userPoints}`)
                                 arr.push("-------------------------------------------------------")
                                 arr.push("Page " + j / 10 + " of " + Math.ceil(numberOfUsers / 10) + " || " + `Column: ${pointValue}` + " || Total recorded users: " + numberOfUsers)
                                 console.log(arr)
@@ -162,7 +159,7 @@ module.exports.getTop = (message, page, date) => {
                 sendTop(message)
                 arr.join("\n")
                 message.channel.send(arr, { code: "xl" }).then(message => {
-                    message.react("◀").then(message.react("▶")).then(
+                    message.react("◀").then(MessageReaction => message.react("▶")).then(
                         setTimeout(function () {
                             message.clearReactions()
                         }, deleteTime)

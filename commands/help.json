@@ -3,3 +3,5 @@
     "top": "!top [argument] [argument] \nAvailable arguments: Date, Page \nDate: MMM\\_YYYY. Example: dec\\_2017 or feb\\_2016 \nPage: Page number.\nArguments need not be in order.\nIt is not necessary to specify both arguments.",
     "convert": "Converts from one unit to another. Available measures (eg mass) are: \n[Length] [Area] [Mass] [Volume] [Volume Flow Rate] [Temperature] [Time] [Speed] [Pressure] [Digital] [Parts-Per] [Energy]\nTo see the available conversions, please type !contype [unit or measure].\nTo convert, type !convert [value] [original unit] [new unit]. Eg: !convert 10 kg lb"
 }
+
+

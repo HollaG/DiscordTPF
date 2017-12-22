@@ -17,10 +17,7 @@ function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-connection.on('error', function(err) { 
-    console.log(err.code) 
-    connection.query('SELECT 1')
-})
+
 
 
 module.exports.server = (message) => {
@@ -111,25 +108,28 @@ module.exports.server = (message) => {
 }
 
 module.exports.profile = (message) => {
-    var mclength = (message.content.split(' '))   
+    var mclength = (message.content.split(' '))
     var person = message.mentions.users.size === 0 ? message.author.username : message.mentions.users.first().username
     var personid = message.mentions.users.size === 0 ? message.author.id : message.mentions.users.first().id
     var youtube;
-    var steam; 
+    var steam;
     var twitch;
-    connection.query('SELECT * FROM links WHERE userId = ?', [personid], function(err, results, fields) {         
+
+    connection.query('SELECT * FROM links WHERE userId = ?', [personid], function (err, results, fields) {
         youtube = results[0].youtube
         steam = results[0].steam
         twitch = results[0].twitch
     })
     var points;
     var level;
-    connection.query('SELECT * FROM points WHERE userId = ?', [personid], function (err, results, fields) { 
+    connection.query('SELECT * FROM points WHERE userId = ?', [personid], function (err, results, fields) {
         points = results[0].points
         level = results[0].level
-    })    
+    })
 
-    
+
+
+
     var role; var joinDate; var userIcon;
     if (message.mentions.users.size >= 1) {
         if (message.mentions.members.first().highestRole.name == "@everyone") {
@@ -147,9 +147,9 @@ module.exports.profile = (message) => {
         } else {
             role = message.member.highestRole.name
         }
-        joinDate = new Date(message.member.joinedAt).toDateString()
+        joinDate = new Date(message.member.joinedTimestamp).toDateString()
         userIcon = message.client.user.displayAvatarURL
-    }   
+    }
 
 
     setTimeout(embedProfile, 150)
