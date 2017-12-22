@@ -1,4 +1,6 @@
 
+
+
 const Discord = require("discord.js");
 const sql = require("sqlite")
 sql.open("./scoring/scores.sqlite")
@@ -25,6 +27,7 @@ const pointsSQL = require("./updates/points-sql.js");
 const conversion = require("./utility/conversion.js");
 const links = require("./information/links.js");
 const updateLinks = require("./updates/update-links.js")
+const workshop = require("./information/workshop-items.js")
 //const leveling = require("./updates/points.js");
 
 const mysql = require("mysql");
@@ -69,7 +72,7 @@ client.login(tokenId.token);
 
 client.on("ready", () => {
     console.log("I am ready!");
-    client.channels.get(/*botstuff*/botstuff).send("Bot has restarted on " + new Date().toString())
+    client.channels.get(/*botstuff*/testBotStuff).send("Bot has restarted on " + new Date().toString())
     //client.user.setGame("transportfever.com");
     client.user.setPresence({
         game: {
@@ -83,7 +86,10 @@ client.on("error", (e) => console.error(e));
 client.on("warn", (e) => console.warn(e));
 //client.on("debug", (e) => console.info(e));
 
-//eval 
+//restart after 1 day
+setTimeout(function () {
+    process.exit()
+}, 86400000)
 
 function clean(text) {
     if (typeof (text) === "string")
@@ -130,7 +136,23 @@ function commitSQL() {
     });
 }
 
-//Updating of scores
+client.on("message", message => {
+    var args = message.content.slice(config.prefix.length).trim().split(/ +/g);
+    if (message.author.bot) return
+    console.log(args)
+    var command = args.shift().toLowerCase()
+    if (command === "test") {
+        workshop.testFunction(message, args.join("+"), args.join(" "))
+    }
+})
+
+
+
+
+
+
+
+
 
 ontime({
     cycle: '1T12:00:00',
@@ -378,9 +400,7 @@ client.on("message", message => {
                 if (!args || args.length !== 3) {
                     return message.channel.send("Please specify valid units and values!")
                 } else {
-
                     conversion.convertUnits(message, args[0].toLowerCase(), args[1].toLowerCase(), args[2].toLowerCase())
-
                 }
                 break;
             case "contype":
@@ -389,6 +409,9 @@ client.on("message", message => {
                 } else {
                     conversion.showTypes(message, args[0].toLowerCase())
                 }
+                break;
+            case "search":
+                workshop.searchWorkshop(message, args.join("+"), args.join(" "))
                 break;
             case "ssl":
                 if (!args || args.length !== 1) {
