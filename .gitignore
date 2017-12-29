@@ -1,6 +1,6 @@
 node_modules
 
-configuration
+configuration/tokenId.json
 backup
 scoring
 ignore

@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "cli-table2": "^0.2.0",
     "convert-units": "^2.3.1",
     "discord.js": "^11.1.0",
     "mysql": "^2.15.0",

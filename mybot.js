@@ -28,7 +28,7 @@ const conversion = require("./utility/conversion.js");
 const links = require("./information/links.js");
 const updateLinks = require("./updates/update-links.js")
 const workshop = require("./information/workshop-items.js")
-//const leveling = require("./updates/points.js");
+const suggestions = require("./utility/suggestions.js")
 
 const mysql = require("mysql");
 const connection = mysql.createConnection({
@@ -72,7 +72,7 @@ client.login(tokenId.token);
 
 client.on("ready", () => {
     console.log("I am ready!");
-    client.channels.get(/*botstuff*/botstuff).send("Bot has restarted on " + new Date().toString())
+    client.channels.get(/*botstuff*/testBotStuff).send("Bot has restarted on " + new Date().toString())
     //client.user.setGame("transportfever.com");
     client.user.setPresence({
         game: {
@@ -168,10 +168,10 @@ function updateRole(message) {
 
     //retrieve who is top
     function retrieveData() {
-        connection.query("SELECT userId, username, points FROM points ORDER BY points DESC LIMIT 6", function (err, results) {
+        connection.query("SELECT userId, username, points FROM points ORDER BY points DESC LIMIT 10", function (err, results) {
 
 
-            for (var i = 0; i < 6; i++) {
+            for (var i = 0; i < 10; i++) {
                 console.log(`${results[i].userId}`)
                 let person = guild.members.get(results[i].userId)
                 let points = results[i].points
@@ -184,7 +184,7 @@ function updateRole(message) {
                     person.addRole(myRole).catch(console.error)
                     client.channels.get(announcements).send("User " + NameOfUser + " now has the role with " + points + " points!")
                 }
-                if (i === 5) {
+                if (i === 9) {
                     client.channels.get(announcements).send("Roles have been updated on " + new Date().toString())
                 }
 
@@ -254,6 +254,46 @@ client.on("message", message => {
         }
     }
 });
+
+client.on("message", message => { 
+    var args = message.content.slice(config.prefix.length).trim().split(/ +/g);
+    var command = args.shift().toLowerCase()
+
+    if (command === "request") { 
+        suggestions.makeRequest(client, message, args)
+        console.log("Test")
+
+
+    }
+    if (command === "logme") { 
+        console.log(message)
+    }
+    if (command === "list") {
+         
+        if (args.length === 0) { 
+            return message.channel.send("Please provide an argument, either 'all', 'pending' or 'accepted'.")
+        }
+        let selector = args[0].toLocaleLowerCase()
+        suggestions.listRequest(client, message, selector)
+    }
+    if (command === "accept") { 
+        suggestions.acceptRequest(client, message, args)
+    }
+    if (command === "reject") {
+        suggestions.rejectRequest(client, message, args[0], args.splice(1).join(" "))
+     }
+
+    if (command === "send") { 
+        if (message.author.id !== config.ownerID) return
+        message.delete()
+        message.channel.send(args.join(" "))
+    }
+
+
+
+})
+
+
 
 client.on("message", message => {
     var mclength = message.content.split(" ")
@@ -393,7 +433,7 @@ client.on("message", message => {
                 }
                 break;
             case "search":
-                workshop.searchWorkshop(message, args.join("+"), args.join(" "))
+                workshop.searchWorkshop(message, args.join("+"), args.join(" "), client)
                 break;
             case "ssl":
                 if (!args || args.length !== 1) {
@@ -433,7 +473,7 @@ client.on("message", message => {
 
         function help(args) {
             if (secondaryHelp[args]) {
-                message.channel.send(secondaryHelp[args], { code: "css" })
+                message.channel.send((secondaryHelp[args]).join("\n"), { code: "" })
 
             } else {
                 message.channel.send("No such command, type `!help` for more information")

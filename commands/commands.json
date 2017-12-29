@@ -23,5 +23,10 @@
     "convert": " ",
     "contype": " ",
     "test": " ",
-    "search": " "
+    "search": " ",
+    "list": " ",
+    "accept": " ",
+    "reject": " ",
+    "request": " ",
+    "send": " "
 }
