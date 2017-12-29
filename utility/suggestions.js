@@ -42,7 +42,7 @@ exports.makeRequest = (client, message, suggestion) => {
     try {
         connection.query(`INSERT INTO suggestions (userId, username, suggestion, requesteeID, requesteeName, state, accepter) VALUES (?, ?, ?, ?, ?, ?, ?)`, [message.author.id, message.author.username, actualSugg, requesteeID, requesteeName, "Pending", "Not accepted"], function (err, results) {
             console.log(results)
-            connection.query(`SELECT * FROM suggestions WHERE ID = ${results[0].insertId}`, function (err, result) {
+            connection.query(`SELECT * FROM suggestions WHERE ID = ${results.insertId}`, function (err, result) {
                 message.reply(` your request has been recieved as \`\`\`${result[0].suggestion}\`\`\` The unique ID of this request is \`${result[0].ID}\`. You will be notified if ${requesteeName} accepts your request.`)
 
             })
