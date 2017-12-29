@@ -72,7 +72,7 @@ client.login(tokenId.token);
 
 client.on("ready", () => {
     console.log("I am ready!");
-    client.channels.get(/*botstuff*/testBotStuff).send("Bot has restarted on " + new Date().toString())
+    client.channels.get(/*botstuff*/botstuff).send("Bot has restarted on " + new Date().toString())
     //client.user.setGame("transportfever.com");
     client.user.setPresence({
         game: {
@@ -161,8 +161,8 @@ function updateRole(message) {
             position: 4,
         })
     }, 200)
-    setTimeout(retrieveData, 500)
-    setTimeout(retrieveClear, 1000)
+    setTimeout(retrieveData, 2000)
+    setTimeout(retrieveClear, 5000)
 
 
 
@@ -255,50 +255,12 @@ client.on("message", message => {
     }
 });
 
-client.on("message", message => { 
-    var args = message.content.slice(config.prefix.length).trim().split(/ +/g);
-    var command = args.shift().toLowerCase()
-
-    if (command === "request") { 
-        suggestions.makeRequest(client, message, args)
-        console.log("Test")
-
-
-    }
-    if (command === "logme") { 
-        console.log(message)
-    }
-    if (command === "list") {
-         
-        if (args.length === 0) { 
-            return message.channel.send("Please provide an argument, either 'all', 'pending' or 'accepted'.")
-        }
-        let selector = args[0].toLocaleLowerCase()
-        suggestions.listRequest(client, message, selector)
-    }
-    if (command === "accept") { 
-        suggestions.acceptRequest(client, message, args)
-    }
-    if (command === "reject") {
-        suggestions.rejectRequest(client, message, args[0], args.splice(1).join(" "))
-     }
-
-    if (command === "send") { 
-        if (message.author.id !== config.ownerID) return
-        message.delete()
-        message.channel.send(args.join(" "))
-    }
-
-
-
-})
-
 
 
 client.on("message", message => {
     var mclength = message.content.split(" ")
     console.log(`${message.author.username}` + " has sent a message that is " + mclength.length + " words long.");
-    if (!message.content.startsWith(config.prefix) && message.channel.type !== "dm" && message.author.id !== "354834684234170378") {
+    if (!message.content.startsWith(config.prefix) && message.channel.type !== "dm" && message.author.id !== "354834684234170378" && !message.author.bot) {
         pointsSQL.updatePoints(message) // this adds the points for each message     
     }
     if (message.author.bot) return
@@ -469,6 +431,28 @@ client.on("message", message => {
                     updateLinks.updateAll(message, args)
                     message.reply(`Twitch link has been set as **${args[0]}**\nYoutube link has been set as **${args[1]}**\nSteam link has been set as **${args[2]}**`, { code: "" })
                 }
+                break;
+            case "request":
+                suggestions.makeRequest(client, message, args)
+                break;
+            case "accept":
+                suggestions.acceptRequest(client, message, args)
+                break;
+            case "reject":
+                suggestions.rejectRequest(client, message, args[0], args.splice(1).join(" "))
+                break;
+            case "list":
+                if (args.length === 0) {
+                    return message.channel.send("Please provide an argument, either 'all', 'pending' or 'accepted'.")
+                }
+                let selector = args[0].toLocaleLowerCase()
+                suggestions.listRequest(client, message, selector)
+                break;
+            case "send":
+                if (message.author.id !== config.ownerID) return
+                message.delete()
+                message.channel.send(args.join(" "))
+                break;
         }
 
         function help(args) {
