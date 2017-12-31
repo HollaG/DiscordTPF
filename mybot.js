@@ -1,12 +1,8 @@
-
-
-
 const Discord = require("discord.js");
 const sql = require("sqlite")
 sql.open("./scoring/scores.sqlite")
 const fs = require("fs");
-
-
+const mysql = require("mysql");
 
 const client = new Discord.Client();
 
@@ -30,25 +26,40 @@ const updateLinks = require("./updates/update-links.js")
 const workshop = require("./information/workshop-items.js")
 const suggestions = require("./utility/suggestions.js")
 
-const mysql = require("mysql");
-const connection = mysql.createConnection({
+
+var db_config = {
     host: tokenId.host,
     user: "holla",
     password: tokenId.pass,
 
     database: "scores",
     charset: "utf8"
-
-})
+}
+var connection;
+function handleDisconnect() {
+    connection = mysql.createConnection(db_config); 
+    connection.connect(function (err) {              
+        if (err) {                                   
+            console.log('error when connecting to db:', err);
+            setTimeout(handleDisconnect, 2000); 
+        }                                    
+    });                            
+    connection.on('error', function (err) {
+        console.log('db error', err);
+        if (err.code === 'PROTOCOL_CONNECTION_LOST' || err.code === "ECONNRESET") { 
+            handleDisconnect();                        
+        } else {                                     
+            throw err;                                  
+        }
+    });
+}
+handleDisconnect();
 
 // setInterval(function () {
 //     connection.query('SELECT 1');
 // }, 5000);
 
-connection.on('error', function (err) {
-    console.log(err.code)
-    connection.query('SELECT 1')
-})
+
 
 
 
@@ -72,7 +83,7 @@ client.login(tokenId.token);
 
 client.on("ready", () => {
     console.log("I am ready!");
-    client.channels.get(/*botstuff*/botstuff).send("Bot has restarted on " + new Date().toString())
+    client.channels.get(/*botstuff*/testBotStuff).send("Bot has restarted on " + new Date().toString())
     //client.user.setGame("transportfever.com");
     client.user.setPresence({
         game: {
@@ -263,7 +274,7 @@ client.on("message", message => {
     if (!message.content.startsWith(config.prefix) && message.channel.type !== "dm" && message.author.id !== "354834684234170378" && !message.author.bot) {
         pointsSQL.updatePoints(message) // this adds the points for each message     
     }
-    if (message.author.bot) return
+    //if (message.author.bot) return
     if (message.content.startsWith(config.prefix)) {
         pointsSQL.checkInformation(message) // this checks message count / level
     }
@@ -384,7 +395,7 @@ client.on("message", message => {
                 if (!args || args.length !== 3) {
                     return message.channel.send("Please specify valid units and values!")
                 } else {
-                    conversion.convertUnits(message, args[0].toLowerCase(), args[1].toLowerCase(), args[2].toLowerCase())
+                    conversion.convertUnits(message, args[0], args[1], args[2])
                 }
                 break;
             case "contype":
@@ -447,6 +458,9 @@ client.on("message", message => {
                 }
                 let selector = args[0].toLocaleLowerCase()
                 suggestions.listRequest(client, message, selector)
+                break;
+            case "complete":
+                suggestions.completeRequest(client, message, args[0], args.splice(1).join(" "))
                 break;
             case "send":
                 if (message.author.id !== config.ownerID) return
