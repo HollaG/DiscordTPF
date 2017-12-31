@@ -1,12 +1,32 @@
 const mysql = require("mysql");
 const tokenId = require("../configuration/tokenId.json");
-const connection = mysql.createConnection({
+var db_config = {
     host: tokenId.host,
     user: "holla",
     password: tokenId.pass,
-    database: "scores"
 
-})
+    database: "scores",
+    charset: "utf8"
+}
+var connection;
+function handleDisconnect() {
+    connection = mysql.createConnection(db_config); 
+    connection.connect(function (err) {              
+        if (err) {                                   
+            console.log('error when connecting to db:', err);
+            setTimeout(handleDisconnect, 2000); 
+        }                                    
+    });                            
+    connection.on('error', function (err) {
+        console.log('db error', err);
+        if (err.code === 'PROTOCOL_CONNECTION_LOST' || err.code === "ECONNRESET") { 
+            handleDisconnect();                        
+        } else {                                     
+            throw err;                                  
+        }
+    });
+}
+handleDisconnect();
 const config = require("../configuration/config.json");
 
 function commitSQL() {
@@ -20,20 +40,17 @@ function commitSQL() {
 
     });
 }
-connection.on('error', function (err) {
-    client.channels.get(botstuff).send(err.code)    
-})
-setInterval(function() { 
-    connection.query(`SELECT 1`);
-}, 1000 * 60 * 60)
+
+
 
 
 module.exports.updatePoints = (message) => {
 
     //connection.connect();
-    connection.query('SELECT * FROM points WHERE userId = ?', [message.author.id], function (error, results, fields) {
+    connection.query('SELECT * FROM points WHERE userId = ?', [message.author.id], function (error, results, fields) {        
         if (!results.length) { // if no row
             //console.log(error);
+            
             var post = {
                 userId: message.author.id,
                 username: message.author.username,

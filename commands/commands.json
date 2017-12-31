@@ -28,5 +28,6 @@
     "accept": " ",
     "reject": " ",
     "request": " ",
+    "complete": " ",
     "send": " "
 }

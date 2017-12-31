@@ -7,12 +7,14 @@
         "\n!request [Mention] [Request]: Creates a request for the specified user or role which will be in a pending state. You will be notified by mention if your request is accepted or rejected. The bot will reply to you with an unique ID. This ID is important for accepting or rejecting a request. You can also reject your own request, to see how, see below.",
         "Usage of this command is as follows: !request @Holla Give me admin powers! or !request @Workshop Contributors Please create x mod",
         "This will create a request for Holla which says 'Give me admin powers!' or a request for any workshop contributor to create x mod.",
-        "\n!list [all, pending, accepted]: This will list all requests, all pending requests, and all accepted requests by and for you respectively.",
-        "Usage of this command is as follows: !list all, !list pending, !list accepted",
+        "\n!list [everything, both, pending, accepted]: Argument explanation: \neverything: This will list all the requests made so far\nboth: This will list all requests for or by you\npending: This will list all pending requests for or by you\naccepted: This will list all accepted requests for or by you",
+        "Usage of this command is as follows: !list everything, !list pending, !list accepted",
         "\n!accept [ID]: Accepts requests which match the ID. You have to be the requestee (person being requested) in order to accept the request.",
         "Usage of this command is as follows: !accept 2 5 10 6",
         "This will accept requests with IDs 2, 5, 6, and 10.",
         "\n!reject [ID] [Reason]: Rejects the given request with the ID. Reason is optional, but highly encouraged.",
-        "Usage of this command is as follows: !reject 2 No admin for you"
+        "Usage of this command is as follows: !reject 2 No admin for you",
+        "\n!clear [all, me, others]: Clears all requests, all requests for me, or all requests by me for others respectively. Warning: Only clears Pending requests!",
+        "Usage of this command is as follows: !clear others, !clear all"
     ]
 }

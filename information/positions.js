@@ -6,14 +6,33 @@
 const config = require("../configuration/config.json");
 const tokenId = require("../configuration/tokenId.json");
 const mysql = require("mysql");
-const connection = mysql.createConnection({
-    host: '127.0.0.1',
+var db_config = {
+    host: tokenId.host,
     user: "holla",
     password: tokenId.pass,
-     
-    database: "scores"
 
-})
+    database: "scores",
+    charset: "utf8"
+}
+var connection;
+function handleDisconnect() {
+    connection = mysql.createConnection(db_config); 
+    connection.connect(function (err) {              
+        if (err) {                                   
+            console.log('error when connecting to db:', err);
+            setTimeout(handleDisconnect, 2000); 
+        }                                    
+    });                            
+    connection.on('error', function (err) {
+        console.log('db error', err);
+        if (err.code === 'PROTOCOL_CONNECTION_LOST' || err.code === "ECONNRESET") { 
+            handleDisconnect();                        
+        } else {                                     
+            throw err;                                  
+        }
+    });
+}
+handleDisconnect();
 connection.on('error', function(err) { 
     console.log(err.code) 
     connection.query('SELECT 1')

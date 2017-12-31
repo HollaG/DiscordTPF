@@ -1,13 +1,33 @@
 const config = require("../configuration/config.json");
 const tokenId = require("../configuration/tokenId.json");
 const mysql = require("mysql");
-const connection = mysql.createConnection({
+var db_config = {
+    host: tokenId.host,
     user: "holla",
-    password: tokenId.pass,    
+    password: tokenId.pass,
+
     database: "scores",
     charset: "utf8"
-
-})
+}
+var connection;
+function handleDisconnect() {
+    connection = mysql.createConnection(db_config); 
+    connection.connect(function (err) {              
+        if (err) {                                   
+            console.log('error when connecting to db:', err);
+            setTimeout(handleDisconnect, 2000); 
+        }                                    
+    });                            
+    connection.on('error', function (err) {
+        console.log('db error', err);
+        if (err.code === 'PROTOCOL_CONNECTION_LOST' || err.code === "ECONNRESET") { 
+            handleDisconnect();                        
+        } else {                                     
+            throw err;                                  
+        }
+    });
+}
+handleDisconnect();
 function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }

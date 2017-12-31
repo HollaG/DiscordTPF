@@ -456,11 +456,17 @@ client.on("message", message => {
                 if (args.length === 0) {
                     return message.channel.send("Please provide an argument, either 'all', 'pending' or 'accepted'.")
                 }
-                let selector = args[0].toLocaleLowerCase()
+                let selector = args[0].toLocaleLowerCase()                                
                 suggestions.listRequest(client, message, selector)
                 break;
             case "complete":
                 suggestions.completeRequest(client, message, args[0], args.splice(1).join(" "))
+                break;
+            case "clear": 
+                if (args.length === 0) { 
+                    return message.channel.send(`Please specify what you want to clear! Either list IDs of the requests, or [all], or [pending]`)
+                }
+                suggestions.clearRequests(client, message, args)
                 break;
             case "send":
                 if (message.author.id !== config.ownerID) return
