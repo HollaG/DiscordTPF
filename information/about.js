@@ -22,7 +22,7 @@ function handleDisconnect() {
         }                                    
     });                            
     connection.on('error', function (err) {
-        console.log('db error', err);
+        console.log('db error in file about.js', err);
         if (err.code === 'PROTOCOL_CONNECTION_LOST' || err.code === "ECONNRESET") { 
             handleDisconnect();                        
         } else {                                     
@@ -136,6 +136,7 @@ module.exports.profile = (message) => {
     var twitch;
 
     connection.query('SELECT * FROM links WHERE userId = ?', [personid], function (err, results, fields) {
+        if (err) message.channel.send(err, {code : ""})
         youtube = results[0].youtube
         steam = results[0].steam
         twitch = results[0].twitch
@@ -143,6 +144,7 @@ module.exports.profile = (message) => {
     var points;
     var level;
     connection.query('SELECT * FROM points WHERE userId = ?', [personid], function (err, results, fields) {
+        if (err) message.channel.send(err, {code : ""})
         points = results[0].points
         level = results[0].level
     })

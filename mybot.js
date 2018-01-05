@@ -25,6 +25,7 @@ const links = require("./information/links.js");
 const updateLinks = require("./updates/update-links.js")
 const workshop = require("./information/workshop-items.js")
 const suggestions = require("./utility/suggestions.js")
+const updateRoles = require("./updates/roles")
 
 
 var db_config = {
@@ -37,19 +38,19 @@ var db_config = {
 }
 var connection;
 function handleDisconnect() {
-    connection = mysql.createConnection(db_config); 
-    connection.connect(function (err) {              
-        if (err) {                                   
+    connection = mysql.createConnection(db_config);
+    connection.connect(function (err) {
+        if (err) {
             console.log('error when connecting to db:', err);
-            setTimeout(handleDisconnect, 2000); 
-        }                                    
-    });                            
+            setTimeout(handleDisconnect, 2000);
+        }
+    });
     connection.on('error', function (err) {
-        console.log('db error', err);
-        if (err.code === 'PROTOCOL_CONNECTION_LOST' || err.code === "ECONNRESET") { 
-            handleDisconnect();                        
-        } else {                                     
-            throw err;                                  
+        console.log('db error in file mybot.js', err);
+        if (err.code === 'PROTOCOL_CONNECTION_LOST' || err.code === "ECONNRESET") {
+            handleDisconnect();
+        } else {
+            throw err;
         }
     });
 }
@@ -98,9 +99,7 @@ client.on("warn", (e) => console.warn(e));
 //client.on("debug", (e) => console.info(e));
 
 //restart after 1 day
-setTimeout(function () {
-    process.exit()
-}, 86400000)
+//setTimeout(() => { process.exit() }, 86400000)
 
 function clean(text) {
     if (typeof (text) === "string")
@@ -156,11 +155,14 @@ ontime({
     return
 })
 
+
+
+
 function updateRole(message) {
-    client.channels.get(audit_log).send("Updating user roles for " + Month())
-    client.channels.get(announcements).send("Active user roles have been updated for " + Month())
+    client.channels.find("name", "audit-log").send("Updating user roles for " + Month())
+    client.channels.find("name", "announcements").send("Active user roles have been updated for " + Month())
     console.log("updating role")
-    let guild = client.guilds.find("name", "Transport Fever")
+    let guild = client.guilds.find("name", "BotTestServer") // change this
     var role = guild.roles.find("name", activeUser)
     if (!role) { console.log("role doesn't exist") } else { role.delete() }
 
@@ -175,6 +177,8 @@ function updateRole(message) {
     setTimeout(retrieveData, 2000)
     setTimeout(retrieveClear, 5000)
 
+    setTimeout(process.exit, 10000)
+
 
 
     //retrieve who is top
@@ -188,15 +192,15 @@ function updateRole(message) {
                 let points = results[i].points
                 let NameOfUser = results[i].username
                 if (typeof person === "undefined") {
-                    client.channels.get(audit_log).send(NameOfUser + " is not in the guild, not updating. " + new Date().toString())
+                    client.channels.find("name", "audit-log").send(NameOfUser + " is not in the guild, not updating. " + new Date().toString())
                 } else {
                     //person is not undefined
                     var myRole = guild.roles.find("name", activeUser)
                     person.addRole(myRole).catch(console.error)
-                    client.channels.get(announcements).send("User " + NameOfUser + " now has the role with " + points + " points!")
+                    client.channels.find("name", "announcements").send("User " + NameOfUser + " now has the role with " + points + " points!")
                 }
                 if (i === 9) {
-                    client.channels.get(announcements).send("Roles have been updated on " + new Date().toString())
+                    client.channels.find("name", "announcements").send("Roles have been updated on " + new Date().toString())
                 }
 
             }
@@ -212,20 +216,23 @@ function updateRole(message) {
             connection.query(`ALTER TABLE points ADD ${table_name} int`, function (err, results) {
                 if (err) {
                     return connection.rollback(function () {
-                        throw err + "adding column";
+                        // throw err + "adding column";
+                        console.log(err + "adding column")
                     })
                 }
                 connection.query(`UPDATE points SET ${table_name} = points`, function (err, results) {
                     if (err) {
                         return connection.rollback(function () {
-                            throw err + "setting score";
+                            // throw err + "setting score";
+                            console.log(err + "setting score")
                         })
 
                     }
                     connection.query(`UPDATE points SET points = 0, level = '0'`, function (err) {
                         if (err) {
                             return connection.rollback(function () {
-                                throw err;
+                                //throw err;
+                                console.log(err + "updating score")
                             })
                         }
                     })
@@ -280,6 +287,17 @@ client.on("message", message => {
     }
     var args = message.content.slice(config.prefix.length).trim().split(/ +/g);
     var command = args.shift().toLowerCase()
+
+    if (command === "test") { 
+        updateRoles.updateRoles(client)
+    }
+    if (command === "pull") [
+        workshop.storeDB(client)
+    ]
+
+
+
+
     var acceptedLinks = {
         "twitch": "twitch",
         "steam": "steam",
@@ -324,18 +342,18 @@ client.on("message", message => {
         if (commands[command]) {
             message.channel.send(commands[command]).catch(() => {
             })
-        } else {
-            if (args.length !== 2 && args.length !== 4 && !message.content.startsWith(config.prefix + "top")) {
-                if (message.content.startsWith(config.prefix) && (message.author.id == config.ownerID)) {
-                    message.reply("there is no such command. Type `!help` for list of commands.");
+            // } else {
+            //     if (args.length !== 2 && args.length !== 4 && !message.content.startsWith(config.prefix + "top")) {
+            //         if (message.content.startsWith(config.prefix) && (message.author.id == config.ownerID)) {
+            //             message.reply("there is no such command. Type `!help` for list of commands.");
 
-                } else {
-                    message.reply("I ain't heard of such a thing in my life, dumbass. Perhaps `!help` will sort you out.")
-                    //client.setTimeout(3000)
-                    message.channel.send("Just kidding, no hard feelings :)")
-                    //console.log("Not the owner")
-                }
-            }
+            //         } else {
+            //             message.reply("I ain't heard of such a thing in my life, dumbass. Perhaps `!help` will sort you out.")
+            //             //client.setTimeout(3000)
+            //             message.channel.send("Just kidding, no hard feelings :)")
+            //             //console.log("Not the owner")
+            //         }
+            //     }
         }
         switch (command) {
             case "help":
@@ -456,14 +474,14 @@ client.on("message", message => {
                 if (args.length === 0) {
                     return message.channel.send("Please provide an argument, either 'all', 'pending' or 'accepted'.")
                 }
-                let selector = args[0].toLocaleLowerCase()                                
+                let selector = args[0].toLocaleLowerCase()
                 suggestions.listRequest(client, message, selector)
                 break;
             case "complete":
                 suggestions.completeRequest(client, message, args[0], args.splice(1).join(" "))
                 break;
-            case "clear": 
-                if (args.length === 0) { 
+            case "clear":
+                if (args.length === 0) {
                     return message.channel.send(`Please specify what you want to clear! Either list IDs of the requests, or [all], or [pending]`)
                 }
                 suggestions.clearRequests(client, message, args)

@@ -24,7 +24,7 @@ function handleDisconnect() {
         }                                    
     });                            
     connection.on('error', function (err) {
-        console.log('db error', err);
+        console.log('db error in file positions.js', err);
         if (err.code === 'PROTOCOL_CONNECTION_LOST' || err.code === "ECONNRESET") { 
             handleDisconnect();                        
         } else {                                     

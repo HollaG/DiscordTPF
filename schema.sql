@@ -45,3 +45,20 @@ CREATE TABLE IF NOT EXISTS suggestions
   PRIMARY KEY (ID)
 )
 CHARACTER SET utf8 COLLATE utf8_general_ci;
+
+CREATE DATABASE IF NOT EXISTS workshop
+CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+USE workshop;
+
+CREATE TABLE IF NOT EXISTS steam_workshop
+
+( 
+  ID int NOT NULL AUTO_INCREMENT,
+  fileID varchar(50) NOT NULL,
+  fileName varchar(255) NOT NULL,
+  creatorID varchar(50) NOT NULL,
+  creatorName varchar(255),
+  PRIMARY KEY (ID) 
+)
+CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

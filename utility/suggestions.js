@@ -3,16 +3,7 @@ const request = require("snekfetch");
 const mysql = require("mysql");
 const tokenId = require("../configuration/tokenId.json");
 const config = require("../configuration/config.json");
-//const custFunc = require("./custom-functions.js")
-// var connection = mysql.createConnection({
-//     host: tokenId.host,
-//     user: "holla",
-//     password: tokenId.pass,
 
-//     database: "suggestList",
-//     charset: "utf8"
-
-// })
 var db_config = {
     host: tokenId.host,
     user: "holla",
@@ -31,7 +22,7 @@ function handleDisconnect() {
         }
     });
     connection.on('error', function (err) {
-        console.log('db error', err);
+        console.log('db error in file suggestions.js', err);
         if (err.code === 'PROTOCOL_CONNECTION_LOST' || err.code === "ECONNRESET") {
             handleDisconnect();
         } else {
@@ -60,7 +51,7 @@ exports.makeRequest = async (client, message, suggestion) => {
         ).then(res => {
             return res.body.id
         }).catch(e => {
-            message.channel.send(`Uh oh! An unexpected error occurred: \`\`\`${e}\`\`\``)
+            return message.channel.send(`Uh oh! An unexpected error occurred: \`\`\`${e}\`\`\``)
         })
     }
     
@@ -289,7 +280,7 @@ exports.rejectRequest = (client, message, args, reasons) => {
             function reject(results) {
                 connection.query(`DELETE FROM suggestions WHERE ID = ?`, [args], (err, result) => {
                     message.channel.send(`Successfully rejected ${results[0].username}'s request for ${results[0].requesteeName}.`)
-                    message.guild.members.get(results[0].userId).send(`${results[0].username}, your request \`\`\`${results[0].suggestion}\`\`\` was rejected by ${message.author.username} on ${new Date().toString()} with reason \`\`\`${reasons}\`\`\``)
+                    message.guild.members.get(results[0].userId).send(`${results[0].username}, your request \`\`\`${results[0].suggestion}\`\`\` was rejected by ${message.author.username} on ${new Date().toString()} with reason \`\`\` ${reasons} \`\`\``)
                 })
 
             }

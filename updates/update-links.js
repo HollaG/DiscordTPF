@@ -19,7 +19,7 @@ function handleDisconnect() {
         }                                    
     });                            
     connection.on('error', function (err) {
-        console.log('db error', err);
+        console.log('db error in file update-links.js', err);
         if (err.code === 'PROTOCOL_CONNECTION_LOST' || err.code === "ECONNRESET") { 
             handleDisconnect();                        
         } else {                                     
@@ -28,6 +28,7 @@ function handleDisconnect() {
     });
 }
 handleDisconnect();
+
 function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }

@@ -1,90 +1,68 @@
-// // updating roles
 
-// const sql = require("sqlite");
-// const config = require("../configuration/config.json");
-// sql.open("./scoring/scores.sqlite");
+const config = require("../configuration/config.json");
+const tokenId = require("../configuration/tokenId.json");
+const mysql = require("mysql");
+var db_config = {
+    host: tokenId.host,
+    user: "holla",
+    password: tokenId.pass,
 
-// var announcements = "386091548388884480"
-// var audit_log = "382371100690219028"
+    database: "scores",
+    charset: "utf8"
+}
+var connection;
+function handleDisconnect() {
+    connection = mysql.createConnection(db_config);
+    connection.connect(function (err) {
+        if (err) {
+            console.log('error when connecting to db:', err);
+            setTimeout(handleDisconnect, 2000);
+        }
+    });
+    connection.on('error', function (err) {
+        console.log('db error in file roles.js', err);
+        if (err.code === 'PROTOCOL_CONNECTION_LOST' || err.code === "ECONNRESET") {
+            handleDisconnect();
+        } else {
+            throw err;
+        }
+    });
+}
+handleDisconnect();
 
-// var BotStuff_audit = "382372304619044865"
-// var BotStuff_ann = "382372383421628417"
+function Month() {
+    var monthNames = ["January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ];
+    var d = new Date()
+    return monthNames[d.getMonth()]
 
+}
 
-// module.exports.updateRole = (message) => { 
+function Year() {
+    return new Date().getFullYear()
+}
 
-    
-
-
-// }
-
-// module.exports.updateRoleTestVersion = (message) => { 
-    
-//     client.channels.get(BotStuff_audit).send("Updating user roles for " + Month())
-//     client.channels.get(BotStuff_ann).send("Active user roles have been updated for " + Month())
-//     console.log("updating role")
-//     let guild = client.guilds.find("name", "Transport Fever")
-//     var role = guild.roles.find("name", activeUser)
-//     if (!role) { console.log("role doesn't exist") } else { role.delete() }
-
-//     setTimeout(function () {
-//         guild.createRole({
-//             name: activeUser,
-//             color: "GOLD",
-//             hoist: true,
-//             position: 4,
-//         })
-//     }, 200)
-//     setTimeout(retrieveData, 1000)
-
-//     setTimeout(clearDatabase, 3000)
-
-//     //retrieve who is top
-//     function retrieveData() {
-//         sql.all(`SELECT userId, username, points FROM scores ORDER BY points DESC LIMIT 6`).then(rows => { // select each column               
-
-//             for (var i = 0; i < 6; i++) {
-//                 console.log(`${rows[i].userId}`)
-//                 let person = guild.members.get(rows[i].userId)
-//                 let points = rows[i].points
-//                 let NameOfUser = rows[i].username
-//                 if (typeof person === "undefined") {
-//                     client.channels.get(BotStuff_audit).send(NameOfUser + " is not in the guild, not updating. " + new Date().toString())
-//                 } else {
-//                     //person is not undefined
-
-//                     var myRole = guild.roles.find("name", activeUser)
-//                     //console.log(myRole)
-//                     person.addRole(myRole).catch(console.error)
-//                     // console.log(typeof person)
-//                     client.channels.get(BotStuff_ann).send("User " + NameOfUser + " now has the role with " + points + " points!")
-//                 }
-//                 if (i === 5) {
-//                     client.channels.get(BotStuff_ann).send("Roles have been updated on " + new Date().toString())
-//                 }
-
-//             }
-//         })
-//     }
-
-//     /* 
-//         1. add columns total_score and date of year, check if exists, if already, do nothing
-//         2. set date of year to points
-//         3. Add points to total score 
-//         4. set points to zero
-//     */
+function DateInMonth() {
+    return new Date().getDate()
+}
 
 
-//     //add new column   
-//     let table_name = Month() + "_" + Year() // add String() ? 
-//     console.log(table_name)
-//     function delRecords() { sql.run(`UPDATE scores SET points ='0', level = '0'`).catch((e) => console.log(e)) }
-//     function clearDatabase() {
-//         sql.run(`ALTER TABLE scores ADD COLUMN '${table_name}'`).then(() => { // Add New_Month column (delete this)
-//             sql.run(`UPDATE scores SET '${table_name}' = points`).then(() => delRecords())
-//         }).catch(e => console.log(e))
-//     }
+exports.updateRoles = async (client) => {
+    client.channels.find("name", "audit-log").send("Updating user roles for " + Month())
+    client.channels.find("name", "announcements").send("Active user roles have been updated for " + Month())
+    let guild = client.guilds.find("name", "BotTestServer") // Change this!
+    var result;
+    var test = await connection.query(`SELECT userId, username, points FROM points ORDER BY points DESC`)
+    console.log(result)
+    //console.log(users)
 
-// }
 
-    
+
+
+
+
+
+
+
+}
