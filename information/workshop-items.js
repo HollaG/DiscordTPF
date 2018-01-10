@@ -214,8 +214,12 @@ exports.storeDB = async (client) => {
         var newRows;
         var editThis = await channel.send(`API query 0% done`, { code: "xl" })
         connection.query(`SELECT COUNT(*) as total FROM steam_workshop`, async (err, results) => {
-
-            var oldRows = (results[0].total)
+            var oldRows
+            if (!results) {
+                oldRows = 0
+            } else {
+                oldRows = (results[0].total)
+            }
 
             console.log(oldRows)
 
