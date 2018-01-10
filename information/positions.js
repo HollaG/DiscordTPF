@@ -1,7 +1,5 @@
 
 
-
-
 // !top command
 const config = require("../configuration/config.json");
 const tokenId = require("../configuration/tokenId.json");
@@ -16,29 +14,27 @@ var db_config = {
 }
 var connection;
 function handleDisconnect() {
-    connection = mysql.createConnection(db_config); 
-    connection.connect(function (err) {              
-        if (err) {                                   
+    connection = mysql.createConnection(db_config);
+    connection.connect(function (err) {
+        if (err) {
             console.log('error when connecting to db:', err);
-            setTimeout(handleDisconnect, 2000); 
-        }                                    
-    });                            
+            setTimeout(handleDisconnect, 2000);
+        }
+    });
     connection.on('error', function (err) {
         console.log('db error in file positions.js', err);
-        if (err.code === 'PROTOCOL_CONNECTION_LOST' || err.code === "ECONNRESET") { 
-            handleDisconnect();                        
-        } else {                                     
-            throw err;                                  
+        if (err.code === 'PROTOCOL_CONNECTION_LOST' || err.code === "ECONNRESET") {
+            handleDisconnect();
+        } else {
+            throw err;
         }
     });
 }
 handleDisconnect();
-connection.on('error', function(err) { 
-    console.log(err.code) 
+connection.on('error', function (err) {
+    console.log(err.code)
     connection.query('SELECT 1')
 })
-
-
 
 module.exports.capitalizeFirstLetter = (string) => {
     return string.charAt(0).toUpperCase() + string.slice(1);
@@ -85,7 +81,6 @@ module.exports.getTop = (message, page, date) => {
     }
     console.log(pointValue)
 
-
     var reactedUser = message.author.id
     var arr = []
     var i = 0 // first user
@@ -97,7 +92,7 @@ module.exports.getTop = (message, page, date) => {
     }
     var lessThanTen = 0 // to check how many times the for loop runs. Used if it is less than 10    
     var numberOfUsers = 0 // check total number of users
-    var deleteTime = 15000 // Time before ending the interactive scoreboard
+    var deleteTime = 30000 // Time before ending the interactive scoreboard
     var userPoints = 0 // points of message sender
     connection.beginTransaction(function (err) {
         if (err) {
@@ -109,14 +104,12 @@ module.exports.getTop = (message, page, date) => {
             connection.query('SELECT username, ?? FROM points ORDER BY ?? DESC', [pointValue, pointValue], function (error, results, fields) {
                 numberOfUsers = results.length
 
-
-
                 var totalPages = Math.ceil(numberOfUsers / 10)
                 if (page > totalPages) {
                     return message.reply(`please enter a valid page number between \`1\` and \`${totalPages}\``)
                 }
 
-                function sendTop(message) {
+                async function sendTop(message) {
                     arr = []
                     for (i; i < j; i++) {
                         // this code wouldn't run if there was no error.
@@ -136,12 +129,9 @@ module.exports.getTop = (message, page, date) => {
                             } else {
                                 console.log("else triggered")
 
-
-
                                 // lessThanTen = 6, i = 180, j = 190                                               
                                 // j = i 
                                 i = i - lessThanTen // resets the value of i to before the "for" loop since the "for" loop incremented i by lessThanTen             
-
 
                                 if (j / 10 > totalPages) {
                                     k = 1 // prevent further code from running, change i and j back to normal since there are no more pages
@@ -178,73 +168,104 @@ module.exports.getTop = (message, page, date) => {
                 sendTop(message)
                 arr.join("\n")
                 message.channel.send(arr, { code: "xl" }).then(message => {
-                    message.react("◀").then(MessageReaction => message.react("▶")).then(
+                    ; (async () => {
+                        var deleteMe = await message.channel.send("Click the emojis by the next 30 seconds to go to the next page!")
+                        await message.react("⏮")
+                        await message.react("◀")
+                        await message.react("⏹")
+                        await message.react("▶")
+                        await message.react("⏭")
+
                         setTimeout(function () {
-                            message.clearReactions()
-                        }, deleteTime)
-                    )
-                    message.channel.send("Click the emojis by the next 15 seconds to go to the next page!").then(message => {
-                        setTimeout(function () {
-                            message.edit("Interative scoreboard ended.")
-                        }, deleteTime)
-                    })
+                            collector.on("collect", r => {
+                                r.remove(reactedUser)
+                                lessThanTen = 0
+                                console.log("triggered")
+                                if (r.emoji.name === "◀") { //left arrow, go back
+                                    arr = []
 
-                    setTimeout(function () {
-                        collector.on("collect", r => {
-                            r.remove(reactedUser)
-                            lessThanTen = 0
-                            console.log("triggered")
-                            if (r.emoji.name === "◀") { //left arrow, go back
-                                arr = []
+                                    i = i - 10
+                                    j = j - 10
 
-                                i = i - 10
-                                j = j - 10
+                                    console.log("i = " + i + " normal code running")
+                                    console.log("j = " + j + " normal code running")
+                                    sendTop(message)
+                                    if (k === 0) {
+                                        message.edit(arr, { code: "xl" })
+                                    } else return //r.remove(reactedUser)
 
-                                console.log("i = " + i + " normal code running")
-                                console.log("j = " + j + " normal code running")
-                                sendTop(message)
-                                if (k === 0) {
-                                    message.edit(arr, { code: "xl" })
-                                } else return //r.remove(reactedUser)
-
-
-                            }
-                            if (r.emoji.name === "▶") {
-                                arr = []
-
-                                i = i + 10 // 180 + 10
-                                j = j + 10 // 190 + 10 
-                                // i = 190, j - 200
-                                console.log("i = " + i + " normal code running")
-                                console.log("j = " + j + " normal code running")
-                                sendTop(message)
-
-                                if (k === 0) {
-                                    message.edit(arr, { code: "xl" })
-                                } else {
-                                    return message.channel.send("No more members!").then(message => message.delete(1000))
                                 }
-                            }
-                            // if (r.emoji.name === "⏹") {
-                            //     collector.stop()
-                            //     console.log("here")
-                            //     //message.edit("Interactive scoreboard ended.")
-                            // }
-                            console.log(`collected ${r.emoji.name}`)
-                        })
-                    }, 1700)
-                    const collector = message.createReactionCollector(
-                        (reaction, user) => reaction.emoji.name === "◀" || "▶",
-                        { time: deleteTime }
-                    )
+                                if (r.emoji.name === "▶") {
+                                    arr = []
 
-                    collector.on("end", collected => console.log(`collection ended`))
+                                    i = i + 10 // 180 + 10
+                                    j = j + 10 // 190 + 10 
+                                    // i = 190, j - 200
+                                    console.log("i = " + i + " normal code running")
+                                    console.log("j = " + j + " normal code running")
+                                    sendTop(message)
+
+                                    if (k === 0) {
+                                        message.edit(arr, { code: "xl" })
+                                    } else {
+                                        return message.channel.send("No more members!").then(message => message.delete(1000))
+                                    }
+                                }
+                                if (r.emoji.name === "⏹") {
+                                    collector.stop()
+                                    console.log("here")
+
+                                }
+                                if (r.emoji.name === "⏮") {
+                                    arr = []
+                                    i = 0
+                                    j = 10
+                                    sendTop(message)
+                                    if (k === 0) {
+                                        message.edit(arr, { code: "xl" })
+                                    }
+
+                                }
+                                if (r.emoji.name === "⏭") {
+                                    arr = []
+                                    // If the number of users is not a multiple of 10, i.e. lessThanTen
+                                    j = Math.ceil(numberOfUsers / 10) * 10
+                                    i = j - 10
+                                    sendTop(message)
+                                    console.log(i, "i")
+                                    console.log(j, "j")
+                                    if (k === 0) {
+                                        message.edit(arr, { code: "xl" })
+                                    }
+
+                                }
+
+                                console.log(`collected ${r.emoji.name}`)
+
+                            })
+                        }, 1000)
+                        const collector = message.createReactionCollector(
+                            (reaction, user) => reaction.emoji.name === "◀" || "▶" || "⏹" || "⏮" || "⏭",
+                            { time: deleteTime }
+                        )
+                        collector.on("end", collected => {
+                            try {
+                                console.log(`collection ended`)
+                                deleteMe.edit("Interactive scoreboard ended.")
+                                message.clearReactions()
+
+                            } catch (e) {
+                                console.log(e)
+                            }
+
+                        })
+
+                    })();
+
                 })
 
             })
         }
     })
-
-
 
 }

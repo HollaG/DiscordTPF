@@ -6,8 +6,6 @@ const mysql = require("mysql");
 
 const client = new Discord.Client();
 
-
-
 // required JSON files 
 const config = require("./configuration/config.json");
 const commands = require("./commands/commands.json");
@@ -26,7 +24,6 @@ const updateLinks = require("./updates/update-links.js")
 const workshop = require("./information/workshop-items.js")
 const suggestions = require("./utility/suggestions.js")
 const updateRoles = require("./updates/roles")
-
 
 var db_config = {
     host: tokenId.host,
@@ -60,10 +57,6 @@ handleDisconnect();
 //     connection.query('SELECT 1');
 // }, 5000);
 
-
-
-
-
 var TpF = "246190532949180417"
 var welcome = "246190912315719680" //TpF wlc channel
 var announcements = "386091548388884480" // TpF annc channel
@@ -78,7 +71,6 @@ var BotStuff_ann = "382372383421628417"
 
 const activeUser = "I am active!";
 const ontime = require("ontime");
-
 
 client.login(tokenId.token);
 
@@ -135,7 +127,6 @@ function DateInMonth() {
     return new Date().getDate()
 }
 
-
 function commitSQL() {
     connection.commit(function (err) {
         if (err) {
@@ -148,21 +139,32 @@ function commitSQL() {
 
 ontime({
     cycle: '1T12:00:00',
-}, function (ot, message) {
+}, function (ot) {
     console.log("running program");
     updateRole(message);
     ot.done();
     return
 })
 
+var doThis = (client) => {
+    workshop.storeDB(client)
+}
 
+ontime({
+    cycle: '11:00:00',
+}, function (ot) {
+    console.log(client)    
+    doThis(client)    
+    ot.done();
+    return
 
+})
 
 function updateRole(message) {
     client.channels.find("name", "audit-log").send("Updating user roles for " + Month())
     client.channels.find("name", "announcements").send("Active user roles have been updated for " + Month())
     console.log("updating role")
-    let guild = client.guilds.find("name", "BotTestServer") // change this
+    let guild = client.guilds.find("name", "Transport Fever") // change this
     var role = guild.roles.find("name", activeUser)
     if (!role) { console.log("role doesn't exist") } else { role.delete() }
 
@@ -179,12 +181,9 @@ function updateRole(message) {
 
     setTimeout(process.exit, 10000)
 
-
-
     //retrieve who is top
     function retrieveData() {
         connection.query("SELECT userId, username, points FROM points ORDER BY points DESC LIMIT 10", function (err, results) {
-
 
             for (var i = 0; i < 10; i++) {
                 console.log(`${results[i].userId}`)
@@ -240,18 +239,10 @@ function updateRole(message) {
             })
             commitSQL()
 
-
         })
     }
 
-
-
-
-
-
 }
-
-
 
 // eval 
 client.on("message", message => {
@@ -273,8 +264,6 @@ client.on("message", message => {
     }
 });
 
-
-
 client.on("message", message => {
     var mclength = message.content.split(" ")
     console.log(`${message.author.username}` + " has sent a message that is " + mclength.length + " words long.");
@@ -288,15 +277,21 @@ client.on("message", message => {
     var args = message.content.slice(config.prefix.length).trim().split(/ +/g);
     var command = args.shift().toLowerCase()
 
-    if (command === "test") { 
+    if (command === "test") {
         updateRoles.updateRoles(client)
     }
-    if (command === "pull") [
+    if (command === "pull") {
         workshop.storeDB(client)
-    ]
+    }
 
+    if (command === "searchuser") {
+        var searchStr = args.join(" ")
+        if (searchStr.length < 3) {
+            return message.channel.send("Search terms must be more than 3 characters.")
+        }
+        workshop.searchUser(client, message, args.join(" "))
 
-
+    }
 
     var acceptedLinks = {
         "twitch": "twitch",
@@ -364,7 +359,6 @@ client.on("message", message => {
                 } else {
                     message.channel.send(`No such command, type \`!help\` for more information`)
                 }
-
 
                 break;
             case "shutdown":
@@ -503,13 +497,17 @@ client.on("message", message => {
         }
     } else {
         let responses = message.content.split(" ").reverse().pop().toLocaleLowerCase()
-        if (wordResponse[responses]) {
+        // check for id
+        if (!message.mentions.users.first()) { 
+            return             
+        }
+        if (wordResponse[responses] && message.mentions.users.first().id === client.user.id) {
             message.channel.send(wordResponse[responses])
         }
+        
     }
 
 })
-
 
 // delete message spam prevention
 client.on("messageDelete", (message) => {
@@ -519,7 +517,7 @@ client.on("messageDelete", (message) => {
 // Member join welcome message
 client.on("guildMemberAdd", (member) => {
     console.log(`${member.user.username} has joined TFDiscord`);
-    member.guild.defaultChannel.send(`Welcome ${member.user.username} to the server! Please read the rules in <#${welcome}>!`);
+    client.channels.find("name", "general").send(`Welcome ${member.user.username} to the server! Please read the rules in <#${welcome}>!`);
     //client.channels.get(general).send(`Welcome ${member.user.username} to the server! Please read the rules in <#${welcome}>!`)
 });
 
