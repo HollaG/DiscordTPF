@@ -268,10 +268,18 @@ exports.storeDB = async (client) => {
             var steamIDs = []
             const errors = []
             const names = []
-            var firstRes = await request.get(`https://api.steampowered.com/IPublishedFileService/QueryFiles/v1/?key=${tokenId.key}&format=json&&creator_appid=446800&totalonly=1`)
+            try { 
+                var firstRes = await request.get(`https://api.steampowered.com/IPublishedFileService/QueryFiles/v1/?key=${tokenId.key}&format=json&&creator_appid=446800&totalonly=1`)
+            } catch (e) { 
+                console.log(e)
+            }
+            
             var totalItems = firstRes.body.response.total // 2020
             var numberOfPagesToSearch = Math.ceil(totalItems / 100)
             var iterator;
+            // try { 
+
+            // } catch (e) { }
             for (let i = 1; i < numberOfPagesToSearch + 1; i++) {
                 var results = await request.get(`https://api.steampowered.com/IPublishedFileService/QueryFiles/v1/?key=${tokenId.key}&page=${i}&numperpage=100&creator_appid=446800&return_metadata=1`)
 
@@ -374,7 +382,6 @@ exports.storeDB = async (client) => {
 
                 })
             console.log("done")
-
 
         })
     } catch (e) {
