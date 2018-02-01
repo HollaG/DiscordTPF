@@ -138,12 +138,19 @@ function commitSQL() {
 }
 
 ontime({
-    cycle: '1T12:00:00',
+    cycle: '1T20:00:00',
 }, function (ot) {
     console.log("running program");
-    updateRole(message);
-    ot.done();
-    return
+    try { 
+        updateRole();
+    }
+    catch (e) { 
+        client.channels.find("name", "botstuff").send(e)
+    } finally { 
+        ot.done();
+        return
+    }
+   
 })
 
 var doThis = (client) => {
@@ -151,9 +158,9 @@ var doThis = (client) => {
 }
 
 ontime({
-    cycle: '11:00:00',
+    cycle: '12:00:00',
 }, function (ot) {
-    console.log(client)    
+    //console.log(client)    
     doThis(client)    
     ot.done();
     return
