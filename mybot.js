@@ -186,8 +186,6 @@ function updateRole(message) {
     setTimeout(retrieveData, 2000)
     setTimeout(retrieveClear, 5000)
 
-    setTimeout(process.exit, 10000)
-
     //retrieve who is top
     function retrieveData() {
         connection.query("SELECT userId, username, points FROM points ORDER BY points DESC LIMIT 10", function (err, results) {
@@ -234,7 +232,7 @@ function updateRole(message) {
                         })
 
                     }
-                    connection.query(`UPDATE points SET points = 0, level = '0'`, function (err) {
+                    connection.query(`UPDATE points SET points = '0', level = '0'`, function (err) {
                         if (err) {
                             return connection.rollback(function () {
                                 //throw err;
