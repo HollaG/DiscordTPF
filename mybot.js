@@ -307,10 +307,10 @@ client.on("message", message => {
     if (acceptedLinks[command]) {
         links.checkLinks(message, command)
     }
-
-    if (message.mentions.everyone) {
+    if (message.mentions.everyone && !message.member.roles.some(r => ["Game DeveloperZ", "AdminZ", "MoDerators"].includes(r.name)))  {
         message.channel.send("```Please do NOT use @everyone or @here!```")
     }
+  
     if (message.content === "!copyDB" && message.author.id === config.ownerID) {
         var numberOfUsers_scores = 0
         sql.all(`SELECT * FROM scores`).then((row) => {

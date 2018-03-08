@@ -208,6 +208,7 @@ handleDisconnect();
 exports.storeDB = async (client) => {
 
     try {
+        var timeStart = process.hrtime()
         var channel = client.channels.find("name", "botstuff")
         channel.send(`Updating local database, please stand by.`)
 
@@ -251,7 +252,7 @@ exports.storeDB = async (client) => {
                 creatorURL varchar(255)
             )
                 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`)
-            await connection.query(`DROP TABLE IF EXISTS steam_workshop`)
+            // await connection.query(`DROP TABLE IF EXISTS steam_workshop`)
             await connection.query(`CREATE TABLE IF NOT EXISTS steam_workshop
             ( 
                 ID int NOT NULL AUTO_INCREMENT,
@@ -268,17 +269,18 @@ exports.storeDB = async (client) => {
             var steamIDs = []
             const errors = []
             const names = []
-            try { 
+            try {
                 var firstRes = await request.get(`https://api.steampowered.com/IPublishedFileService/QueryFiles/v1/?key=${tokenId.key}&format=json&&creator_appid=446800&totalonly=1`)
-            } catch (e) { 
+            } catch (e) {
                 console.log(e)
             }
-            
+
             var totalItems = firstRes.body.response.total // 2020
             var numberOfPagesToSearch = Math.ceil(totalItems / 100)
             var iterator;
             // try { 
-
+            var dbDelete;
+            dbDelete = await channel.send(`Database 0% updated`, { code: "xl" })
             // } catch (e) { }
             for (let i = 1; i < numberOfPagesToSearch + 1; i++) {
                 var results = await request.get(`https://api.steampowered.com/IPublishedFileService/QueryFiles/v1/?key=${tokenId.key}&page=${i}&numperpage=100&creator_appid=446800&return_metadata=1`)
@@ -301,19 +303,19 @@ exports.storeDB = async (client) => {
                         [fileID]: tempObj
                     }
                     //console.log(iterator)
-                    connection.query(`INSERT INTO tempWorkshop SET ?`, tempObj, function (err, results) {
+                    connection.query(`INSERT INTO tempWorkshop SET ?`, tempObj, async function (err, results) {
                         if (results.insertId === Math.round(totalItems / 4)) {
                             console.log("HEREJKSRIJASEBJ")
-                            editThis.edit(`Database 20% updated`, { code: "xl" })
+                            dbDelete.edit(`Database 20% updated`, { code: "xl" })
                         }
                         if (results.insertId === Math.round(totalItems / 2)) {
-                            editThis.edit(`Database 40% updated`, { code: "xl" })
+                            dbDelete.edit(`Database 40% updated`, { code: "xl" })
                         }
                         if (results.insertId === Math.round(totalItems / 4) * 3) {
-                            editThis.edit(`Database 60% updated`, { code: "xl" })
+                            dbDelete.edit(`Database 60% updated`, { code: "xl" })
                         }
                         if (results.insertId === Math.round(totalItems - 1)) {
-                            editThis.edit(`Database 80% updated`, { code: "xl" })
+                            dbDelete.edit(`Database 80% updated`, { code: "xl" })
                         }
 
                     })
@@ -352,9 +354,34 @@ exports.storeDB = async (client) => {
                 }
             }
 
+            connection.query(`SELECT fileID, fileName FROM steam_workshop
+                WHERE fileID NOT IN (SELECT fileID FROM tempWorkshop)
+                UNION
+                SELECT fileID, fileName FROM tempWorkshop
+                WHERE fileID NOT IN (SELECT fileID FROM steam_workshop)`)
+
             //console.log(names)
 
             // removes duplicates
+
+            // check for new / old
+
+            // await connection.query(`DROP TABLE IF EXISTS steam_workshop`)
+
+            // await connection.query(`CREATE TABLE IF NOT EXISTS steam_workshop
+            // ( 
+            //     ID int NOT NULL AUTO_INCREMENT,
+            //     fileID varchar(50) NOT NULL,
+            //     fileName varchar(255) NOT NULL,
+            //     creatorID varchar(50) NOT NULL,     
+            //     creatorName varchar(255),   
+            //     creatorURL varchar(255),  
+            //     PRIMARY KEY (ID) 
+            // )
+            // CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`)
+
+            //throw "me"
+
             connection.query(`INSERT INTO users (creatorID, creatorName, creatorURL)
                 SELECT DISTINCT creatorID,creatorName,creatorURL
                 FROM tempUsersTable`
@@ -364,7 +391,7 @@ exports.storeDB = async (client) => {
                 from tempWorkshop
                 LEFT JOIN users ON tempWorkshop.creatorID = users.creatorID;`
                         , (err, results => {
-                            editThis.edit(`Database 100% updated`, { code: "xl" })
+                            dbDelete.edit(`Database 100% updated`, { code: "xl" })
                             var changed;
                             var word;
                             if (iterator > oldRows) {
@@ -377,7 +404,8 @@ exports.storeDB = async (client) => {
                                 changed = oldRows - iterator
                                 word = "removed"
                             }
-                            channel.send(`Status\n----------------------\nRows ${word}: ${iterator - oldRows}\n----------------------`, { code: "xl" })
+                            var end = process.hrtime(timeStart)
+                            channel.send(`Status\n----------------------\nEntries ${word}: ${iterator - oldRows} (${oldRows} -> ${iterator})\nTime taken: ${end[0]} seconds\n----------------------`, { code: "" })
                         }))
 
                 })
