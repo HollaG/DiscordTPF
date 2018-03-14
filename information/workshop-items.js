@@ -252,7 +252,7 @@ exports.storeDB = async (client) => {
                 creatorURL varchar(255)
             )
                 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`)
-            // await connection.query(`DROP TABLE IF EXISTS steam_workshop`)
+            await connection.query(`DROP TABLE IF EXISTS steam_workshop`)
             await connection.query(`CREATE TABLE IF NOT EXISTS steam_workshop
             ( 
                 ID int NOT NULL AUTO_INCREMENT,
@@ -354,11 +354,11 @@ exports.storeDB = async (client) => {
                 }
             }
 
-            connection.query(`SELECT fileID, fileName FROM steam_workshop
-                WHERE fileID NOT IN (SELECT fileID FROM tempWorkshop)
-                UNION
-                SELECT fileID, fileName FROM tempWorkshop
-                WHERE fileID NOT IN (SELECT fileID FROM steam_workshop)`)
+            // connection.query(`SELECT fileID, fileName FROM steam_workshop
+            //     WHERE fileID NOT IN (SELECT fileID FROM tempWorkshop)
+            //     UNION
+            //     SELECT fileID, fileName FROM tempWorkshop
+            //     WHERE fileID NOT IN (SELECT fileID FROM steam_workshop)`)
 
             //console.log(names)
 
