@@ -68,13 +68,15 @@ var testBotStuff = "335619483018461194" // testserver
 var audit_log = "382371100690219028"
 var BotStuff_audit = "382372304619044865"
 var BotStuff_ann = "382372383421628417"
+var addroleMsge = "426734189782630401"
+var removeroleMsge = "426751840546324480"
 
 const activeUser = "I am active!";
 const ontime = require("ontime");
 
 client.login(tokenId.token);
 
-client.on("ready", () => {
+client.on("ready", async () => {
     console.log("I am ready!");
     client.channels.find("name", "botstuff").send("Bot has restarted on " + new Date().toString())
     //client.user.setGame("transportfever.com");
@@ -84,7 +86,49 @@ client.on("ready", () => {
             type: 0
         }
     });
+    
+    var msge = await client.channels.find("name", "welcome").fetchMessage(addroleMsge)
+    var rmsge = await client.channels.find("name", "welcome").fetchMessage(removeroleMsge)    
+    await msge.react("1⃣")
+    await msge.react("2⃣")
+    await msge.react("3⃣")
+    await msge.react("4⃣")
+    await rmsge.react("1⃣")
+    await rmsge.react("2⃣")
+    await rmsge.react("3⃣")
+    await rmsge.react("4⃣")
+    
+    // const collector = msg.createReactionCollector(
+    //     (reaction, user) => reaction.emoji.name === "1⃣" || "2⃣" || "3⃣" || "4⃣"
+    //     , { time: 10000000  })
+
+    // collector.on('collect', r => {
+    //     updateRoles.addRole(client, r)
+    //     console.log(`collected ${r.emoji.name}`)
+    //     console.log(r.users)
+    //     //console.log(r.users.keyArray()[r.users.keyArray().size])
+
+    // })
+
 });
+
+client.on("messageReactionAdd", (reaction, user) => {
+    if (user.bot) return    
+    
+    //msg.react("1⃣").then(msg.react("2⃣")).then(msg.react("3⃣")).then(msg.react("4⃣")).catch(e => console.log(e))
+    
+    if (reaction.message.id == addroleMsge) { 
+        console.log('yes')
+        // console.log(reaction.emoji.name)
+        updateRoles.addRole(client, reaction, user)
+
+    } else if (reaction.message.id == removeroleMsge) { 
+        console.log('no')
+        updateRoles.removeRole(client, reaction, user)
+    }
+
+    return
+})
 
 client.on("error", (e) => console.error(e));
 client.on("warn", (e) => console.warn(e));
@@ -141,16 +185,16 @@ ontime({
     cycle: '1T20:00:00',
 }, function (ot) {
     console.log("running program");
-    try { 
+    try {
         updateRole();
     }
-    catch (e) { 
+    catch (e) {
         client.channels.find("name", "botstuff").send(e)
-    } finally { 
+    } finally {
         ot.done();
         return
     }
-   
+
 })
 
 var doThis = (client) => {
@@ -161,7 +205,7 @@ ontime({
     cycle: '12:00:00',
 }, function (ot) {
     //console.log(client)    
-    doThis(client)    
+    doThis(client)
     ot.done();
     return
 
@@ -307,10 +351,10 @@ client.on("message", message => {
     if (acceptedLinks[command]) {
         links.checkLinks(message, command)
     }
-    if (message.mentions.everyone && !message.member.roles.some(r => ["Game DeveloperZ", "AdminZ", "MoDerators"].includes(r.name)))  {
+    if (message.mentions.everyone && !message.member.roles.some(r => ["Game DeveloperZ", "AdminZ", "MoDerators"].includes(r.name))) {
         message.channel.send("```Please do NOT use @everyone or @here!```")
     }
-  
+
     if (message.content === "!copyDB" && message.author.id === config.ownerID) {
         var numberOfUsers_scores = 0
         sql.all(`SELECT * FROM scores`).then((row) => {
@@ -503,13 +547,13 @@ client.on("message", message => {
     } else {
         let responses = message.content.split(" ").reverse().pop().toLocaleLowerCase()
         // check for id
-        if (!message.mentions.users.first()) { 
-            return             
+        if (!message.mentions.users.first()) {
+            return
         }
         if (wordResponse[responses] && message.mentions.users.first().id === client.user.id) {
             message.channel.send(wordResponse[responses])
         }
-        
+
     }
 
 })

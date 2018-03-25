@@ -47,22 +47,124 @@ function DateInMonth() {
     return new Date().getDate()
 }
 
+exports.addRole = (client, r, user) => {
+    var guild = client.guilds.find("name", "Transport Fever")
+    var channel = guild.channels.find("name", "welcome")
+    var reactor = guild.members.get(user.id)
+    var role;
+    switch (r.emoji.name) {
+        case "1⃣":   //TpF player
+            role = guild.roles.find("name", "TpF Player")
+            try {
+                if (!reactor.roles.has(role.id)) {
+                    reactor.addRole(role).catch(console.error)
+                } else {
+                    channel.send("You already have this role!").then(m => m.delete(1000))
+                }
+            } catch (e) {
+                channel.send("Unexpected error occurred! Contact Holla").then(m => m.delete(1000))
+            }
+            break;
+        case "2⃣":   // CS player
+            role = guild.roles.find("name", "C:S Player")
+            try {
+                if (!reactor.roles.has(role.id)) {
+                    reactor.addRole(role).catch(console.error)
+                } else {
+                    channel.send("You already have this role!").then(m => m.delete(1000))
+                }
+            } catch (e) {
+                channel.send("Unexpected error occurred! Contact Holla").then(m => m.delete(1000))
+            }
+            break;
 
-exports.updateRoles = async (client) => {
-    client.channels.find("name", "audit-log").send("Updating user roles for " + Month())
-    client.channels.find("name", "announcements").send("Active user roles have been updated for " + Month())
-    let guild = client.guilds.find("name", "BotTestServer") // Change this!
-    var result;
-    var test = await connection.query(`SELECT userId, username, points FROM points ORDER BY points DESC`)
-    console.log(result)
-    //console.log(users)
+        case "3⃣":     // Fact Player
+            role = guild.roles.find("name", "Factorio Player")
+            try {
+                if (!reactor.roles.has(role.id)) {
+                    reactor.addRole(role).catch(console.error)
+                } else {
+                    channel.send("You already have this role!").then(m => m.delete(1000))
+                }
+            } catch (e) {
+                channel.send("Unexpected error occurred! Contact Holla").then(m => m.delete(1000))
+            }
+            break;
 
+        case "4⃣": // Wantabe modder
+            role = guild.roles.find("name", "Wantabe Modder")
+            try {
+                if (!reactor.roles.has(role.id)) {
+                    reactor.addRole(role).catch(console.error)
+                } else {
+                    channel.send("You already have this role!").then(m => m.delete(1000))
+                }
+            } catch (e) {
+                channel.send("Unexpected error occurred! Contact Holla").then(m => m.delete(1000))
+            }
+            break;
+    }
 
+}
 
+exports.removeRole = (client, r, user) => {
+    var guild = client.guilds.find("name", "Transport Fever")
+    var channel = guild.channels.find("name", "welcome")
+    var reactor = guild.members.get(user.id)
+    var role;
+    switch (r.emoji.name) {
 
+        case "1⃣":
+            role = guild.roles.find("name", "TpF Player")
+            try {
+                if (reactor.roles.has(role.id)) {
+                    reactor.removeRole(role).catch(console.error)
+                } else {
+                    channel.send("You don't have this role!").then(m => m.delete(1000))
+                }
+            } catch (e) {
+                channel.send("Unexpected error occurred! Contact Holla").then(m => m.delete(1000))
+            }
+            break;
+        case "2⃣":
+            role = guild.roles.find("name", "C:S Player")
+            try {
+                if (reactor.roles.has(role.id)) {
+                    reactor.removeRole(role).catch(console.error)
+                } else {
+                    channel.send("You don't have this role!").then(m => m.delete(1000))
+                }
+            } catch (e) {
+                channel.send("Unexpected error occurred! Contact Holla").then(m => m.delete(1000))
+            }
+            break;
 
+        case "3⃣":
+            role = guild.roles.find("name", "Factorio Player")
+            try {
+                if (reactor.roles.has(role.id)) {
+                    reactor.removeRole(role).catch(console.error)
+                } else {
+                    channel.send("You don't have this role!").then(m => m.delete(1000))
+                }
+            } catch (e) {
+                channel.send("Unexpected error occurred! Contact Holla").then(m => m.delete(1000))
+            }
+            break;
 
+        case "4⃣":
+            role = guild.roles.find("name", "Wantabe Modder")
+            try {
+                if (reactor.roles.has(role.id)) {
+                    reactor.removeRole(role).catch(console.error)
+                } else {
+                    channel.send("You don't have this role!").then(m => m.delete(1000))
+                }
+            } catch (e) {
+                channel.send("Unexpected error occurred! Contact Holla").then(m => m.delete(1000))
+            }
+            break;
 
-
+    }
 
 }
