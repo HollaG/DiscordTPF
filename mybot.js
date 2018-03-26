@@ -517,7 +517,7 @@ client.on("message", message => {
                 if (args.length === 0) {
                     return message.channel.send("Please provide an argument, either 'all', 'pending' or 'accepted'.")
                 }
-                let selector = args[0].toLocaleLowerCase()
+                selector = args[0].toLocaleLowerCase()
                 suggestions.listRequest(client, message, selector)
                 break;
             case "complete":
