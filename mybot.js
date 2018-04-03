@@ -86,9 +86,9 @@ client.on("ready", async () => {
             type: 0
         }
     });
-    
+
     var msge = await client.channels.find("name", "welcome").fetchMessage(addroleMsge)
-    var rmsge = await client.channels.find("name", "welcome").fetchMessage(removeroleMsge)    
+    var rmsge = await client.channels.find("name", "welcome").fetchMessage(removeroleMsge)
     await msge.react("1⃣")
     await msge.react("2⃣")
     await msge.react("3⃣")
@@ -97,7 +97,7 @@ client.on("ready", async () => {
     await rmsge.react("2⃣")
     await rmsge.react("3⃣")
     await rmsge.react("4⃣")
-    
+
     // const collector = msg.createReactionCollector(
     //     (reaction, user) => reaction.emoji.name === "1⃣" || "2⃣" || "3⃣" || "4⃣"
     //     , { time: 10000000  })
@@ -113,16 +113,16 @@ client.on("ready", async () => {
 });
 
 client.on("messageReactionAdd", (reaction, user) => {
-    if (user.bot) return    
-    
+    if (user.bot) return
+
     //msg.react("1⃣").then(msg.react("2⃣")).then(msg.react("3⃣")).then(msg.react("4⃣")).catch(e => console.log(e))
-    
-    if (reaction.message.id == addroleMsge) { 
+
+    if (reaction.message.id == addroleMsge) {
         console.log('yes')
         // console.log(reaction.emoji.name)
         updateRoles.addRole(client, reaction, user)
 
-    } else if (reaction.message.id == removeroleMsge) { 
+    } else if (reaction.message.id == removeroleMsge) {
         console.log('no')
         updateRoles.removeRole(client, reaction, user)
     }
@@ -186,9 +186,8 @@ ontime({
 }, function (ot) {
     console.log("running program");
     try {
-        updateRole();
-    }
-    catch (e) {
+        updateRoles.activeOne(client);
+    } catch (e) {
         client.channels.find("name", "botstuff").send(e)
     } finally {
         ot.done();
@@ -210,88 +209,6 @@ ontime({
     return
 
 })
-
-function updateRole(message) {
-    client.channels.find("name", "audit-log").send("Updating user roles for " + Month())
-    client.channels.find("name", "announcements").send("Active user roles have been updated for " + Month())
-    console.log("updating role")
-    let guild = client.guilds.find("name", "Transport Fever") // change this
-    var role = guild.roles.find("name", activeUser)
-    if (!role) { console.log("role doesn't exist") } else { role.delete() }
-
-    setTimeout(function () {
-        guild.createRole({
-            name: activeUser,
-            color: "GOLD",
-            hoist: true,
-            position: 4,
-        })
-    }, 200)
-    setTimeout(retrieveData, 2000)
-    setTimeout(retrieveClear, 5000)
-
-    //retrieve who is top
-    function retrieveData() {
-        connection.query("SELECT userId, username, points FROM points ORDER BY points DESC LIMIT 10", function (err, results) {
-
-            for (var i = 0; i < 10; i++) {
-                console.log(`${results[i].userId}`)
-                let person = guild.members.get(results[i].userId)
-                let points = results[i].points
-                let NameOfUser = results[i].username
-                if (typeof person === "undefined") {
-                    client.channels.find("name", "audit-log").send(NameOfUser + " is not in the guild, not updating. " + new Date().toString())
-                } else {
-                    //person is not undefined
-                    var myRole = guild.roles.find("name", activeUser)
-                    person.addRole(myRole).catch(console.error)
-                    client.channels.find("name", "announcements").send("User " + NameOfUser + " now has the role with " + points + " points!")
-                }
-                if (i === 9) {
-                    client.channels.find("name", "announcements").send("Roles have been updated on " + new Date().toString())
-                }
-
-            }
-
-        })
-
-    }
-    //add new column   
-    let table_name = Month() + "_" + Year()
-    console.log(table_name)
-    function retrieveClear() {
-        connection.beginTransaction(function (err) {
-            connection.query(`ALTER TABLE points ADD ${table_name} int`, function (err, results) {
-                if (err) {
-                    return connection.rollback(function () {
-                        // throw err + "adding column";
-                        console.log(err + "adding column")
-                    })
-                }
-                connection.query(`UPDATE points SET ${table_name} = points`, function (err, results) {
-                    if (err) {
-                        return connection.rollback(function () {
-                            // throw err + "setting score";
-                            console.log(err + "setting score")
-                        })
-
-                    }
-                    connection.query(`UPDATE points SET points = '0', level = '0'`, function (err) {
-                        if (err) {
-                            return connection.rollback(function () {
-                                //throw err;
-                                console.log(err + "updating score")
-                            })
-                        }
-                    })
-                })
-            })
-            commitSQL()
-
-        })
-    }
-
-}
 
 // eval 
 client.on("message", message => {
@@ -327,7 +244,7 @@ client.on("message", message => {
     var command = args.shift().toLowerCase()
 
     if (command === "test") {
-        updateRoles.updateRoles(client)
+        updateRoles.activeOne(client)
     }
     if (command === "pull") {
         workshop.storeDB(client)

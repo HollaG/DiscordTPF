@@ -168,3 +168,67 @@ exports.removeRole = (client, r, user) => {
     }
 
 }
+
+exports.activeOne = async (client) => {
+    var guild = client.guilds.find("name", "BotTestServer")
+    var annchannel = client.channels.find("name", "announcements")
+    var auditlogchannel = client.channels.find("name", "audit-log")
+
+    var role = guild.roles.find("name", "I am active!")
+
+    var res1 = await connection.query(`SELECT userId FROM points ORDER BY userId DESC LIMIT 1`)
+
+    var deleted;
+
+    if (role) { 
+        deleted = await role.delete()
+    }
+    var tempVar = await auditlogchannel.send(`${deleted.name} role deleted`)
+
+    var newRole = await guild.createRole({
+        name: "I am active!",
+        color: "GOLD",
+        hoist: true,
+        position: 4,
+    })
+    tempVar.edit("Role added")
+    var notInGuild = ["People not in guild:"]
+    var inGuild = ["---------------------"]
+    connection.query(`SELECT userId, username, points FROM points ORDER BY points DESC LIMIT 10`, (err, res) => {
+        // console.log(res) 
+        // [ RowDataPacket { userId: '188192190705434624', username: 'Holla', points: 92 },
+        // RowDataPacket { userId: '206405439422857217', username: 'Ebi', points: 3 },
+        // RowDataPacket { userId: '330697266652250112', username: 'Surge', points: 3 } ]
+        res.forEach(element => {
+            // 1 Check if member is in the guild
+            // 2 Stop if not, add if in
+            let person = guild.members.get(element.userId)
+            if (!person) { 
+                notInGuild.push(`${element.username}`)
+            } else { 
+                person.addRole(newRole)
+                inGuild.push(`${element.username} with ${element.points} points!`)
+            }
+        })
+        auditlogchannel.send(notInGuild.join("\n"), { code : "" })
+        inGuild.push("---------------------")
+        annchannel.send(`These people have been given the role for ${Month()}`)
+        annchannel.send(inGuild.join("\n"), { code : "xl" })
+
+        var tableName = Month() + "_" + Year() // April_2018
+        try { 
+            connection.query(`ALTER TABLE points ADD ${tableName} int`, (err, res) => { 
+                if (err) auditlogchannel.send(err, { code : "" })
+                connection.query(`UPDATE points SET ${tableName} = points`, (err, res) => {
+                    if (err) auditlogchannel.send(err, { code : "" })
+                    connection.query(`UPDATE points SET points = '0', level = '0'`)
+                })
+    
+            })
+        } catch (e) { 
+            auditlogchannel.send(e, {code : ""})
+        }
+        
+    })
+
+}
