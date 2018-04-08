@@ -23,7 +23,8 @@ const links = require("./information/links.js");
 const updateLinks = require("./updates/update-links.js")
 const workshop = require("./information/workshop-items.js")
 const suggestions = require("./utility/suggestions.js")
-const updateRoles = require("./updates/roles")
+const updateRoles = require("./updates/roles.js")
+const totalpoints = require("./utility/total-points.js")
 
 var db_config = {
     host: tokenId.host,
@@ -317,6 +318,10 @@ client.on("message", message => {
             //     }
         }
         switch (command) {
+            case "score": 
+                totalpoints.totalScore(client, message)
+                break;
+
             case "help":
                 if (args.length == 0) {
                     message.channel.send(config.commandlist, { code: "asciidoc" })
