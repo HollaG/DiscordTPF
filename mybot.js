@@ -352,10 +352,15 @@ client.on("message", message => {
                 var page; var date
                 console.log(args.length)
                 if (args.length === 1) {
-                    page = Number(args[0])
-                    if (isNaN(page)) { // if page is not a number
-                        date = String(args[0]).toLowerCase()
+                    if (args === "all") {                         
+                        date = "all"
+                    } else { 
+                        page = Number(args[0])
+                        if (isNaN(page)) { // if page is not a number
+                            date = String(args[0]).toLowerCase()
+                        }
                     }
+                    
                 }
                 if (args.length === 2) {
                     page = Number(args[0])

@@ -699,17 +699,27 @@ exports.searchUser = (client, message, searchStr) => {
                             })();
 
                         } else {
-                            message.channel.send(msgToSend.join("\n"), { code: "" }).then(msg => {
+                            message.channel.send(msgToSend.join("\n"), { code: "", split: "true" }).then(msg => {
                                 ; (async () => {
                                     var deleteMsg = await message.channel.send("Select which mod you would like to view by typing in its number in the next 10 seconds.")
-                                    let collected = await message.channel.awaitMessages(response => response.content.length === 1, {
+                                    let collected = await message.channel.awaitMessages(response => response.content.length < 3, {
                                         max: 1,
                                         time: 10000,
                                         errors: ['time'],
                                     })
-                                    collected.first().delete()
-                                    msg.delete()
-                                    deleteMsg.delete()
+                                    
+                                    try { 
+                                        collected.first().delete()
+                                        if (msg.length) { 
+                                            msg.forEach(m => m.delete())
+                                        } else (
+                                            msg.delete()
+                                        )                                       
+                                        deleteMsg.delete()
+                                    } catch (e) { 
+                                        console.error;
+                                    }
+                                    
                                     if (arr[collected.first().content - 1]) {
                                         //console.log(arr[collected.first().content - 1], "HERE")
                                         var res = await request.post(
