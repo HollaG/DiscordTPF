@@ -245,6 +245,7 @@ client.on("message", message => {
     var command = args.shift().toLowerCase()
 
     if (command === "test") {
+        if (message.author.id !== config.ownerID) return; 
         updateRoles.activeOne(client)
     }
     if (command === "pull") {

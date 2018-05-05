@@ -170,7 +170,7 @@ exports.removeRole = (client, r, user) => {
 }
 
 exports.activeOne = async (client) => {
-    var guild = client.guilds.find("name", "BotTestServer")
+    var guild = client.guilds.find("name", "Transport Fever")
     var annchannel = client.channels.find("name", "announcements")
     var auditlogchannel = client.channels.find("name", "audit-log")
 
