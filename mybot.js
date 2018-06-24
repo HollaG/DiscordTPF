@@ -267,7 +267,7 @@ client.on("message", message => {
         "youtube": "youtube",
     }
 
-    if (acceptedLinks[command]) {
+    if (acceptedLinks[command] && message.content.startsWith(config.prefix)) {
         links.checkLinks(message, command)
     }
     if (message.mentions.everyone && !message.member.roles.some(r => ["Game DeveloperZ", "AdminZ", "MoDerators"].includes(r.name))) {
