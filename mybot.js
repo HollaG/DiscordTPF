@@ -245,7 +245,7 @@ client.on("message", message => {
     var command = args.shift().toLowerCase()
 
     if (command === "test") {
-        if (message.author.id !== config.ownerID) return; 
+        if (message.author.id !== config.ownerID) return;
         updateRoles.activeOne(client)
     }
     if (command === "pull") {
@@ -319,7 +319,7 @@ client.on("message", message => {
             //     }
         }
         switch (command) {
-            case "score": 
+            case "score":
                 totalpoints.totalScore(client, message)
                 break;
 
@@ -353,15 +353,15 @@ client.on("message", message => {
                 var page; var date
                 console.log(args.length)
                 if (args.length === 1) {
-                    if (args === "all") {                         
+                    if (args === "all") {
                         date = "all"
-                    } else { 
+                    } else {
                         page = Number(args[0])
                         if (isNaN(page)) { // if page is not a number
                             date = String(args[0]).toLowerCase()
                         }
                     }
-                    
+
                 }
                 if (args.length === 2) {
                     page = Number(args[0])
@@ -432,24 +432,14 @@ client.on("message", message => {
                     message.reply(`Twitch link has been set as **${args[0]}**\nYoutube link has been set as **${args[1]}**\nSteam link has been set as **${args[2]}**`, { code: "" })
                 }
                 break;
-            
+
             case "accept":
                 suggestions.acceptRequest(client, message, args)
-                break;
-            case "reject":
-                suggestions.rejectRequest(client, message, args[0], args.splice(1).join(" "))
-                break;
-            case "list":
-                if (args.length === 0) {
-                    return message.channel.send("Please provide an argument, either 'all', 'pending' or 'accepted'.")
-                }
-                selector = args[0].toLocaleLowerCase()
-                suggestions.listRequest(client, message, selector)
                 break;
             case "complete":
                 suggestions.completeRequest(client, message, args)
                 break;
-            case "clear":                
+            case "clear":
                 suggestions.clearRequests(client, message)
                 break;
             case "send":
@@ -483,7 +473,7 @@ client.on("message", message => {
 
 // delete message spam prevention
 client.on("messageDelete", (message) => {
-    
+
     message.guild.channels.find("name", "audit-log").send(`A message whose content was \`${message.cleanContent}\` sent by \`${message.author.username}\` in <#${message.channel.id}> was deleted on \`${new Date().toString()}\` `)
 })
 
