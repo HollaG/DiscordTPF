@@ -35,7 +35,7 @@ handleDisconnect();
 (async () => {
     await connection.query(`CREATE DATABASE IF NOT EXISTS requests`)
     await connection.changeUser({ database: "requests" }, (err) => { if (err) throw err })
-    await connection.query(`CREATE TABLE IF NOT EXISTS modRequests (
+    await connection.query(`CREATE TABLE IF NOT EXISTS modrequests (
             ID int NOT NULL AUTO_INCREMENT,
             messageID TEXT,
             sender TEXT,
@@ -131,8 +131,7 @@ exports.acceptRequest = async (client, message, args) => {
             date_raw: new Date(),
             completed_status: "FALSE"
         }
-        connection.query(`INSERT INTO modrequests SET ?`, obj, async (err, res, fields) => {
-            console.log(res)
+        connection.query(`INSERT INTO modrequests SET ?`, obj, async (err, res, fields) => {            
             const embed = new Discord.RichEmbed()
                 .setTitle(`Accepted request by ${m.author.username}`)
                 .setAuthor(message.author.username, message.author.displayAvatarURL)
@@ -215,8 +214,7 @@ exports.clearRequests = async (client, message) => {
 
             (async () => {
                 var deleteThis = await message.channel.send("Deletion in progress...")
-                for (var i = 0; i < res.length; i++) {
-                    console.log(res[i])
+                for (var i = 0; i < res.length; i++) {                    
                     message.channel.fetchMessage(res[i].acceptorMessageID).then(m => {
                         m.delete()
                     })
