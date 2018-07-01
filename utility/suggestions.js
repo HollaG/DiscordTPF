@@ -132,7 +132,7 @@ exports.acceptRequest = async (client, message, args) => {
             completed_status: "FALSE"
         }
         connection.query(`INSERT INTO modrequests SET ?`, obj, async (err, res, fields) => {
-
+            console.log(res)
             const embed = new Discord.RichEmbed()
                 .setTitle(`Accepted request by ${m.author.username}`)
                 .setAuthor(message.author.username, message.author.displayAvatarURL)
