@@ -131,25 +131,32 @@ exports.acceptRequest = async (client, message, args) => {
             date_raw: new Date(),
             completed_status: "FALSE"
         }
-        connection.query(`INSERT INTO modrequests SET ?`, obj, async (err, res, fields) => {            
-            const embed = new Discord.RichEmbed()
-                .setTitle(`Accepted request by ${m.author.username}`)
-                .setAuthor(message.author.username, message.author.displayAvatarURL)
-                .setDescription(content)
-                .setImage(attachments)
-                .setColor(color())
-                .setFooter(`ID: ${res.insertId}`)
-                .setTimestamp()
-            var channel = client.channels.find("name", "accepted-suggestions")
-            var messageIDs = []
 
-            var m1 = await channel.send(embed)
-
-            messageIDs.push(m1.id)
-            connection.query('UPDATE modrequests SET acceptorMessageID = ? WHERE ID = ?', [messageIDs.join(" "), res.insertId])
-
-        })
-    }    
+        copyMessage = async () => {
+            return new Promise((resolve, reject) => {
+                connection.query(`INSERT INTO modrequests SET ?`, obj, async (err, res, fields) => {
+                    const embed = new Discord.RichEmbed()
+                        .setTitle(`Accepted request by ${m.author.username}`)
+                        .setAuthor(message.author.username, message.author.displayAvatarURL)
+                        .setDescription(content)
+                        .setImage(attachments)
+                        .setColor(color())
+                        .setFooter(`ID: ${res.insertId}`)
+                        .setTimestamp()
+                    var channel = client.channels.find("name", "accepted-suggestions")
+                    var messageIDs = []
+                    channel.send(embed).then(m1 => {
+                        messageIDs.push(m1.id)
+                        connection.query('UPDATE modrequests SET acceptorMessageID = ? WHERE ID = ?', [messageIDs.join(" "), res.insertId], (err, result, fields) => {
+                            if (err) reject()
+                            resolve()
+                        })
+                    })
+                })
+            })
+        }
+        await copyMessage()
+    }
 }
 
 exports.completeRequest = async (client, message, args) => {
@@ -164,7 +171,7 @@ exports.completeRequest = async (client, message, args) => {
     }
 
     connection.query(`SELECT * FROM modrequests WHERE ID IN (${cleaned.join()}) AND acceptorID = '${message.author.id}'`, (err, res, fields) => {
-        
+
         connection.query(`UPDATE modrequests SET completed_status = 'TRUE' WHERE ID IN (${cleaned.join()})`)
         var IDs = []
         res.forEach(element => {
@@ -200,7 +207,7 @@ exports.completeRequest = async (client, message, args) => {
             client.users.get(e.senderID).send(`Your request was completed by ${e.acceptor}!`, { code: "css" })
 
         })
-    })      
+    })
 }
 exports.clearRequests = async (client, message) => {
 
@@ -214,7 +221,7 @@ exports.clearRequests = async (client, message) => {
 
             (async () => {
                 var deleteThis = await message.channel.send("Deletion in progress...")
-                for (var i = 0; i < res.length; i++) {                    
+                for (var i = 0; i < res.length; i++) {
                     message.channel.fetchMessage(res[i].acceptorMessageID).then(m => {
                         m.delete()
                     })
@@ -229,5 +236,18 @@ exports.clearRequests = async (client, message) => {
         connection.query(`DELETE FROM modrequests WHERE acceptorID = ${message.author.id} AND completed_status = 'FALSE'`, (error, res, fields) => {
             if (err) console.log(error)
         })
-    })   
+    })
+}
+
+exports.deleteRequest = (client, message, args) => { 
+    var cleaned = args.map(e => Number(e))
+    message.delete(2000)
+    if (cleaned.some(m => isNaN(m))) {
+        return message.channel.send("- Please input only NUMBERS! -", { code: "diff" }).then(msg => {
+            msg.delete(2000)
+        })
+
+    }
+    connection.query(`SELECT * FROM modrequests WHERE ID IN (${cleaned.join()})`)
+
 }
