@@ -432,9 +432,7 @@ client.on("message", message => {
                     message.reply(`Twitch link has been set as **${args[0]}**\nYoutube link has been set as **${args[1]}**\nSteam link has been set as **${args[2]}**`, { code: "" })
                 }
                 break;
-            case "request":
-                suggestions.makeRequest(client, message, args)
-                break;
+            
             case "accept":
                 suggestions.acceptRequest(client, message, args)
                 break;
@@ -449,13 +447,10 @@ client.on("message", message => {
                 suggestions.listRequest(client, message, selector)
                 break;
             case "complete":
-                suggestions.completeRequest(client, message, args[0], args.splice(1).join(" "))
+                suggestions.completeRequest(client, message, args)
                 break;
-            case "clear":
-                if (args.length === 0) {
-                    return message.channel.send(`Please specify what you want to clear! Either list IDs of the requests, or [all], or [pending]`)
-                }
-                suggestions.clearRequests(client, message, args)
+            case "clear":                
+                suggestions.clearRequests(client, message)
                 break;
             case "send":
                 if (message.author.id !== config.ownerID) return
@@ -488,6 +483,7 @@ client.on("message", message => {
 
 // delete message spam prevention
 client.on("messageDelete", (message) => {
+    
     message.guild.channels.find("name", "audit-log").send(`A message whose content was \`${message.cleanContent}\` sent by \`${message.author.username}\` in <#${message.channel.id}> was deleted on \`${new Date().toString()}\` `)
 })
 

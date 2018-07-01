@@ -3,18 +3,9 @@
     "top": ["!top [argument] [argument] \nAvailable arguments: Date, Page \nDate: MMM\\_YYYY. Example: dec\\_2017 or feb\\_2016 \nPage: Page number.\nArguments need not be in order.\nIt is not necessary to specify both arguments."],
     "convert": ["Converts from one unit to another. Available measures (eg mass) are: \n[Length] [Area] [Mass] [Volume] [Volume Flow Rate] [Temperature] [Time] [Speed] [Pressure] [Digital] [Parts-Per] [Energy]\nTo see the available conversions, please type !contype [unit or measure].\nTo convert, type !convert [value] [original unit] [new unit]. Eg: !convert 10 kg lb"],
     "request": [
-        "Bunch of useful features for the server's modders and developers. See #welcome for full list of modders / developers.",
-        "\n!request [Mention] [Request]: Creates a request for the specified user or role which will be in a pending state. You will be notified by mention if your request is accepted or rejected. The bot will reply to you with an unique ID. This ID is important for accepting or rejecting a request. You can also reject your own request, to see how, see below.",
-        "Usage of this command is as follows: !request @Holla Give me admin powers! or !request @Workshop Contributors Please create x mod",
-        "This will create a request for Holla which says 'Give me admin powers!' or a request for any workshop contributor to create x mod.",
-        "\n!list [everything, both, pending, accepted]: Argument explanation: \neverything: This will list all the requests made so far\nboth: This will list all requests for or by you\npending: This will list all pending requests for or by you\naccepted: This will list all accepted requests for or by you",
-        "Usage of this command is as follows: !list everything, !list pending, !list accepted",
-        "\n!accept [ID]: Accepts requests which match the ID. You have to be the requestee (person being requested) in order to accept the request.",
-        "Usage of this command is as follows: !accept 2 5 10 6",
-        "This will accept requests with IDs 2, 5, 6, and 10.",
-        "\n!reject [ID] [Reason]: Rejects the given request with the ID. Reason is optional, but highly encouraged.",
-        "Usage of this command is as follows: !reject 2 No admin for you",
-        "\n!clear [all, me, others]: Clears all requests, all requests for me, or all requests by me for others respectively. Warning: Only clears Pending requests!",
-        "Usage of this command is as follows: !clear others, !clear all"
+        "Description: For modders, by not-a-modder.", 
+        "\n!accept [messageID] || How to use: See a request that you want to / will work on in the future? Right click the message containing the request, select \"Copy ID\". Now send !accept [the copied ID] and the bot will move it to the dedicated channel for you. Multiple messages can be accepted in the same message.",
+        "\n!complete [ID] || How to use: Upon accepting a request, you will see a ID number in the footer of the embed. Use this ID to specify which requests you want to complete. Multiple requests can be specified in the same message.",
+        "\n!clear || How to use: Clears all your requests. Warning: This action is IRREVERSIBLE!!"
     ]
 }
