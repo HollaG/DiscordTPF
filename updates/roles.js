@@ -48,7 +48,7 @@ function DateInMonth() {
 }
 
 exports.addRole = (client, r, user) => {
-    var guild = client.guilds.get(246190532949180417)
+    var guild = client.guilds.get("246190532949180417")
     var channel = guild.channels.find("name", "welcome")
     var reactor = guild.members.get(user.id)
     var role;
@@ -108,7 +108,7 @@ exports.addRole = (client, r, user) => {
 }
 
 exports.removeRole = (client, r, user) => {
-    var guild = client.guilds.find("name", "Transport Fever")
+    var guild = client.guilds.get("246190532949180417")
     var channel = guild.channels.find("name", "welcome")
     var reactor = guild.members.get(user.id)
     var role;
@@ -170,7 +170,7 @@ exports.removeRole = (client, r, user) => {
 }
 
 exports.activeOne = async (client) => {
-    var guild = client.guilds.find("name", "Transport Fever")
+    var guild = client.guilds.get("246190532949180417")
     var annchannel = client.channels.find("name", "announcements")
     var auditlogchannel = client.channels.find("name", "audit-log")
 
