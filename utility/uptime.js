@@ -4,8 +4,8 @@ const fs = require("fs")
 const Discord = require("discord.js")
 const randomColor = require("randomcolor")
 
-//data.currentStartUpDate = new Date().toString()
-//fs.writeFile("./configuration/data.json", JSON.stringify(data, null, 2), (err) => { if (err) console.log(err) })
+data.currentStartUpDate = new Date().toString()
+fs.writeFile("./configuration/data.json", JSON.stringify(data, null, 2), (err) => { if (err) console.log(err) })
 
 var previousUptime = data.uptime 
 var timeBeforeFirstFunction
