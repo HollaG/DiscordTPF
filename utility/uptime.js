@@ -4,8 +4,8 @@ const fs = require("fs")
 const Discord = require("discord.js")
 const randomColor = require("randomcolor")
 
-data.currentStartUpDate = new Date().toString()
-fs.writeFile("./configuration/data.json", JSON.stringify(data, null, 2), (err) => { if (err) console.log(err) })
+//data.currentStartUpDate = new Date().toString()
+//fs.writeFile("./configuration/data.json", JSON.stringify(data, null, 2), (err) => { if (err) console.log(err) })
 
 var previousUptime = data.uptime 
 var timeBeforeFirstFunction
@@ -52,7 +52,7 @@ function updateUptime() {
 exports.checkUptime = (client, message) => { 
 
     function msToTime(s) {
-        var ms = s % 1000;
+        var ms = s;
         s = (s - ms) / 1000;
         var secs = s % 60;
         s = (s - secs) / 60;
