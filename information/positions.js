@@ -99,6 +99,9 @@ module.exports.getTop = (message, page, date) => {
             return console.log(err)
         } else {
             connection.query('SELECT ?? FROM points WHERE userId = ?', [pointValue, message.author.id], function (err, result) {
+                if (!result[0]) { 
+                    return message.channel.send("No such period exists in the database!", {code: ""})
+                }
                 userPoints = result[0][pointValue]
             })
             connection.query('SELECT username, ?? FROM points ORDER BY ?? DESC', [pointValue, pointValue], function (error, results, fields) {

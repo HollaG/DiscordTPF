@@ -221,7 +221,9 @@ exports.activeOne = async (client) => {
                 if (err) auditlogchannel.send(err, { code : "" })
                 connection.query(`UPDATE points SET ${tableName} = points`, (err, res) => {
                     if (err) auditlogchannel.send(err, { code : "" })
-                    connection.query(`UPDATE points SET points = '0', level = '0'`)
+                    connection.query(`UPDATE points SET points = '0', level = '0'`, (err, res) => {
+                        auditlogchannel.send("Done!", { code : ""})
+                    })
                 })
     
             })

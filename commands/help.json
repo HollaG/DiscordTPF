@@ -7,5 +7,12 @@
         "\n!accept [messageID] || How to use: See a request that you want to / will work on in the future? Right click the message containing the request, select \"Copy ID\". Now send !accept [the copied ID] and the bot will move it to the dedicated channel for you. Multiple messages can be accepted in the same message.",
         "\n!complete [ID] || How to use: Upon accepting a request, you will see a ID number in the footer of the embed. Use this ID to specify which requests you want to complete. Multiple requests can be specified in the same message.",
         "\n!clear || How to use: Clears all your requests. Warning: This action is IRREVERSIBLE!!"
+    ],
+    "translate": [
+        "Description: Translate from one language to another using Yandex.",
+        "\n!translate [Language to translate from] [Language to translate to] [Sentence to translate]",
+        "\nIf the language to translate from is not specified, it defaults to English.", 
+        "\nExample: !translate German English guten morgen",
+        "\n\nSupported languages: 'Afrikaans', 'Albanian', 'Amharic', 'Arabic', 'Armenian', 'Azerbaijan', 'Bashkir', 'Basque', 'Belarusian', 'Bengali', 'Bosnian', 'Bulgarian', 'Burmese', 'Catalan', 'Cebuano', 'Chinese', 'Croatian', 'Czech', 'Danish', 'Dutch', 'English', 'Esperanto', 'Estonian', 'Finnish', 'French', 'Galician', 'Georgian', 'German', 'Greek', 'Gujarati', 'Haitian', 'Hebrew', 'Hill Mari', 'Hindi', 'Hungarian', 'Icelandic', 'Indonesian', 'Irish', 'Italian', 'Japanese', 'Javanese', 'Kannada', 'Kazakh', 'Khmer', 'Korean', 'Kyrgyz', 'Laotian', 'Latin', 'Latvian', 'Lithuanian', 'Luxembourgish', 'Macedonian', 'Malagasy', 'Malay', 'Malayalam', 'Maltese', 'Maori', 'Marathi', 'Mari', 'Mongolian', 'Nepali', 'Norwegian', 'Papiamento', 'Persian', 'Polish', 'Portuguese', 'Punjabi', 'Romanian', 'Russian', 'Scottish', 'Serbian', 'Sinhala', 'Slovakian', 'Slovenian', 'Spanish', 'Sundanese', 'Swahili', 'Swedish', 'Tagalog', 'Tajik', 'Tamil', 'Tatar', 'Telugu', 'Thai', 'Turkish', 'Udmurt', 'Ukrainian', 'Urdu', 'Uzbek', 'Vietnamese', 'Welsh', 'Xhosa', 'Yiddish'"
     ]
 }
