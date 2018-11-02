@@ -25,6 +25,8 @@ const workshop = require("./information/workshop-items.js")
 const suggestions = require("./utility/suggestions.js")
 const updateRoles = require("./updates/roles.js")
 const totalpoints = require("./utility/total-points.js")
+const translate = require("./utility/translate")
+const uptime = require("./utility/uptime")
 
 var db_config = {
     host: tokenId.host,
@@ -342,12 +344,14 @@ client.on("message", message => {
             case "profile":
                 getInfo.profile(message)
                 break;
-            case "uptime":
-                if (client.uptime / 60000 > 600) {
-                    message.channel.send(Math.round(client.uptime / 3600000) + " hours since restart")
-                } else {
-                    message.channel.send(Math.round(client.uptime / 60000) + " minutes since restart")
-                }
+            case "uptime": // change this to miliseconds ltr REMEMBER process.uptime is in seconds
+                uptime.checkUptime(client, message)
+            
+                // if (client.uptime / 60000 > 600) {
+                //     message.channel.send(Math.round(client.uptime / 3600000) + " hours since restart")
+                // } else {
+                //     message.channel.send(Math.round(client.uptime / 60000) + " minutes since restart")
+                // }
                 break;
             case "top":
                 var page; var date
@@ -446,6 +450,9 @@ client.on("message", message => {
                 if (message.author.id !== config.ownerID) return
                 message.delete()
                 message.channel.send(args.join(" "))
+                break;
+            case "translate":
+                translate.breaker(client, message, args)
                 break;
         }
 
