@@ -487,7 +487,7 @@ client.on("messageDelete", (message) => {
 // Member join welcome message
 client.on("guildMemberAdd", (member) => {
     console.log(`${member.user.username} has joined TFDiscord`);
-    client.channels.find("name", "general").send(`Welcome ${member.user.username} to the server! Please read the rules in <#${welcome}>!`);
+    client.channels.find("name", "welcome-info").send(`Welcome ${member.user.username} to the server! Please read the rules in <#${rules}>!`);
     //client.channels.get(general).send(`Welcome ${member.user.username} to the server! Please read the rules in <#${welcome}>!`)
 });
 
