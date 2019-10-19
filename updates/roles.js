@@ -49,7 +49,7 @@ function DateInMonth() {
 
 exports.addRole = (client, r, user) => {
     var guild = client.guilds.get("246190532949180417")
-    var channel = guild.channels.find("name", "welcome")
+    var channel = guild.channels.find("name", "roles")
     var reactor = guild.members.get(user.id)
     var role;
     switch (r.emoji.name) {
