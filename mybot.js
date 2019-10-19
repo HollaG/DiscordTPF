@@ -61,7 +61,8 @@ handleDisconnect();
 // }, 5000);
 
 var TpF = "246190532949180417"
-var welcome = "246190912315719680" //TpF wlc channel
+var welcome = "634725723751448576" //TpF wlc channel
+var rules = "634007370770415616" //TpF rules channel
 var announcements = "386091548388884480" // TpF annc channel
 var general = "272094615434166272" // TpF general channel
 var botstuff = "335767575973593099" // TpF botstuff channel 
@@ -487,7 +488,7 @@ client.on("messageDelete", (message) => {
 // Member join welcome message
 client.on("guildMemberAdd", (member) => {
     console.log(`${member.user.username} has joined TFDiscord`);
-    client.channels.find("name", "general").send(`Welcome ${member.user.username} to the server! Please read the rules in <#${welcome}>!`);
+    client.channels.find("name", "welcome").send(`Welcome ${member.user.username} to the server! Please read the rules in <#${rules}>!`);
     //client.channels.get(general).send(`Welcome ${member.user.username} to the server! Please read the rules in <#${welcome}>!`)
 });
 
