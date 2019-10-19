@@ -91,8 +91,8 @@ client.on("ready", async () => {
         }
     });
 
-    var msge = await client.channels.find("name", "welcome").fetchMessage(addroleMsge)
-    var rmsge = await client.channels.find("name", "welcome").fetchMessage(removeroleMsge)
+    var msge = await client.channels.find("name", "roles").fetchMessage(addroleMsge)
+    var rmsge = await client.channels.find("name", "roles").fetchMessage(removeroleMsge)
     await msge.react("1⃣")
     await msge.react("2⃣")
     await msge.react("3⃣")
