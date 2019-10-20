@@ -269,6 +269,10 @@ client.on("message", message => {
         "steam": "steam",
         "youtube": "youtube",
     }
+    // deletes all unnecessary messages in the roles channel
+    // if (message.channel.name == "agree" && message.content !== "!agree" && !message.author.bot) { 
+    //     message.delete()
+    // }
 
     if (acceptedLinks[command] && message.content.startsWith(config.prefix)) {
         links.checkLinks(message, command)
@@ -455,6 +459,21 @@ client.on("message", message => {
             case "translate":
                 translate.breaker(client, message, args)
                 break;
+            case "agree":
+            var guild = client.guilds.get(TpF)
+            var unverified = guild.roles.find("name", "Unverified") // Unverified role
+            var verified = guild.roles.find("name", "Verified") // verified
+                if (message.channel.name == "agree" && message.member.roles.has(unverified.id)) {                     
+                    // message.delete(1000)
+                    message.reply("thank you for agreeing to the rules. The rest of the server has been unlocked. We hope you enjoy your stay.").then(m => { 
+                        
+                        // m.delete(1000)
+                        
+                    })                  
+                    message.member.removeRole(unverified).catch(e => console.log(e))
+                    message.member.addRole(verified).catch(e => console.log(e))
+                }
+                break;
         }
 
         function help(args) {
@@ -481,14 +500,21 @@ client.on("message", message => {
 
 // delete message spam prevention
 client.on("messageDelete", (message) => {
-
-    message.guild.channels.find("name", "audit-log").send(`A message whose content was \`${message.cleanContent}\` sent by \`${message.author.username}\` in <#${message.channel.id}> was deleted on \`${new Date().toString()}\` `)
+    if (message.channel.name == "audit-log") { 
+        return 
+    } else { 
+        message.guild.channels.find("name", "audit-log").send(`A message whose content was \`${message.cleanContent}\` sent by \`${message.author.username}\` in <#${message.channel.id}> was deleted on \`${new Date().toString()}\` `)
+    }
+    
 })
 
 // Member join welcome message
 client.on("guildMemberAdd", (member) => {
     console.log(`${member.user.username} has joined TFDiscord`);
-    client.channels.find("name", "welcome").send(`Welcome ${member.user.username} to the server! Please read the rules in <#${rules}>!`);
+    client.channels.find("name", "welcome").send(`Welcome ${member.user.username} to the server! Please read the rules in <#${rules}>!`);     
+     // change the guild name here
+     var unverified = client.guilds.get(TpF).roles.find("name", "Unverified") // Unverified role
+    member.addRole(unverified)
     //client.channels.get(general).send(`Welcome ${member.user.username} to the server! Please read the rules in <#${welcome}>!`)
 });
 
