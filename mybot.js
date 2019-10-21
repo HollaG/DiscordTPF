@@ -463,7 +463,7 @@ client.on("message", message => {
                 break;
             case "agree":
                 //try { 
-                    var guild = client.guilds.get(testBotStuff)
+                    var guild = client.guilds.get(TpF)
                     var unverified = guild.roles.find("name", "Unverified") // Unverified role
                     var verified = guild.roles.find("name", "Verified") // verified
                         if (message.channel.name == "agree" && message.member.roles.has(unverified.id)) {                     
