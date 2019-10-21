@@ -462,29 +462,33 @@ client.on("message", message => {
                 translate.breaker(client, message, args)
                 break;
             case "agree":
-                try { 
-                    var guild = client.guilds.get(TpF)
+                //try { 
+                    var guild = client.guilds.get(testBotStuff)
                     var unverified = guild.roles.find("name", "Unverified") // Unverified role
                     var verified = guild.roles.find("name", "Verified") // verified
                         if (message.channel.name == "agree" && message.member.roles.has(unverified.id)) {                     
                             // message.delete(1000)
                             message.reply("thank you for agreeing to the rules. The rest of the server has been unlocked. We hope you enjoy your stay.").then(m => { 
-                                // m.delete(1000)                                
+                                // m.delete(1000)    
+                                message.member.addRole(verified).catch(e => { 
+                                    message.reply("error adding. Something went wrong. Please ping @Holla.")
+                                    console.log(e)
+                                })
+                                setTimeout(function(){ 
+                                    message.member.removeRole(unverified).catch(e => { 
+                                        console.log(e)
+                                        message.reply("error removing. Something went wrong. Please ping @Holla.")
+                                    })
+                                }, 10000)
+                                
                             })                  
-                            message.member.removeRole(unverified).catch(e => { 
-                                console.log(e)
-                                message.reply("something went wrong. Please ping @Holla.")
-                            })
-                            message.member.addRole(verified).catch(e => { 
-                                message.reply("something went wrong. Please ping @Holla.")
-                                console.log(e)
-                            })
+                            
                         }
                         
-                } catch (e) { 
-                    message.reply("unexpected error, please contact @Holla")
+                //} catch (e) { 
+                //     message.reply("unexpected error, please contact @Holla")
 
-                }
+                // }
                 break;                
         }
 
