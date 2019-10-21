@@ -2,7 +2,7 @@ const config = require("../configuration/config.json");
 const tokenId = require("../configuration/tokenId.json");
 const Discord = require("discord.js");
 
-exports.audit = (client, message) => { 
+exports.auditMessageDelete = (client, message) => { 
     const auditLogChannel = message.guild.channels.find("name", "audit-log")
     var messageAuthor = message.author.username
     var deletedChannelID = message.channel.id
@@ -22,7 +22,7 @@ exports.audit = (client, message) => {
      };
       
     var embed = new Discord.RichEmbed()
-        .setColor("#ad2424")
+        .setColor("#d19630")
         .setTitle("Message deleted")
         .setDescription(`\`\`\`${escapeMarkdown(deletedMessage)}\`\`\``)
         .addField("Author", messageAuthor)
@@ -31,5 +31,33 @@ exports.audit = (client, message) => {
         .addField("Deletor", checkIfBot(message))
         .setFooter("Message Logger")
 
+    auditLogChannel.send(embed)
+}
+
+exports.auditMemberJoin = (client, member) => { 
+    const auditLogChannel = member.guild.channels.find("name", "audit-log")
+    var time = new Date().toString()
+    var embed = new Discord.RichEmbed()
+        .setColor("#3dba36")
+        .setTitle("Member joined.")
+        .setDescription(`Members increased from ${member.guild.memberCount - 1} to ${member.guild.memberCount}`)
+        .addField("Name", member.user.username)
+        .addField("ID", member.user.id)
+        .addField("Time", time)        
+        .setFooter("Join Logger")
+    auditLogChannel.send(embed)
+}
+
+exports.auditMemberLeave = (client, member) => { 
+    const auditLogChannel = member.guild.channels.find("name", "audit-log")
+    var time = new Date().toString()
+    var embed = new Discord.RichEmbed()
+        .setColor("#b82828")
+        .setTitle("Member left.")
+        .setDescription(`Members decreased from ${member.guild.memberCount + 1} to ${member.guild.memberCount}`)
+        .addField("Name", member.user.username)
+        .addField("ID", member.user.id)
+        .addField("Time", time)        
+        .setFooter("Leave Logger")
     auditLogChannel.send(embed)
 }

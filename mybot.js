@@ -468,7 +468,7 @@ client.on("message", message => {
                     var verified = guild.roles.find("name", "Verified") // verified
                         if (message.channel.name == "agree" && message.member.roles.has(unverified.id)) {                     
                             // message.delete(1000)
-                            message.reply("thank you for agreeing to the rules. The rest of the server has been unlocked. We hope you enjoy your stay.").then(m => { 
+                            message.reply("thank you for agreeing to the rules. The rest of the server will be unlocked. We hope you enjoy your stay.").then(m => { 
                                 // m.delete(1000)    
                                 message.member.addRole(verified).catch(e => { 
                                     message.reply("error adding. Something went wrong. Please ping @Holla.")
@@ -519,7 +519,7 @@ client.on("messageDelete", (message) => {
     if (message.channel.name == "audit-log") { 
         return 
     } else { 
-        auditLogs.audit(client, message)        
+        auditLogs.auditMessageDelete(client, message)        
     }
     
 })
@@ -532,12 +532,14 @@ client.on("guildMemberAdd", (member) => {
      var unverified = client.guilds.get(TpF).roles.find("name", "Unverified") // Unverified role
     member.addRole(unverified)
     //client.channels.get(general).send(`Welcome ${member.user.username} to the server! Please read the rules in <#${welcome}>!`)
+    auditLogs.auditMemberJoin(client, member)
+
 });
 
 // Member leave console message
 client.on("guildMemberRemove", (member) => {
     console.log(`${member.user.username} has left TFDiscord`);
-
+    auditLogs.auditMemberLeave(client, member)
 })
 
 client.on("error", error => {
