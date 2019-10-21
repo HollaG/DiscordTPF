@@ -14,6 +14,7 @@ const wordResponse = require("./commands/wordResponse.json")
 const secondaryHelp = require("./commands/help.json")
 
 //modules!
+const auditLogs = require("./utility/audit-log")
 const roleUpdates = require("./updates/roles.js");
 const getInfo = require("./information/about.js");
 const positions = require("./information/positions.js");
@@ -63,6 +64,7 @@ handleDisconnect();
 var TpF = "246190532949180417"
 var welcome = "634725723751448576" //TpF wlc channel
 var rules = "634007370770415616" //TpF rules channel
+var iAgree = "635334812239921162" // TpF agree channel
 var announcements = "386091548388884480" // TpF annc channel
 var general = "272094615434166272" // TpF general channel
 var botstuff = "335767575973593099" // TpF botstuff channel 
@@ -460,20 +462,30 @@ client.on("message", message => {
                 translate.breaker(client, message, args)
                 break;
             case "agree":
-            var guild = client.guilds.get(TpF)
-            var unverified = guild.roles.find("name", "Unverified") // Unverified role
-            var verified = guild.roles.find("name", "Verified") // verified
-                if (message.channel.name == "agree" && message.member.roles.has(unverified.id)) {                     
-                    // message.delete(1000)
-                    message.reply("thank you for agreeing to the rules. The rest of the server has been unlocked. We hope you enjoy your stay.").then(m => { 
+                try { 
+                    var guild = client.guilds.get(TpF)
+                    var unverified = guild.roles.find("name", "Unverified") // Unverified role
+                    var verified = guild.roles.find("name", "Verified") // verified
+                        if (message.channel.name == "agree" && message.member.roles.has(unverified.id)) {                     
+                            // message.delete(1000)
+                            message.reply("thank you for agreeing to the rules. The rest of the server has been unlocked. We hope you enjoy your stay.").then(m => { 
+                                // m.delete(1000)                                
+                            })                  
+                            message.member.removeRole(unverified).catch(e => { 
+                                console.log(e)
+                                message.reply("something went wrong. Please ping @Holla.")
+                            })
+                            message.member.addRole(verified).catch(e => { 
+                                message.reply("something went wrong. Please ping @Holla.")
+                                console.log(e)
+                            })
+                        }
                         
-                        // m.delete(1000)
-                        
-                    })                  
-                    message.member.removeRole(unverified).catch(e => console.log(e))
-                    message.member.addRole(verified).catch(e => console.log(e))
+                } catch (e) { 
+                    message.reply("unexpected error, please contact @Holla")
+
                 }
-                break;
+                break;                
         }
 
         function help(args) {
@@ -503,7 +515,7 @@ client.on("messageDelete", (message) => {
     if (message.channel.name == "audit-log") { 
         return 
     } else { 
-        message.guild.channels.find("name", "audit-log").send(`A message whose content was \`${message.cleanContent}\` sent by \`${message.author.username}\` in <#${message.channel.id}> was deleted on \`${new Date().toString()}\` `)
+        auditLogs.audit(client, message)        
     }
     
 })
@@ -511,7 +523,7 @@ client.on("messageDelete", (message) => {
 // Member join welcome message
 client.on("guildMemberAdd", (member) => {
     console.log(`${member.user.username} has joined TFDiscord`);
-    client.channels.find("name", "welcome").send(`Welcome ${member.user.username} to the server! Please read the rules in <#${rules}>!`);     
+    client.channels.find("name", "welcome").send(`Welcome ${member.user.username} to the server! Please read the rules in <#${rules}> and type !agree in <#${iAgree} to agree!`);     
      // change the guild name here
      var unverified = client.guilds.get(TpF).roles.find("name", "Unverified") // Unverified role
     member.addRole(unverified)
