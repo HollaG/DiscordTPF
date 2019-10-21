@@ -527,7 +527,7 @@ client.on("messageDelete", (message) => {
 // Member join welcome message
 client.on("guildMemberAdd", (member) => {
     console.log(`${member.user.username} has joined TFDiscord`);
-    client.channels.find("name", "welcome").send(`Welcome ${member.user.username} to the server! Please read the rules in <#${rules}> and type !agree in <#${iAgree} to agree!`);     
+    client.channels.find("name", "welcome").send(`Welcome ${member.user.username} to the server! Please read the rules in <#${rules}> and type !agree in <#${iAgree}> to agree!`);     
      // change the guild name here
      var unverified = client.guilds.get(TpF).roles.find("name", "Unverified") // Unverified role
     member.addRole(unverified)
