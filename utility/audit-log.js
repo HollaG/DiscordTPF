@@ -25,13 +25,13 @@ exports.auditMessageDelete = (client, message) => {
         .setColor("#d19630")
         .setTitle("Message deleted")
         .setDescription(`\`\`\`${escapeMarkdown(deletedMessage)}\`\`\``)
-        .addField("Author", messageAuthor)
+        .addField("Author", messageAuthor + "#" + message.author.discriminator)
         .addField("Channel", `<#${deletedChannelID}>`)
         .addField("Time", time)
-        .addField("Deletor", checkIfBot(message))
+        .addField("Sender", checkIfBot(message))
         .setFooter("Message Logger")
 
-    auditLogChannel.send(embed)
+    auditLogChannel.send(embed).catch(e => console.log(e))
 }
 
 exports.auditMemberJoin = (client, member) => { 
@@ -43,7 +43,8 @@ exports.auditMemberJoin = (client, member) => {
         .setDescription(`Members increased from ${member.guild.memberCount - 1} to ${member.guild.memberCount}`)
         .addField("Name", member.user.username)
         .addField("ID", member.user.id)
-        .addField("Time", time)        
+        .addField("Time", time) 
+        .addField("Account creation date", member.user.createdAt.toString())       
         .setFooter("Join Logger")
     auditLogChannel.send(embed)
 }

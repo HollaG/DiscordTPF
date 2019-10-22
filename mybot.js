@@ -61,7 +61,13 @@ handleDisconnect();
 //     connection.query('SELECT 1');
 // }, 5000);
 
-var TpF = "246190532949180417"
+var mainServer = "335619483018461194"
+
+// swap the numbers as needed
+// var TpF = "246190532949180417"
+// var testBotStuff = "335619483018461194" // testserver 
+
+
 var welcome = "634725723751448576" //TpF wlc channel
 var rules = "634007370770415616" //TpF rules channel
 var iAgree = "635334812239921162" // TpF agree channel
@@ -70,7 +76,6 @@ var general = "272094615434166272" // TpF general channel
 var botstuff = "335767575973593099" // TpF botstuff channel 
 var information = "```This bot is running on a modified version of York's code. See website for details.\nhttps://anidiots.guide/. \n\nSource code for this bot is available on Github at https://github.com/HollaG/DiscordTPF```"
 var server = "335619483018461194"
-var testBotStuff = "335619483018461194" // testserver 
 var audit_log = "382371100690219028"
 var BotStuff_audit = "382372304619044865"
 var BotStuff_ann = "382372383421628417"
@@ -82,7 +87,7 @@ const ontime = require("ontime");
 
 client.login(tokenId.token);
 
-client.on("ready", async () => {
+client.on("ready", async() => {
     console.log("I am ready!");
     client.channels.find("name", "botstuff").send("Bot has restarted on " + new Date().toString())
     //client.user.setGame("transportfever.com");
@@ -463,7 +468,7 @@ client.on("message", message => {
                 break;
             case "agree":
                 //try { 
-                    var guild = client.guilds.get(TpF)
+                    var guild = client.guilds.get(mainServer)
                     var unverified = guild.roles.find("name", "Unverified") // Unverified role
                     var verified = guild.roles.find("name", "Verified") // verified
                         if (message.channel.name == "agree" && message.member.roles.has(unverified.id)) {                     
@@ -529,7 +534,7 @@ client.on("guildMemberAdd", (member) => {
     console.log(`${member.user.username} has joined TFDiscord`);
     client.channels.find("name", "welcome").send(`Welcome ${member.user.username} to the server! Please read the rules in <#${rules}> and type !agree in <#${iAgree}> to agree!`);     
      // change the guild name here
-     var unverified = client.guilds.get(TpF).roles.find("name", "Unverified") // Unverified role
+    var unverified = client.guilds.get(mainServer).roles.find("name", "Unverified") // Unverified role
     member.addRole(unverified)
     //client.channels.get(general).send(`Welcome ${member.user.username} to the server! Please read the rules in <#${welcome}>!`)
     auditLogs.auditMemberJoin(client, member)

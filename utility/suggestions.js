@@ -34,7 +34,7 @@ function handleDisconnect() {
 handleDisconnect();
 (async () => {
     await connection.query(`CREATE DATABASE IF NOT EXISTS requests`)
-    await connection.changeUser({ database: "requests" }, (err) => { if (err) throw err })
+    await connection.changeUser({ database: "requests" }, (err) => { if (err) console.log(err)})
     await connection.query(`CREATE TABLE IF NOT EXISTS modrequests (
             ID int NOT NULL AUTO_INCREMENT,
             messageID TEXT,
