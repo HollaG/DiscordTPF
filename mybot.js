@@ -1,6 +1,6 @@
 const Discord = require("discord.js");
 const sql = require("sqlite")
-sql.open("./scoring/scores.sqlite")
+sql.open("./sqliteDB/scores.sqlite")
 const fs = require("fs");
 const mysql = require("mysql");
 
@@ -13,21 +13,26 @@ const tokenId = require("./configuration/tokenId.json");
 const wordResponse = require("./commands/wordResponse.json")
 const secondaryHelp = require("./commands/help.json")
 
-//modules!
+// modules!
 const auditLogs = require("./utility/audit-log")
-const roleUpdates = require("./updates/roles.js");
-const getInfo = require("./information/about.js");
-const positions = require("./information/positions.js");
-const pointsSQL = require("./updates/points-sql.js");
-const conversion = require("./utility/conversion.js");
-const links = require("./information/links.js");
-const updateLinks = require("./updates/update-links.js")
-const workshop = require("./information/workshop-items.js")
+const uptime = require("./utility/uptime")
 const suggestions = require("./utility/suggestions.js")
-const updateRoles = require("./updates/roles.js")
+const conversion = require("./utility/conversion.js");
 const totalpoints = require("./utility/total-points.js")
 const translate = require("./utility/translate")
-const uptime = require("./utility/uptime")
+
+// updates
+const roleUpdates = require("./updates/roles.js");
+const pointsSQL = require("./updates/points-sql.js");
+const updateLinks = require("./updates/update-links.js")
+const updateRoles = require("./updates/roles.js")
+
+// information
+const getInfo = require("./information/about.js");
+const positions = require("./information/positions.js");
+const links = require("./information/links.js");
+const workshop = require("./information/workshop-items.js");
+const dailyInfo = require("./information/dailyinfo")
 
 var db_config = {
     host: tokenId.host,
@@ -57,23 +62,21 @@ function handleDisconnect() {
 }
 handleDisconnect();
 
-// setInterval(function () {
-//     connection.query('SELECT 1');
-// }, 5000);
-
-var mainServer = "335619483018461194"
+var mainServer = "246190532949180417"
 
 // swap the numbers as needed
 // var TpF = "246190532949180417"
 // var testBotStuff = "335619483018461194" // testserver 
 
-
+/* Transport Fever Server IDs */ 
 var welcome = "634725723751448576" //TpF wlc channel
 var rules = "634007370770415616" //TpF rules channel
 var iAgree = "635334812239921162" // TpF agree channel
 var announcements = "386091548388884480" // TpF annc channel
 var general = "272094615434166272" // TpF general channel
 var botstuff = "335767575973593099" // TpF botstuff channel 
+/* -------------------------- */
+
 var information = "```This bot is running on a modified version of York's code. See website for details.\nhttps://anidiots.guide/. \n\nSource code for this bot is available on Github at https://github.com/HollaG/DiscordTPF```"
 var server = "335619483018461194"
 var audit_log = "382371100690219028"
@@ -97,48 +100,22 @@ client.on("ready", async() => {
             type: 0
         }
     });
-
-    var msge = await client.channels.find("name", "roles").fetchMessage(addroleMsge)
-    var rmsge = await client.channels.find("name", "roles").fetchMessage(removeroleMsge)
-    await msge.react("1⃣")
-    await msge.react("2⃣")
-    await msge.react("3⃣")
-    await msge.react("4⃣")
-    await rmsge.react("1⃣")
-    await rmsge.react("2⃣")
-    await rmsge.react("3⃣")
-    await rmsge.react("4⃣")
-
-    // const collector = msg.createReactionCollector(
-    //     (reaction, user) => reaction.emoji.name === "1⃣" || "2⃣" || "3⃣" || "4⃣"
-    //     , { time: 10000000  })
-
-    // collector.on('collect', r => {
-    //     updateRoles.addRole(client, r)
-    //     console.log(`collected ${r.emoji.name}`)
-    //     console.log(r.users)
-    //     //console.log(r.users.keyArray()[r.users.keyArray().size])
-
-    // })
-
 });
 
-client.on("messageReactionAdd", (reaction, user) => {
-    if (user.bot) return
+// var welcome = client.guilds.get(mainServer).channels.find("name", "welcome")
+// console.log(client.guilds.get(mainServer))
 
-    //msg.react("1⃣").then(msg.react("2⃣")).then(msg.react("3⃣")).then(msg.react("4⃣")).catch(e => console.log(e))
+client.on("messageReactionAdd", (reaction, user) => {
+    if (user.bot) return  
 
     if (reaction.message.id == addroleMsge) {
-        console.log('yes')
-        // console.log(reaction.emoji.name)
+        console.log('yes')        
         updateRoles.addRole(client, reaction, user)
 
     } else if (reaction.message.id == removeroleMsge) {
         console.log('no')
         updateRoles.removeRole(client, reaction, user)
-    }
-
-    return
+    }    
 })
 
 client.on("error", (e) => console.error(e));
@@ -193,7 +170,7 @@ function commitSQL() {
 }
 
 ontime({
-    cycle: '1T20:00:00',
+    cycle: '1T20:00:00'
 }, function (ot) {
     console.log("running program");
     try {
@@ -204,6 +181,14 @@ ontime({
         ot.done();
         return
     }
+
+})
+
+ontime({ 
+    cycle: "0:00:00"
+}, (ot) => { 
+    dailyInfo
+    ot.done()
 
 })
 
@@ -256,7 +241,10 @@ client.on("message", message => {
 
     if (command === "test") {
         if (message.author.id !== config.ownerID) return;
-        updateRoles.activeOne(client)
+        // updateRoles.activeOne(client)
+        message.guild.fetchMembers().then(res =>res.members.forEach(function(key, value) { 
+            console.log(key, value)
+        }))
     }
     if (command === "pull") {
         workshop.storeDB(client)
