@@ -62,7 +62,7 @@ function handleDisconnect() {
 }
 handleDisconnect();
 
-var mainServer = "335619483018461194"
+var mainServer = "246190532949180417"
 
 // swap the numbers as needed
 // var TpF = "246190532949180417"
@@ -185,7 +185,7 @@ ontime({
 })
 
 ontime({ 
-    cycle: "0:00:00"
+    cycle: "0:01:00"
 }, (ot) => { 
     dailyInfo.updateDaily(client, mainServer)
     ot.done()
@@ -230,8 +230,9 @@ client.on("message", message => {
     var mclength = message.content.split(" ")
     console.log(`${message.author.username}` + " has sent a message that is " + mclength.length + " words long.");
     if (!message.content.startsWith(config.prefix) && message.channel.type !== "dm" && message.author.id !== "354834684234170378" && !message.author.bot) {
-        pointsSQL.updatePoints(message) // this adds the points for each message 
-
+        pointsSQL.updatePoints(message) // this adds the points for each message
+        dailyInfo.logSpecificChannel(client, message, mainServer) 
+        dailyInfo.logSpecificUser(client, message, mainServer) 
     }
     //if (message.author.bot) return
     if (message.content.startsWith(config.prefix)) {
@@ -246,7 +247,7 @@ client.on("message", message => {
         // message.guild.fetchMembers().then(res =>res.members.forEach(function(key, value) { 
         //     console.log(key, value)
         // }))
-        dailyInfo.logSpecificUser(client, message, mainServer)
+        dailyInfo.updateDaily(client, mainServer)
     }
     if (command === "pull") {
         workshop.storeDB(client)
@@ -484,7 +485,11 @@ client.on("message", message => {
                 //     message.reply("unexpected error, please contact @Holla")
 
                 // }
-                break;                
+                break;  
+            case "daily":
+                dailyInfo.checkYesterdayInfo(client, message, mainServer)
+                break;
+            
         }
 
         function help(args) {

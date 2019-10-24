@@ -63,10 +63,10 @@ CREATE TABLE IF NOT EXISTS steam_workshop
 )
 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
-CREATE DATABASE IF NOT EXISTS serverInfo
+CREATE DATABASE IF NOT EXISTS serverInfoDB
 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
-USE information
+USE serverInfoDB
 CREATE TABLE IF NOT EXISTS dailyInfo
 
 ( 
