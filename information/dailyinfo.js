@@ -176,8 +176,7 @@ exports.logSpecificUser = async (client, message, mainServer) => {
 
 exports.checkYesterdayInfo = async (client, message, mainServer) => { 
     var connection = await mysql.createConnection(db_config);
-    var result = await connection.query(`SELECT * FROM serverInfo WHERE Date = ?`, [getYesterdayDate()])
-    console.log(result[0][0].Date)
+    var result = await connection.query(`SELECT * FROM serverInfo WHERE Date = ?`, [getYesterdayDate()])    
     var a = result[0][0].Date ? result[0][0].Date : 0
     var b = result[0][0].NumberOfUsersYesterday ? result[0][0].NumberOfUsersYesterday : 0
     var c = result[0][0].NumberOfUsersToday ? result[0][0].NumberOfUsersToday : 0
