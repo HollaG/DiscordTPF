@@ -147,13 +147,13 @@ exports.logSpecificChannel = async (client, message, mainServer) => {
     var channelID = message.channel.id
     var channelName = message.channel.name
     var connection = await mysql.createConnection(db_config);
-    var result = await connection.query(`SELECT * FROM channelinfo WHERE channelID = ${channelID}`)
+    var result = await connection.query(`SELECT * FROM channelInfo WHERE channelID = ${channelID}`)
     try { 
         if (!result[0][0]) { // if no result, add the channel as a new entry
             console.log("No result")
-            connection.execute(`INSERT INTO channelinfo SET channelId = ?, channelName = ?, numberSent = ?` ,[channelID, channelName, 1])
+            connection.execute(`INSERT INTO channelInfo SET channelId = ?, channelName = ?, numberSent = ?` ,[channelID, channelName, 1])
         } else { // update the existing entry
-            connection.execute(`UPDATE channelinfo SET numberSent = ${result[0][0].numberSent + 1} WHERE channelID = ${channelID}`)
+            connection.execute(`UPDATE channelInfo SET numberSent = ${result[0][0].numberSent + 1} WHERE channelID = ${channelID}`)
         }  
     } catch (e) { 
         console.log(e)
