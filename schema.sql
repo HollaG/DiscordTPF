@@ -62,3 +62,20 @@ CREATE TABLE IF NOT EXISTS steam_workshop
   PRIMARY KEY (ID) 
 )
 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE DATABASE IF NOT EXISTS serverInfo
+CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+USE information
+CREATE TABLE IF NOT EXISTS dailyInfo
+
+( 
+  Date TEXT,
+  NumberOfUsersYesterday INTEGER,
+  NumberOfUsersToday INTEGER,
+  NetUserChange INTEGER,
+  TotalMessagesSent INTEGER,
+  MostActiveChannel varchar(100),
+  MostActiveUser varchar(100)
+)
+CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

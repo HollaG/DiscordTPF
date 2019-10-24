@@ -62,7 +62,7 @@ function handleDisconnect() {
 }
 handleDisconnect();
 
-var mainServer = "246190532949180417"
+var mainServer = "335619483018461194"
 
 // swap the numbers as needed
 // var TpF = "246190532949180417"
@@ -187,7 +187,7 @@ ontime({
 ontime({ 
     cycle: "0:00:00"
 }, (ot) => { 
-    dailyInfo
+    dailyInfo.updateDaily(client, mainServer)
     ot.done()
 
 })
@@ -230,7 +230,8 @@ client.on("message", message => {
     var mclength = message.content.split(" ")
     console.log(`${message.author.username}` + " has sent a message that is " + mclength.length + " words long.");
     if (!message.content.startsWith(config.prefix) && message.channel.type !== "dm" && message.author.id !== "354834684234170378" && !message.author.bot) {
-        pointsSQL.updatePoints(message) // this adds the points for each message     
+        pointsSQL.updatePoints(message) // this adds the points for each message 
+
     }
     //if (message.author.bot) return
     if (message.content.startsWith(config.prefix)) {
@@ -242,9 +243,10 @@ client.on("message", message => {
     if (command === "test") {
         if (message.author.id !== config.ownerID) return;
         // updateRoles.activeOne(client)
-        message.guild.fetchMembers().then(res =>res.members.forEach(function(key, value) { 
-            console.log(key, value)
-        }))
+        // message.guild.fetchMembers().then(res =>res.members.forEach(function(key, value) { 
+        //     console.log(key, value)
+        // }))
+        dailyInfo.logSpecificUser(client, message, mainServer)
     }
     if (command === "pull") {
         workshop.storeDB(client)
