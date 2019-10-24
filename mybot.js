@@ -231,8 +231,8 @@ client.on("message", message => {
     console.log(`${message.author.username}` + " has sent a message that is " + mclength.length + " words long.");
     if (!message.content.startsWith(config.prefix) && message.channel.type !== "dm" && message.author.id !== "354834684234170378" && !message.author.bot) {
         pointsSQL.updatePoints(message) // this adds the points for each message
-        dailyInfo.logSpecificChannel(client, message, mainServer) 
-        dailyInfo.logSpecificUser(client, message, mainServer) 
+        // dailyInfo.logSpecificChannel(client, message, mainServer) 
+        // dailyInfo.logSpecificUser(client, message, mainServer) 
     }
     //if (message.author.bot) return
     if (message.content.startsWith(config.prefix)) {
