@@ -11,6 +11,14 @@ var db_config = {
     database: "serverInfoDB",
     charset: "utf8"
 };
+var db_config_pool = { 
+    connectionLimit: 25,
+    host: tokenId.host,
+    user: "holla",
+    password: tokenId.pass,
+    database: "serverInfoDB",
+    charset: "utf8"
+};
 (async() => { 
     try { 
         var connection = await mysql.createConnection(db_config);
@@ -89,7 +97,7 @@ exports.updateDaily = async (client, mainServer) => {
     var result1 = await connection.query(`SELECT NumberOfUsersToday FROM serverInfo WHERE Date = ?`, [getDayBeforeYesterday()])
     var b = (result1[0][0]) ? result1[0][0].NumberOfUsersToday : 0    
     var c = client.guilds.get(mainServer).memberCount
-    var d = c - d
+    var d = c - b
     var result2 = await connection.query(`SELECT SUM(numberSent) AS messageCount FROM channelinfo`)
     var e = (result2[0][0]) ? result2[0][0].messageCount : 0
     var result3 = await connection.query(`SELECT * FROM channelInfo ORDER BY numberSent DESC LIMIT 3`)
@@ -125,9 +133,9 @@ exports.updateDaily = async (client, mainServer) => {
         .setColor("#5f87ed")
         .addField("Date", a ? a : 0)
         .addField("Number of users yesterday", b ? b : 0)
-        .addField("Number of users today", c ? c : 0, true)
+        .addField("Number of users yesterday", c ? c : 0, true)
         .addField("Net user change", d ? d : 0)
-        .addField("Total messages sent today", e ? e : 0, true)
+        .addField("Total messages sent yesterday", e ? e : 0, true)
         .addField("Most active channels", f ? f : 0)
         .addField("Most active people", g ? g : 0)
         .setTimestamp()
@@ -138,36 +146,46 @@ exports.updateDaily = async (client, mainServer) => {
     
     // delete the daily info updates
 
-    connection.execute("DELETE FROM userinfo, channelinfo")
+    await connection.execute("DELETE FROM userInfo")
+    await connection.execute("DELETE FROM channelInfo")
+    connection.end()
     
 }
 
+var pool = mysql.createPool(db_config_pool)
+pool.on('error', (err) => { 
+    if (err) { 
+        console.log(err)
+    }
+})
 exports.logSpecificChannel = async (client, message, mainServer) => { 
     // fires whenever a message is sent
     var channelID = message.channel.id
     var channelName = message.channel.name
-    var connection = await mysql.createConnection(db_config);
-    var result = await connection.query(`SELECT * FROM channelInfo WHERE channelID = ${channelID}`)
+
+    
+    // var connection = await mysql.createConnection(db_config);
+    var result = await pool.query(`SELECT * FROM channelInfo WHERE channelID = ${channelID}`)
     try { 
         if (!result[0][0]) { // if no result, add the channel as a new entry
             console.log("No result")
-            connection.execute(`INSERT INTO channelInfo SET channelId = ?, channelName = ?, numberSent = ?` ,[channelID, channelName, 1])
+            pool.execute(`INSERT INTO channelInfo SET channelId = ?, channelName = ?, numberSent = ?` ,[channelID, channelName, 1])
         } else { // update the existing entry
-            connection.execute(`UPDATE channelInfo SET numberSent = ${result[0][0].numberSent + 1} WHERE channelID = ${channelID}`)
+            pool.execute(`UPDATE channelInfo SET numberSent = ${result[0][0].numberSent + 1} WHERE channelID = ${channelID}`)
         }  
-    } catch (e) { 
+    } catch (e) {
         console.log(e)
     }
 };
 
 exports.logSpecificUser = async (client, message, mainServer) => { 
-    var connection = await mysql.createConnection(db_config);
-    var result = await connection.query(`SELECT * FROM userInfo WHERE userId = ${message.author.id}`)
+    // var connection = await mysql.createConnection(db_config);
+    var result = await pool.query(`SELECT * FROM userInfo WHERE userId = ${message.author.id}`)
     try { 
         if (!result[0][0]) { 
-            connection.execute(`INSERT INTO userInfo SET userId = ?, username = ?, numberSent = ?`, [message.author.id, message.author.username, 1])
+            pool.execute(`INSERT INTO userInfo SET userId = ?, username = ?, numberSent = ?`, [message.author.id, message.author.username, 1])
         } else {
-            connection.execute(`UPDATE userInfo SET numberSent = ${result[0][0].numberSent + 1} WHERE userId = ${message.author.id}`)
+            pool.execute(`UPDATE userInfo SET numberSent = ${result[0][0].numberSent + 1} WHERE userId = ${message.author.id}`)
         }
     } catch (e) {
         console.log(e)
@@ -177,22 +195,22 @@ exports.logSpecificUser = async (client, message, mainServer) => {
 exports.checkYesterdayInfo = async (client, message, mainServer) => { 
     var connection = await mysql.createConnection(db_config);
     var result = await connection.query(`SELECT * FROM serverInfo WHERE Date = ?`, [getYesterdayDate()])    
-    var a = result[0][0].Date ? result[0][0].Date : 0
-    var b = result[0][0].NumberOfUsersYesterday ? result[0][0].NumberOfUsersYesterday : 0
-    var c = result[0][0].NumberOfUsersToday ? result[0][0].NumberOfUsersToday : 0
-    var d = result[0][0].NetUserChange ? result[0][0].NetUserChange : 0
-    var e = result[0][0].TotalMessagesSent ? result[0][0].TotalMessagesSent : 0
-    var f = result[0][0].MostActiveChannel ? result[0][0].MostActiveChannel : 0
-    var g = result[0][0].MostActiveUser ? result[0][0].MostActiveUser : 0
+    var a = result[0][0] ? result[0][0].Date : 0
+    var b = result[0][0] ? result[0][0].NumberOfUsersYesterday : 0
+    var c = result[0][0] ? result[0][0].NumberOfUsersToday : 0
+    var d = result[0][0] ? result[0][0].NetUserChange : 0
+    var e = result[0][0] ? result[0][0].TotalMessagesSent : 0
+    var f = result[0][0] ? result[0][0].MostActiveChannel : 0
+    var g = result[0][0] ? result[0][0].MostActiveUser : 0
     const embed = new Discord.RichEmbed()
         .setTitle(`Server statistics for ${getYesterdayDate()}`)
         .setDescription("A compilation of the day's events.")
         .setColor("#5f87ed")
         .addField("Date", a)
         .addField("Number of users yesterday", b)
-        .addField("Number of users today", c, true)
+        .addField("Number of users yesterday", c, true)
         .addField("Net user change", d)
-        .addField("Total messages sent today", e, true)
+        .addField("Total messages sent yesterday", e, true)
         .addField("Most active channels", f)
         .addField("Most active people", g)
         .setTimestamp()
@@ -200,5 +218,5 @@ exports.checkYesterdayInfo = async (client, message, mainServer) => {
         .setThumbnail(client.user.avatarURL)
 
     message.channel.send(embed)
-    
+    connection.end()
 }
