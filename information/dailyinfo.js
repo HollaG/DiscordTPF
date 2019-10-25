@@ -98,7 +98,7 @@ exports.updateDaily = async (client, mainServer) => {
     var b = (result1[0][0]) ? result1[0][0].NumberOfUsersToday : 0    
     var c = client.guilds.get(mainServer).memberCount
     var d = c - b
-    var result2 = await connection.query(`SELECT SUM(numberSent) AS messageCount FROM channelinfo`)
+    var result2 = await connection.query(`SELECT SUM(numberSent) AS messageCount FROM channelInfo`)
     var e = (result2[0][0]) ? result2[0][0].messageCount : 0
     var result3 = await connection.query(`SELECT * FROM channelInfo ORDER BY numberSent DESC LIMIT 3`)
     var fArr = []   
