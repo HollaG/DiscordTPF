@@ -31,8 +31,8 @@ var db_config_pool = {
             NumberOfUsersToday INTEGER,
             NetUserChange INTEGER,
             TotalMessagesSent INTEGER,
-            MostActiveChannel varchar(100),
-            MostActiveUser varchar(100)
+            MostActiveChannel TEXT,
+            MostActiveUser TEXT
         )
             CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`)
 
@@ -126,14 +126,14 @@ exports.updateDaily = async (client, mainServer) => {
 
     // send the update message 
 
-    var botstuff = client.channels.find("name", "botstuff")
+    var stats = client.channels.find("name", "statistics")
     const embed = new Discord.RichEmbed()
         .setTitle(`Server statistics for ${getYesterdayDate()}`)
         .setDescription("A compilation of the day's events.")
         .setColor("#5f87ed")
         .addField("Date", a ? a : 0)
         .addField("Number of users yesterday", b ? b : 0)
-        .addField("Number of users yesterday", c ? c : 0, true)
+        .addField("Number of users now", c ? c : 0, true)
         .addField("Net user change", d ? d : 0)
         .addField("Total messages sent yesterday", e ? e : 0, true)
         .addField("Most active channels", f ? f : 0)
@@ -142,7 +142,7 @@ exports.updateDaily = async (client, mainServer) => {
         .setFooter("Daily statistic bot", client.user.avatarURL)
         .setThumbnail(client.user.avatarURL)
 
-    botstuff.send(embed)
+    stats.send(embed)
     
     // delete the daily info updates
 
@@ -163,7 +163,6 @@ exports.logSpecificChannel = async (client, message, mainServer) => {
     var channelID = message.channel.id
     var channelName = message.channel.name
 
-    
     // var connection = await mysql.createConnection(db_config);
     var result = await pool.query(`SELECT * FROM channelInfo WHERE channelID = ${channelID}`)
     try { 
@@ -208,7 +207,7 @@ exports.checkYesterdayInfo = async (client, message, mainServer) => {
         .setColor("#5f87ed")
         .addField("Date", a)
         .addField("Number of users yesterday", b)
-        .addField("Number of users yesterday", c, true)
+        .addField("Number of users now", c, true)
         .addField("Net user change", d)
         .addField("Total messages sent yesterday", e, true)
         .addField("Most active channels", f)

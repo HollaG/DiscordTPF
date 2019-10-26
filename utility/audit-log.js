@@ -37,6 +37,9 @@ exports.auditMessageDelete = (client, message) => {
 exports.auditMemberJoin = (client, member) => { 
     const auditLogChannel = member.guild.channels.find("name", "audit-log")
     var time = new Date().toString()
+    var currentTimestamp = new Date().getTime()
+    var createdTimestamp = member.user.createdTimestamp
+    var accountAge = Math.round((currentTimestamp - createdTimestamp)/86400000)
     var embed = new Discord.RichEmbed()
         .setColor("#3dba36")
         .setTitle("Member joined.")
@@ -44,9 +47,17 @@ exports.auditMemberJoin = (client, member) => {
         .addField("Name", member.user.username)
         .addField("ID", member.user.id)
         .addField("Time", time) 
-        .addField("Account creation date", member.user.createdAt.toString())       
+        .addField("Account creation date", member.user.createdAt.toString())   
+        .addField("Account age", `${accountAge} days`)    
         .setFooter("Join Logger")
     auditLogChannel.send(embed)
+
+    if (accountAge < 2) { 
+        var admin = member.guild.channels.find("name", "admin-talk")
+        console.log(admin)
+        admin.send(`User ${member.user.username} joined whose account was created only \`${accountAge}\` days ago. More details found in <#${auditLogChannel.id}>.`)
+    }
+    
 }
 
 exports.auditMemberLeave = (client, member) => { 
