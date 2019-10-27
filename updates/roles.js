@@ -1,7 +1,7 @@
 
 const config = require("../configuration/config.json");
 const tokenId = require("../configuration/tokenId.json");
-const mysql = require("mysql");
+const mysql = require("mysql2/promise");
 var db_config = {
     host: tokenId.host,
     user: "holla",
@@ -10,6 +10,7 @@ var db_config = {
     database: "scores",
     charset: "utf8"
 }
+/*
 var connection;
 function handleDisconnect() {
     connection = mysql.createConnection(db_config);
@@ -29,7 +30,7 @@ function handleDisconnect() {
     });
 }
 handleDisconnect();
-
+*/
 function Month() {
     var monthNames = ["January", "February", "March", "April", "May", "June",
         "July", "August", "September", "October", "November", "December"
@@ -169,14 +170,16 @@ exports.removeRole = (client, r, user) => {
 
 }
 
-exports.activeOne = async (client) => {
-    var guild = client.guilds.get("246190532949180417")
+exports.activeOne = async (client, mainServer) => {
+    var connection = await mysql.createConnection(db_config);
+
+    var guild = client.guilds.get(mainServer)
     var annchannel = client.channels.find("name", "announcements")
     var auditlogchannel = client.channels.find("name", "audit-log")
 
     var role = guild.roles.find("name", "I am active!")
 
-    var res1 = await connection.query(`SELECT userId FROM points ORDER BY userId DESC LIMIT 1`)
+    // var res1 = await connection.query(`SELECT userId FROM points ORDER BY userId DESC LIMIT 10`)
 
     var deleted;
 
@@ -212,14 +215,14 @@ exports.activeOne = async (client) => {
         })
         auditlogchannel.send(notInGuild.join("\n"), { code : "" })
         inGuild.push("---------------------")
-        annchannel.send(`These people have been given the role for ${Month()}`)
+        annchannel.send(`These people have been given the role being active in ${Month()}!`)
         annchannel.send(inGuild.join("\n"), { code : "xl" })
 
-        var tableName = Month() + "_" + Year() // April_2018
+        var columnName = Month() + "_" + Year() // April_2018
         try { 
-            connection.query(`ALTER TABLE points ADD ${tableName} int`, (err, res) => { 
+            connection.query(`ALTER TABLE points ADD ${columnName} int`, (err, res) => { 
                 if (err) auditlogchannel.send(err, { code : "" })
-                connection.query(`UPDATE points SET ${tableName} = points`, (err, res) => {
+                connection.query(`UPDATE points SET ${columnName} = points`, (err, res) => {
                     if (err) auditlogchannel.send(err, { code : "" })
                     connection.query(`UPDATE points SET points = '0', level = '0'`, (err, res) => {
                         auditlogchannel.send("Done!", { code : ""})

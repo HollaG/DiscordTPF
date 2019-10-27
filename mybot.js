@@ -62,7 +62,7 @@ function handleDisconnect() {
 }
 handleDisconnect();
 
-var mainServer = "246190532949180417"
+var mainServer = "335619483018461194"
 
 // swap the numbers as needed
 // var TpF = "246190532949180417"
@@ -174,7 +174,7 @@ ontime({
 }, function (ot) {
     console.log("running program");
     try {
-        updateRoles.activeOne(client);
+        updateRoles.activeOne(client, mainServer);
     } catch (e) {
         client.channels.find("name", "botstuff").send(e)
     } finally {
@@ -250,11 +250,9 @@ client.on("message", message => {
         // message.guild.fetchMembers().then(res =>res.members.forEach(function(key, value) { 
         //     console.log(key, value)
         // }))
-        dailyInfo.updateDaily(client, mainServer)
-    }
-    if (command === "pull") {
-        workshop.storeDB(client)
-    }
+        // dailyInfo.updateDaily(client, mainServer)
+        updateRoles.activeOne(client, mainServer)
+    }    
 
     if (command === "searchuser") {
         var searchStr = args.join(" ")
