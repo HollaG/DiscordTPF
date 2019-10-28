@@ -79,11 +79,12 @@ exports.purgeMessage = async (client, mainServer, message, args) => {
     const auditLogChannel = message.guild.channels.find("name", "audit-log")
     const filter = (reaction, user) => (reaction.emoji.name === '✔' || reaction.emoji.name === '❌') && user.id === message.author.id
     const collector = embedMessage.createReactionCollector(filter, { time: 10000 });
-    collector.on("collect", r => {
+    collector.on("collect", async r => {
         if (r.emoji.name === '✔') {            
             collector.stop()
-            message.delete()
-            embedMessage.delete()
+            await message.delete()
+            await embedMessage.delete()
+
             channelToDelete.bulkDelete(number)
                 .then(msgs => {                     
                     var embed = new Discord.RichEmbed()
