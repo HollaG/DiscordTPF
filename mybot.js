@@ -1,6 +1,4 @@
 const Discord = require("discord.js");
-const sql = require("sqlite")
-sql.open("./sqliteDB/scores.sqlite")
 const fs = require("fs");
 const mysql = require("mysql");
 
@@ -13,21 +11,22 @@ const tokenId = require("./configuration/tokenId.json");
 const wordResponse = require("./commands/wordResponse.json")
 const secondaryHelp = require("./commands/help.json")
 
-// modules!
+// utility modules
 const auditLogs = require("./utility/audit-log")
 const uptime = require("./utility/uptime")
 const suggestions = require("./utility/suggestions.js")
 const conversion = require("./utility/conversion.js");
 const totalpoints = require("./utility/total-points.js")
 const translate = require("./utility/translate")
+const modTools = require("./utility/modtools.js")
 
-// updates
+// update modules
 const roleUpdates = require("./updates/roles.js");
 const pointsSQL = require("./updates/points-sql.js");
 const updateLinks = require("./updates/update-links.js")
 const updateRoles = require("./updates/roles.js")
 
-// information
+// information modules
 const getInfo = require("./information/about.js");
 const positions = require("./information/positions.js");
 const links = require("./information/links.js");
@@ -62,7 +61,7 @@ function handleDisconnect() {
 }
 handleDisconnect();
 
-var mainServer = "335619483018461194"
+var mainServer = "246190532949180417"
 
 // swap the numbers as needed
 // var TpF = "246190532949180417"
@@ -88,42 +87,7 @@ var removeroleMsge = "426751840546324480"
 const activeUser = "I am active!";
 const ontime = require("ontime");
 
-client.login(tokenId.token);
-
-client.on("ready", async() => {
-    console.log("I am ready!");
-    client.channels.find("name", "botstuff").send("Bot has restarted on " + new Date().toString())
-    //client.user.setGame("transportfever.com");
-    client.user.setPresence({
-        game: {
-            name: '!help || transportfever.com',
-            type: 0
-        }
-    });
-});
-
-// var welcome = client.guilds.get(mainServer).channels.find("name", "welcome")
-// console.log(client.guilds.get(mainServer))
-
-client.on("messageReactionAdd", (reaction, user) => {
-    if (user.bot) return  
-
-    if (reaction.message.id == addroleMsge) {
-        console.log('yes')        
-        updateRoles.addRole(client, reaction, user)
-
-    } else if (reaction.message.id == removeroleMsge) {
-        console.log('no')
-        updateRoles.removeRole(client, reaction, user)
-    }    
-})
-
-client.on("error", (e) => console.error(e));
-client.on("warn", (e) => console.warn(e));
-//client.on("debug", (e) => console.info(e));
-
-//restart after 1 day
-//setTimeout(() => { process.exit() }, 86400000)
+// custom functions 
 
 function clean(text) {
     if (typeof (text) === "string")
@@ -169,6 +133,36 @@ function commitSQL() {
     });
 }
 
+client.login(tokenId.token);
+
+client.on("ready", async() => {
+    console.log("I am ready!");
+    client.channels.find("name", "botstuff").send("Bot has restarted on " + new Date().toString())
+    //client.user.setGame("transportfever.com");
+    client.user.setPresence({
+        game: {
+            name: '!help || transportfever.com',
+            type: 0
+        }
+    });
+});
+
+client.on("messageReactionAdd", (reaction, user) => {
+    if (user.bot) return  
+
+    if (reaction.message.id == addroleMsge) {
+        console.log('yes')        
+        updateRoles.addRole(client, reaction, user)
+
+    } else if (reaction.message.id == removeroleMsge) {
+        console.log('no')
+        updateRoles.removeRole(client, reaction, user)
+    }    
+})
+
+client.on("error", (e) => console.error(e));
+client.on("warn", (e) => console.warn(e));
+
 ontime({
     cycle: '1T20:00:00'
 }, function (ot) {
@@ -206,7 +200,8 @@ ontime({
 
 })
 
-// eval 
+// eval message code
+
 client.on("message", message => {
     const args = message.content.split(" ").slice(1);
 
@@ -309,21 +304,22 @@ client.on("message", message => {
     var selector;
     if (message.content.startsWith(config.prefix)) {
         if (commands[command]) {
-            message.channel.send(commands[command]).catch(() => {
-            })
-            // } else {
-            //     if (args.length !== 2 && args.length !== 4 && !message.content.startsWith(config.prefix + "top")) {
-            //         if (message.content.startsWith(config.prefix) && (message.author.id == config.ownerID)) {
-            //             message.reply("there is no such command. Type `!help` for list of commands.");
-
-            //         } else {
-            //             message.reply("I ain't heard of such a thing in my life, dumbass. Perhaps `!help` will sort you out.")
-            //             //client.setTimeout(3000)
-            //             message.channel.send("Just kidding, no hard feelings :)")
-            //             //console.log("Not the owner")
-            //         }
-            //     }
+            // message reply array, see commands.json
+            message.channel.send(commands[command]).catch(e => {})
         }
+
+        // admin- and mod- specific commands 
+        if (message.member.roles.some(r => ["AdminZ", "MoDerators"].includes(r.name))) { 
+            switch (command) { 
+                case "delete":                     
+                    modTools.purgeMessage(client, mainServer, message, args)    
+                    break;
+
+            }
+
+        }
+        
+        // general commands
         switch (command) {
             case "score":
                 totalpoints.totalScore(client, message)
@@ -490,7 +486,11 @@ client.on("message", message => {
             case "daily":
                 dailyInfo.checkYesterdayInfo(client, message, mainServer)
                 break;
-            
+            case "say": 
+                if (message.author.id !== config.ownerID) return
+                message.channel.send(args.join(" "))
+                message.delete()
+                break;                          
         }
 
         function help(args) {
@@ -529,10 +529,8 @@ client.on("messageDelete", (message) => {
 client.on("guildMemberAdd", (member) => {
     console.log(`${member.user.username} has joined TFDiscord`);
     client.channels.find("name", "welcome").send(`Welcome ${member.user.username} to the server! Please read the rules in <#${rules}> and type !agree in <#${iAgree}> to agree!`);     
-     // change the guild name here
     var unverified = client.guilds.get(mainServer).roles.find("name", "Unverified") // Unverified role
-    member.addRole(unverified)
-    //client.channels.get(general).send(`Welcome ${member.user.username} to the server! Please read the rules in <#${welcome}>!`)
+    member.addRole(unverified)   
     auditLogs.auditMemberJoin(client, member)
 
 });

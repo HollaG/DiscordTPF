@@ -1,7 +1,4 @@
 // server, profile command
-
-const sql = require("sqlite");
-sql.open("./scoring/scores.sqlite");
 const tokenId = require("../configuration/tokenId.json");
 const mysql = require("mysql");
 var db_config = {
@@ -37,9 +34,6 @@ function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-
-
-
 module.exports.server = (message) => {
     var totalMembers = (message.guild.memberCount + " members")
     var allchannellist = message.guild.channels
@@ -54,8 +48,6 @@ module.exports.server = (message) => {
 
     var textChannel = allchannellist.findAll("type", "text").toString()
     var voiceChannel = allchannellist.findAll("type", "voice").toString()
-
-
 
     function embed() {
         message.channel.send({
@@ -149,9 +141,6 @@ module.exports.profile = (message) => {
         level = results[0].level
     })
 
-
-
-
     var role; var joinDate; var userIcon;
     if (message.mentions.users.size >= 1) {
         if (message.mentions.members.first().highestRole.name == "@everyone") {
@@ -162,7 +151,6 @@ module.exports.profile = (message) => {
         joinDate = new Date(message.mentions.members.first().joinedAt).toDateString()
         userIcon = message.mentions.users.first().displayAvatarURL
 
-
     } else {
         if (message.member.highestRole.name == "@everyone") {
             role = "No role for this user!"
@@ -172,7 +160,6 @@ module.exports.profile = (message) => {
         joinDate = new Date(message.member.joinedTimestamp).toDateString()
         userIcon = message.client.user.displayAvatarURL
     }
-
 
     setTimeout(embedProfile, 150)
     function embedProfile() {
