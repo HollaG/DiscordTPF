@@ -50,7 +50,7 @@ exports.purgeMessage = async (client, mainServer, message, args) => {
     
     var channelID = channel.replace(/[^a-zA-Z0-9]/g, "")
     var channelToDelete = client.channels.get(channelID)
-
+    console.log(channelID)
     // step 3
     var error = 0
     if (!message.guild.channels.get(channelID)) {
@@ -112,4 +112,32 @@ exports.purgeMessage = async (client, mainServer, message, args) => {
     // deletes the command and question automatically
     embedMessage.delete(10000).catch(e => {})
     message.delete(10000).catch(e => {}) 
+}
+
+exports.fetchBans = async (client, mainServer, message, args) => { 
+    /*
+    step 1 verify that the arguments are correct
+    step 2 check if the user even exists
+    step 3 ask for time
+    step 4 ask for reason
+    step 5 confirm ban
+    step 6 ban
+    */
+
+    // console.log(args) // [ '<@188192190705434624>' ] or [ '188192190705434624' ]
+    var arg = args[0].toString()
+    var ID = Number(arg.replace(/[<@>]/g, ""))
+    var user = client.guilds.get(mainServer).get(ID)
+    console.log(ID)
+    console.log(user)
+    if (isNaN(ID) || !user) { 
+        var desc = `**${message.author.username}**, please select a valid user.`
+        // message.channel.send
+    }
+
+
+
+
+
+
 }

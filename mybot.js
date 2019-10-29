@@ -61,7 +61,7 @@ function handleDisconnect() {
 }
 handleDisconnect();
 
-var mainServer = "246190532949180417"
+var mainServer = "335619483018461194"
 
 // swap the numbers as needed
 // var TpF = "246190532949180417"
@@ -246,7 +246,7 @@ client.on("message", message => {
         //     console.log(key, value)
         // }))
         // dailyInfo.updateDaily(client, mainServer)
-        updateRoles.activeOne(client, mainServer)
+        modTools.fetchBans(client, mainServer, message, args)
     }    
 
     if (command === "searchuser") {
