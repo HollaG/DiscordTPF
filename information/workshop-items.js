@@ -4,6 +4,10 @@ const config = require("../configuration/config.json");
 const tokenId = require("../configuration/tokenId.json");
 const request = require("snekfetch")
 
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 async function getFileDetails(message, results, fileDetail, rawSearch) {
     // fileDetail is basisically the array of the details of the files
 
@@ -176,7 +180,7 @@ exports.searchWorkshop = async (message, searchString, rawSearch, client) => {
     })
 }
 
-const mysql = require("mysql");
+const mysql = require("mysql2/promise");
 var db_config = {
     host: tokenId.host,
     user: "holla",
@@ -185,28 +189,28 @@ var db_config = {
     database: "workshop",
     charset: "utf8"
 }
-var connection;
-function handleDisconnect() {
-    connection = mysql.createConnection(db_config);
-    connection.connect(function (err) {
-        if (err) {
-            console.log('error when connecting to db:', err);
-            setTimeout(handleDisconnect, 2000);
-        }
-    });
-    connection.on('error', function (err) {
-        console.log('db error in file workshop-items.js', err);
-        if (err.code === 'PROTOCOL_CONNECTION_LOST' || err.code === "ECONNRESET") {
-            handleDisconnect();
-        } else {
-            throw err;
-        }
-    });
-}
-handleDisconnect();
+// var connection;
+// function handleDisconnect() {
+//     connection = mysql.createConnection(db_config);
+//     connection.connect(function (err) {
+//         if (err) {
+//             console.log('error when connecting to db:', err);
+//             setTimeout(handleDisconnect, 2000);
+//         }
+//     });
+//     connection.on('error', function (err) {
+//         console.log('db error in file workshop-items.js', err);
+//         if (err.code === 'PROTOCOL_CONNECTION_LOST' || err.code === "ECONNRESET") {
+//             handleDisconnect();
+//         } else {
+//             throw err;
+//         }
+//     });
+// }
+// handleDisconnect();
 
 exports.storeDB = async (client) => {
-
+    var connection = await mysql.createConnection(db_config);
     try {
         var timeStart = process.hrtime()
         var channel = client.channels.find("name", "botstuff")
@@ -352,6 +356,8 @@ exports.storeDB = async (client) => {
                 if (i === numberOfPagesToSearch) {
                     editThis.edit("API query 100% done", { code: "xl" })
                 }
+                sleep(500)
+                console.log("looping", i)
             }
 
             // connection.query(`SELECT fileID, fileName FROM steam_workshop
@@ -707,19 +713,19 @@ exports.searchUser = (client, message, searchStr) => {
                                         time: 10000,
                                         errors: ['time'],
                                     })
-                                    
-                                    try { 
+
+                                    try {
                                         collected.first().delete()
-                                        if (msg.length) { 
+                                        if (msg.length) {
                                             msg.forEach(m => m.delete())
                                         } else (
                                             msg.delete()
-                                        )                                       
+                                        )
                                         deleteMsg.delete()
-                                    } catch (e) { 
+                                    } catch (e) {
                                         console.error;
                                     }
-                                    
+
                                     if (arr[collected.first().content - 1]) {
                                         //console.log(arr[collected.first().content - 1], "HERE")
                                         var res = await request.post(
