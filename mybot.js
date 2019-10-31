@@ -241,12 +241,14 @@ client.on("message", message => {
 
     if (command === "test") {
         if (message.author.id !== config.ownerID) return;
+        doThis(client)
         // updateRoles.activeOne(client)
         // message.guild.fetchMembers().then(res =>res.members.forEach(function(key, value) { 
         //     console.log(key, value)
         // }))
         // dailyInfo.updateDaily(client, mainServer)
-        modTools.fetchBans(client, mainServer, message, args)
+        // if (args.length !== 1) return
+        // modTools.fetchBans(client, mainServer, message, args)
     }    
 
     if (command === "searchuser") {
