@@ -277,32 +277,38 @@ client.on("message", message => {
         message.channel.send("```Please do NOT use @everyone or @here!```")
     }
 
-    if (message.content === "!copyDB" && message.author.id === config.ownerID) {
-        var numberOfUsers_scores = 0
-        sql.all(`SELECT * FROM scores`).then((row) => {
-            while (row[numberOfUsers_scores]) {
-                numberOfUsers_scores++
-                console.log(numberOfUsers_scores)
-            }
-            setTimeout(function () {
-                for (var i = 0; i < numberOfUsers_scores; i++) {
-                    connection.query('INSERT INTO points VALUES (?, ?, ?, ?, ?, ?)', [row[i].userId, row[i].username, row[i].points, row[i].level, row[i].November_2017, row[i].December_2017])
-                }
-            }, 4000)
-        })
-        var numberOfUsers_links = 0
-        sql.all(`SELECT * FROM links`).then((rows) => {
-            while (rows[numberOfUsers_links]) {
-                numberOfUsers_links++
-                console.log(numberOfUsers_links)
-            }
-            setTimeout(function () {
-                for (var i = 0; i < numberOfUsers_links; i++) {
-                    connection.query('INSERT INTO links VALUES (?, ?, ?, ?, ?)', [rows[i].userId, rows[i].username, rows[i].twitch, rows[i].youtube, rows[i].steam])
-                }
-            }, 4000)
-        })
+    // if (message.content === "!copyDB" && message.author.id === config.ownerID) {
+    //     var numberOfUsers_scores = 0
+    //     sql.all(`SELECT * FROM scores`).then((row) => {
+    //         while (row[numberOfUsers_scores]) {
+    //             numberOfUsers_scores++
+    //             console.log(numberOfUsers_scores)
+    //         }
+    //         setTimeout(function () {
+    //             for (var i = 0; i < numberOfUsers_scores; i++) {
+    //                 connection.query('INSERT INTO points VALUES (?, ?, ?, ?, ?, ?)', [row[i].userId, row[i].username, row[i].points, row[i].level, row[i].November_2017, row[i].December_2017])
+    //             }
+    //         }, 4000)
+    //     })
+    //     var numberOfUsers_links = 0
+    //     sql.all(`SELECT * FROM links`).then((rows) => {
+    //         while (rows[numberOfUsers_links]) {
+    //             numberOfUsers_links++
+    //             console.log(numberOfUsers_links)
+    //         }
+    //         setTimeout(function () {
+    //             for (var i = 0; i < numberOfUsers_links; i++) {
+    //                 connection.query('INSERT INTO links VALUES (?, ?, ?, ?, ?)', [rows[i].userId, rows[i].username, rows[i].twitch, rows[i].youtube, rows[i].steam])
+    //             }
+    //         }, 4000)
+    //     })
+    // }
+
+    if (message.channel.name == "new-mods-releases" && message.content.match(`https:\/\/steamcommunity\.com\/sharedfiles\/filedetails\/`)) { // match this specific link
+        workshop.automaticInfo(client, message, mainServer)
+
     }
+
     var selector;
     if (message.content.startsWith(config.prefix)) {
         if (commands[command]) {

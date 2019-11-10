@@ -1,7 +1,7 @@
 
-
 const config = require("../configuration/config.json");
 const tokenId = require("../configuration/tokenId.json");
+const Discord = require("discord.js")
 const request = require("snekfetch")
 
 function sleep(ms) {
@@ -425,16 +425,20 @@ exports.storeDB = async (client) => {
 
 }
 
-exports.searchUser = (client, message, searchStr) => {
+exports.searchUser = async (client, message, searchStr) => {
     (async () => {
         console.log(searchStr, "searchStr")
         var searchText = `%${searchStr}%`
-        var results = await connection.query(`SELECT * FROM steam_workshop WHERE creatorName LIKE ?`, [searchText], (err, results) => {
-            if (err) throw err
+        var connection = await mysql.createConnection(db_config);
+        var results = await connection.query(`SELECT * FROM steam_workshop WHERE creatorName LIKE ?`, [searchText])
+        try {
             people = new Set()
-            results.forEach((result) => {
-                people.add(result.creatorName)
+            results[0].forEach((result) => {
+                if (result.creatorName) {
+                    people.add(result.creatorName)
+                }
             })
+
             var moreThanOne_message;
 
             var retrieveSpecificInfo = async (sqlResult, webResult, selector, arrayOfResults, arrSelector) => {
@@ -668,7 +672,7 @@ exports.searchUser = (client, message, searchStr) => {
                     })
 
                 } catch (e) {
-                    console.log(e)
+                    console.log("errorered", e)
 
                 } finally {
                     console.log("done")
@@ -679,90 +683,90 @@ exports.searchUser = (client, message, searchStr) => {
             var retrieveInfo = async (ID) => {
                 // ID is the creatorID
                 // Purpose of this function is to retrieve all the mods and modnames of the specified creator
+
                 try {
-                    connection.query(`SELECT * FROM steam_workshop WHERE creatorID = ?`, [ID], (err, res) => {
-                        var arr = Array.from(res)
-                        var msgToSend = arr.map(item => {
-                            return (arr.indexOf(item) + 1) + ". " + item.fileName
-                        })
-
-                        if (arr.length === 1) {
-                            ; (async () => {
-                                var res = await request.post(
-                                    'https://api.steampowered.com/ISteamRemoteStorage/GetPublishedFileDetails/v1/',
-                                    {
-                                        headers: {
-                                            'Content-Type': 'application/x-www-form-urlencoded'
-                                        },
-                                        data: `itemcount=1&publishedfileids[0]=${arr[0].fileID}`
-                                    }
-                                )
-                                console.log(arr[0])
-                                console.log(res.body.response.publishedfiledetails)
-                                message.channel.send("This user has only published 1 item so far!")
-                                retrieveSpecificInfo(arr[0], res.body.response.publishedfiledetails, "false")
-                                console.log("only 1 item")
-                            })();
-
-                        } else {
-                            message.channel.send(msgToSend.join("\n"), { code: "", split: "true" }).then(msg => {
-                                ; (async () => {
-                                    var deleteMsg = await message.channel.send("Select which mod you would like to view by typing in its number in the next 10 seconds.")
-                                    let collected = await message.channel.awaitMessages(response => response.content.length < 3, {
-                                        max: 1,
-                                        time: 10000,
-                                        errors: ['time'],
-                                    })
-
-                                    try {
-                                        collected.first().delete()
-                                        if (msg.length) {
-                                            msg.forEach(m => m.delete())
-                                        } else (
-                                            msg.delete()
-                                        )
-                                        deleteMsg.delete()
-                                    } catch (e) {
-                                        console.error;
-                                    }
-
-                                    if (arr[collected.first().content - 1]) {
-                                        //console.log(arr[collected.first().content - 1], "HERE")
-                                        var res = await request.post(
-                                            'https://api.steampowered.com/ISteamRemoteStorage/GetPublishedFileDetails/v1/',
-                                            {
-                                                headers: {
-                                                    'Content-Type': 'application/x-www-form-urlencoded'
-                                                },
-                                                data: `itemcount=1&publishedfileids[0]=${(arr[collected.first().content - 1]).fileID}`
-                                            }
-                                        )
-
-                                        retrieveSpecificInfo(arr[collected.first().content - 1], res.body.response.publishedfiledetails, "true", arr, collected.first().content - 1)
-                                        console.log("number was correct")
-
-                                    } else {
-                                        console.log("invalid number")
-                                    }
-                                })();
-                            })
-                        }
-                        // if clause to check if there is only 1 item
+                    var res = await connection.query(`SELECT * FROM steam_workshop WHERE creatorID = ?`, [ID])
+                    // console.log(res, "test")
+                    var arr = Array.from(res[0])
+                    var msgToSend = arr.map(item => {
+                        return (arr.indexOf(item) + 1) + ". " + item.fileName
                     })
+
+                    if (arr.length === 1) {
+                        ; (async () => {
+                            var res = await request.post(
+                                'https://api.steampowered.com/ISteamRemoteStorage/GetPublishedFileDetails/v1/',
+                                {
+                                    headers: {
+                                        'Content-Type': 'application/x-www-form-urlencoded'
+                                    },
+                                    data: `itemcount=1&publishedfileids[0]=${arr[0].fileID}`
+                                }
+                            )
+                            console.log(arr[0])
+                            console.log(res.body.response.publishedfiledetails)
+                            message.channel.send("This user has only published 1 item so far!")
+                            retrieveSpecificInfo(arr[0], res.body.response.publishedfiledetails, "false")
+                            console.log("only 1 item")
+                        })();
+
+                    } else {
+                        message.channel.send(msgToSend.join("\n"), { code: "", split: "true" }).then(msg => {
+                            ; (async () => {
+                                var deleteMsg = await message.channel.send("Select which mod you would like to view by typing in its number in the next 10 seconds.")
+                                let collected = await message.channel.awaitMessages(response => response.content.length < 3, {
+                                    max: 1,
+                                    time: 10000,
+                                    errors: ['time'],
+                                })
+
+                                try {
+                                    collected.first().delete()
+                                    if (msg.length) {
+                                        msg.forEach(m => m.delete())
+                                    } else (
+                                        msg.delete()
+                                    )
+                                    deleteMsg.delete()
+                                } catch (e) {
+                                    console.error;
+                                }
+
+                                if (arr[collected.first().content - 1]) {
+                                    //console.log(arr[collected.first().content - 1], "HERE")
+                                    var res = await request.post(
+                                        'https://api.steampowered.com/ISteamRemoteStorage/GetPublishedFileDetails/v1/',
+                                        {
+                                            headers: {
+                                                'Content-Type': 'application/x-www-form-urlencoded'
+                                            },
+                                            data: `itemcount=1&publishedfileids[0]=${(arr[collected.first().content - 1]).fileID}`
+                                        }
+                                    )
+
+                                    retrieveSpecificInfo(arr[collected.first().content - 1], res.body.response.publishedfiledetails, "true", arr, collected.first().content - 1)
+                                    console.log("number was correct")
+
+                                } else {
+                                    console.log("invalid number")
+                                }
+                            })();
+                        })
+                    }
+                    // if clause to check if there is only 1 item
                 } catch (e) {
                     console.log(e)
                 }
+
             }
 
                 ; (async () => {
                     switch (people.size) {
                         case 1:
-                            retrieveInfo(results[0].creatorID)
+                            retrieveInfo(results[0][0].creatorID)
                             break;
                         case 0:
                             return message.channel.send(`No users matching ${searchStr} were found.`)
-                            break;
-
                         default:
                             //console.log("ran")
                             var usersArray = Array.from(people)
@@ -792,9 +796,143 @@ exports.searchUser = (client, message, searchStr) => {
                     }
 
                 })();
+        } catch (e) {
+            console.log(e)
+        }
 
-        })
     })();
+}
+const fetch = require('node-fetch');
+
+exports.automaticInfo = async (client, message, mainServer) => {
+    var replacer = (match, p1, p2, p3, string) => p3;
+    var links = message.content.match(/(https?:\/\/[^ ]*)/g) // match any link
+    var ids = []
+    for (link of links) {
+        ids.push(link.match(/\d+/g))
+    }
+    console.log(ids[0])
+    for (id of ids[0]) {
+        try {
+            // var id = link.match(/\d+/g)
+
+            var response1 = await fetch(`https://api.steampowered.com/IPublishedFileService/GetDetails/v1/?key=${tokenId.key}&publishedfileids[0]=${id}&includetags=1&includeadditionalpreviews=1&includechildren=1&includevotes=1&return_playtime_stats=0&appid=446800`)
+
+            var res1 = await response1.json()
+            var file = res1.response.publishedfiledetails[0]
+
+            var res2 = await fetch(`https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v1/?key=${tokenId.key}&steamids=${file.creator}`)
+            var creators = await res2.json() // { response: { players: { player: [Array] } } }
+            var creator = creators.response.players.player[0]
+
+            var modName = file.title
+            var author = creator.personaname
+            var authorProfilePage = creator.profileurl
+            var authorProfilePic = creator.avatarfull
+            var timeCreated = new Date(file.time_created * 1000).toDateString() // 1
+            var timeUpdated = new Date(file.time_updated * 1000).toDateString() // 2
+
+            var tags = []
+            if (file.tags) {
+                for (tag of file.tags) {
+                    tags.push(tag.tag)
+                }
+            } else {
+                tags.push("No tags!")
+            }
+
+            var dependencies = []
+            if (file.children) {
+                for (child of file.children) {
+                    var childId = child.publishedfileid
+                    // Get the file details of a child
+                    var response3 = await fetch(`https://api.steampowered.com/IPublishedFileService/GetDetails/v1/?key=${tokenId.key}&publishedfileids[0]=${childId}&includetags=1&includeadditionalpreviews=1&includechildren=1&includevotes=1&return_playtime_stats=0&appid=446800`)
+                    var res3 = await response3.json()
+                    var childFile = res3.response.publishedfiledetails[0]
+
+                    // Get the creator of this child
+                    var res4 = await fetch(`https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v1/?key=${tokenId.key}&steamids=${childFile.creator}`)
+                    var childCreators = await res4.json() // { response: { players: { player: [Array] } } }    
+
+                    var authorChild = creators.response.players.player[0].personaname // creator name                
+                    dependencies.push(`${childFile.title} by ${authorChild}`) // [Title] by [Name]
+
+                }
+            } else {
+                dependencies.push("No dependencies!")
+            }
+            var numberOfDependencies = file.num_children
+
+            var fileImage = file.preview_url
+            var modLink = `http://steamcommunity.com/sharedfiles/filedetails/?id=${file.publishedfileid}`
+            var fileSize = "Approximately " + (file.file_size / 1000000).toFixed(2) + "MB" // 3
+
+            var description = file.file_description // .trim().replace(/\[(\w+)(?:='(.*)')?\](.*)\[\/\1\]/g, replacer).replace(/\[(\w+)(?:='(.*)')?\](.*)\[\/\1\]/g, replacer)  
+            // replace all links, then remove all newlines   
+            var shortDescription = `\`\`\`${description.trim().replace(/(<a href[\s\S]*?>[\s\S]*?)|(\b(http|https):\/\/.*[^ alt]\b)/g, "").replace(/^\s*\n/gm, "").replace(/\[[^\]]*\]/g, "").substring(0, Math.min(description.length, 250))}...\`\`\`Read more at [the mod's workshop page.](${modLink})`
+
+            var linkToMessage = message.url
+            var embed = new Discord.RichEmbed()
+                .setTitle(`New mod published in the workshop.`)
+                .setDescription(`[See the annoucement message](${linkToMessage})`)
+                .setColor(3447003)
+                .setAuthor(author, authorProfilePic, authorProfilePage)
+                .setTimestamp()
+                .setFooter("Automatic workshop preview bot")
+                .setImage(fileImage)               
+                .addField("Mod name", modName, true)
+                .addField("Author", author, true)
+                .addField("Time created", timeCreated, true)
+                .addField("Time last updated", timeUpdated, true)
+                .addField("Description", shortDescription)
+                .addField(`Tags (${tags.length})`, tags.join(", "), true)
+                .addField(`Dependencies (${numberOfDependencies})`, dependencies.join("\n"), true)
+                .addField("File size", fileSize)
+
+            var workshopUpdate = client.channels.find("name", "new-mods-preview")
+            workshopUpdate.send(embed)
+        } catch (e) {
+
+        }
+
+        // console.log(file)
+        /* 
+        [ { publishedfileid: '1606452257',
+            result: 1,
+            creator: '76561198255490559',
+            creator_app_id: 446800,
+            consumer_app_id: 446800,
+            filename: '',
+            file_size: 21159446,
+            file_url: '',
+            hcontent_file: '7813598328728077683',
+            preview_url: 'https://steamuserimages-a.akamaihd.net/ugc/955225924153664850/D47E1DAFA28733EC81B98847FFF8C13549DC73FF/',
+            hcontent_preview: '955225924153664850',
+            title: 'Siemens Avenio TZ München',
+            description: 'blah',
+            time_created: 1546078314,
+            time_updated: 1573290921,
+            visibility: 0,
+            banned: 0,
+            ban_reason: '',
+            subscriptions: 8143,
+            favorited: 134,
+            lifetime_subscriptions: 9380,
+            lifetime_favorited: 142,
+            views: 11271,
+            tags:
+            [ [Object],
+            [Object],
+            [Object],
+            [Object],
+            [Object],
+            [Object],
+            [Object] ] } ]
+
+            */
+
+    }
+
 }
 
 process.on('unhandledRejection', error => {
