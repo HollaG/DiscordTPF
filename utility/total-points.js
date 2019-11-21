@@ -4,7 +4,7 @@ const config = require("../configuration/config.json");
 
 var db_config = {
     host: tokenId.host,
-    user: "holla",
+    user: "tfbot",
     password: tokenId.pass,
 
     database: "scores",

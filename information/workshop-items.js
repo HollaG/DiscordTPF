@@ -183,7 +183,7 @@ exports.searchWorkshop = async (message, searchString, rawSearch, client) => {
 const mysql = require("mysql2/promise");
 var db_config = {
     host: tokenId.host,
-    user: "holla",
+    user: "tfbot",
     password: tokenId.pass,
 
     database: "workshop",

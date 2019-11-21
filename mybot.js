@@ -35,7 +35,7 @@ const dailyInfo = require("./information/dailyinfo")
 
 var db_config = {
     host: tokenId.host,
-    user: "holla",
+    user: "tfbot",
     password: tokenId.pass,
 
     database: "scores",

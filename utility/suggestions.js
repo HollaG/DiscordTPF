@@ -8,7 +8,7 @@ const color = require("randomcolor")
 
 var db_config = {
     host: tokenId.host,
-    user: "holla",
+    user: "tfbot",
     password: tokenId.pass,
 
     charset: "utf8"

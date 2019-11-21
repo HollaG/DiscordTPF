@@ -4,7 +4,7 @@ const tokenId = require("../configuration/tokenId.json");
 const mysql = require("mysql2/promise");
 var db_config = {
     host: tokenId.host,
-    user: "holla",
+    user: "tfbot",
     password: tokenId.pass,
 
     database: "scores",
