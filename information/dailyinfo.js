@@ -6,7 +6,7 @@ const Discord = require("discord.js");
 
 var db_config = { 
     host: tokenId.host,
-    user: "holla",
+    user: "tfbot",
     password: tokenId.pass,
     database: "serverInfoDB",
     charset: "utf8"
@@ -14,7 +14,7 @@ var db_config = {
 var db_config_pool = { 
     connectionLimit: 25,
     host: tokenId.host,
-    user: "holla",
+    user: "tfbot",
     password: tokenId.pass,
     database: "serverInfoDB",
     charset: "utf8"
