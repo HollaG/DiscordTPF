@@ -183,7 +183,7 @@ exports.searchWorkshop = async (message, searchString, rawSearch, client) => {
 const mysql = require("mysql2/promise");
 var db_config = {
     host: tokenId.host,
-    user: "tfbot",
+    user: "express-bot",
     password: tokenId.pass,
 
     database: "workshop",
@@ -816,11 +816,11 @@ exports.automaticInfo = async (client, message, mainServer) => {
         try {
             // var id = link.match(/\d+/g)
 
-            var response1 = await fetch(`https://api.steampowered.com/IPublishedFileService/GetDetails/v1/?key=${tokenId.key}&publishedfileids[0]=${id}&includetags=1&includeadditionalpreviews=1&includechildren=1&includevotes=1&return_playtime_stats=0&appid=446800`)
+            var response1 = await fetch(`https://api.steampowered.com/IPublishedFileService/GetDetails/v1/?key=${tokenId.key}&publishedfileids[0]=${id}&includetags=1&includeadditionalpreviews=1&includechildren=1&includevotes=1&return_playtime_stats=0`)
 
             var res1 = await response1.json()
             var file = res1.response.publishedfiledetails[0]
-
+            console.log(file)
             var res2 = await fetch(`https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v1/?key=${tokenId.key}&steamids=${file.creator}`)
             var creators = await res2.json() // { response: { players: { player: [Array] } } }
             var creator = creators.response.players.player[0]
@@ -846,7 +846,7 @@ exports.automaticInfo = async (client, message, mainServer) => {
                 for (child of file.children) {
                     var childId = child.publishedfileid
                     // Get the file details of a child
-                    var response3 = await fetch(`https://api.steampowered.com/IPublishedFileService/GetDetails/v1/?key=${tokenId.key}&publishedfileids[0]=${childId}&includetags=1&includeadditionalpreviews=1&includechildren=1&includevotes=1&return_playtime_stats=0&appid=446800`)
+                    var response3 = await fetch(`https://api.steampowered.com/IPublishedFileService/GetDetails/v1/?key=${tokenId.key}&publishedfileids[0]=${childId}&includetags=1&includeadditionalpreviews=1&includechildren=1&includevotes=1&return_playtime_stats=0`)
                     var res3 = await response3.json()
                     var childFile = res3.response.publishedfiledetails[0]
 
