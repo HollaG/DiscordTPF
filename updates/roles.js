@@ -50,12 +50,12 @@ function DateInMonth() {
 
 exports.addRole = (client, r, user) => {
     var guild = client.guilds.get("246190532949180417")
-    var channel = guild.channels.find("name", "roles")
+    var channel = guild.channels.find(channel => channel.name == "roles") // Update this 
     var reactor = guild.members.get(user.id)
     var role;
     switch (r.emoji.name) {
-        case "1️⃣":   //TpF player
-            role = guild.roles.find("name", "TpF Player")
+        case "1⃣":   //TpF player
+            role = guild.roles.find(role => role.name == "TpF Player")
             try {
                 if (!reactor.roles.has(role.id)) {
                     reactor.addRole(role).catch(console.error)
@@ -66,21 +66,8 @@ exports.addRole = (client, r, user) => {
                 channel.send("Unexpected error occurred! Contact Holla").then(m => m.delete(1000))
             }
             break;
-        case "2️⃣":   // CS player
-            role = guild.roles.find("name", "C:S Player")
-            try {
-                if (!reactor.roles.has(role.id)) {
-                    reactor.addRole(role).catch(console.error)
-                } else {
-                    channel.send("You already have this role!").then(m => m.delete(1000))
-                }
-            } catch (e) {
-                channel.send("Unexpected error occurred! Contact Holla").then(m => m.delete(1000))
-            }
-            break;
-
-        case "3️⃣":     // Fact Player
-            role = guild.roles.find("name", "Factorio Player")
+        case "2⃣":   // CS player
+            role = guild.roles.find(role => role.name == "C:S Player")
             try {
                 if (!reactor.roles.has(role.id)) {
                     reactor.addRole(role).catch(console.error)
@@ -92,8 +79,21 @@ exports.addRole = (client, r, user) => {
             }
             break;
 
-        case "4️⃣": // Wantabe modder
-            role = guild.roles.find("name", "Wantabe Modder")
+        case "3⃣":     // Fact Player
+            role = guild.roles.find(role => role.name == "Factorio Player")
+            try {
+                if (!reactor.roles.has(role.id)) {
+                    reactor.addRole(role).catch(console.error)
+                } else {
+                    channel.send("You already have this role!").then(m => m.delete(1000))
+                }
+            } catch (e) {
+                channel.send("Unexpected error occurred! Contact Holla").then(m => m.delete(1000))
+            }
+            break;
+
+        case "4⃣": // Wantabe modder
+            role = guild.roles.find(role => role.name == "Wantabe Modder")
             try {
                 if (!reactor.roles.has(role.id)) {
                     reactor.addRole(role).catch(console.error)
@@ -110,13 +110,13 @@ exports.addRole = (client, r, user) => {
 
 exports.removeRole = (client, r, user) => {
     var guild = client.guilds.get("246190532949180417")
-    var channel = guild.channels.find("name", "welcome")
+    var channel = guild.channels.find(channel => channel.name == "roles")
     var reactor = guild.members.get(user.id)
     var role;
     switch (r.emoji.name) {
 
         case "1⃣":
-            role = guild.roles.find("name", "TpF Player")
+            role = guild.roles.find(role => role.name == "TpF Player")
             try {
                 if (reactor.roles.has(role.id)) {
                     reactor.removeRole(role).catch(console.error)
@@ -128,7 +128,7 @@ exports.removeRole = (client, r, user) => {
             }
             break;
         case "2⃣":
-            role = guild.roles.find("name", "C:S Player")
+            role = guild.roles.find(role => role.name == "C:S Player")
             try {
                 if (reactor.roles.has(role.id)) {
                     reactor.removeRole(role).catch(console.error)
@@ -141,7 +141,7 @@ exports.removeRole = (client, r, user) => {
             break;
 
         case "3⃣":
-            role = guild.roles.find("name", "Factorio Player")
+            role = guild.roles.find(role => role.name == "Factorio Player")
             try {
                 if (reactor.roles.has(role.id)) {
                     reactor.removeRole(role).catch(console.error)
@@ -154,7 +154,7 @@ exports.removeRole = (client, r, user) => {
             break;
 
         case "4⃣":
-            role = guild.roles.find("name", "Wantabe Modder")
+            role = guild.roles.find(role => role.name == "Wantabe Modder")
             try {
                 if (reactor.roles.has(role.id)) {
                     reactor.removeRole(role).catch(console.error)
