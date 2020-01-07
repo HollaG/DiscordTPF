@@ -54,7 +54,7 @@ exports.addRole = (client, r, user) => {
     var reactor = guild.members.get(user.id)
     var role;
     switch (r.emoji.name) {
-        case "1⃣":   //TpF player
+        case "1️⃣":   //TpF player
             role = guild.roles.find("name", "TpF Player")
             try {
                 if (!reactor.roles.has(role.id)) {
@@ -66,7 +66,7 @@ exports.addRole = (client, r, user) => {
                 channel.send("Unexpected error occurred! Contact Holla").then(m => m.delete(1000))
             }
             break;
-        case "2⃣":   // CS player
+        case "2️⃣":   // CS player
             role = guild.roles.find("name", "C:S Player")
             try {
                 if (!reactor.roles.has(role.id)) {
@@ -79,7 +79,7 @@ exports.addRole = (client, r, user) => {
             }
             break;
 
-        case "3⃣":     // Fact Player
+        case "3️⃣":     // Fact Player
             role = guild.roles.find("name", "Factorio Player")
             try {
                 if (!reactor.roles.has(role.id)) {
@@ -92,7 +92,7 @@ exports.addRole = (client, r, user) => {
             }
             break;
 
-        case "4⃣": // Wantabe modder
+        case "4️⃣": // Wantabe modder
             role = guild.roles.find("name", "Wantabe Modder")
             try {
                 if (!reactor.roles.has(role.id)) {
