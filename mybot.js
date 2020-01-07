@@ -35,7 +35,7 @@ const dailyInfo = require("./information/dailyinfo")
 
 var db_config = {
     host: tokenId.host,
-    user: "tfbot",
+    user: "express-bot",
     password: tokenId.pass,
 
     database: "scores",
@@ -70,6 +70,7 @@ var mainServer = "246190532949180417"
 /* Transport Fever Server IDs */ 
 var welcome = "634725723751448576" //TpF wlc channel
 var rules = "634007370770415616" //TpF rules channel
+var roles = ""
 var iAgree = "635334812239921162" // TpF agree channel
 var announcements = "386091548388884480" // TpF annc channel
 var general = "272094615434166272" // TpF general channel
@@ -145,11 +146,16 @@ client.on("ready", async() => {
             type: 0
         }
     });
+    var rolesChannel = client.channel.find("name", "roles")
+    await rolesChannel.fetchMessage(addroleMsge)
+    await rolesChannel.fetchMessage(removeroleMsge)
+
 });
 
 client.on("messageReactionAdd", (reaction, user) => {
-    if (user.bot) return  
 
+    if (user.bot) return  
+    console.log("Here")
     if (reaction.message.id == addroleMsge) {
         console.log('yes')        
         updateRoles.addRole(client, reaction, user)
