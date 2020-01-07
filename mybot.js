@@ -146,7 +146,7 @@ client.on("ready", async() => {
             type: 0
         }
     });
-    var rolesChannel = client.channel.find("name", "roles")
+    var rolesChannel = client.channels.find("name", "roles")
     await rolesChannel.fetchMessage(addroleMsge)
     await rolesChannel.fetchMessage(removeroleMsge)
 
