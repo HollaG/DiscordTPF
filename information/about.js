@@ -63,7 +63,7 @@ module.exports.server = (message) => {
     function embed() {
         message.channel.send({
             "embed": {
-                "title": "Stats for " + (serverName),
+                "title": "Stats for " + (mainServerName),
                 // "description": ".",
                 "color": 149684,
                 "timestamp": (message.createdAt),
@@ -72,12 +72,12 @@ module.exports.server = (message) => {
                     "text": "Requested by " + (message.author.username)
                 },
                 "thumbnail": {
-                    "url": (serverIcon)
+                    "url": (mainServerIcon)
                 },
                 "author": {
-                    "name": (serverName),
+                    "name": (mainServerName),
                     "url": "",
-                    "icon_url": (serverIcon)
+                    "icon_url": (mainServerIcon)
                 },
                 "fields": [
                     {

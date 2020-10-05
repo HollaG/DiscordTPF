@@ -486,7 +486,7 @@ client.on("message", message => {
                 break;
             case "agree":
                 //try { 
-                    var guild = client.guilds.cache.get(server)
+                    var guild = client.guilds.cache.get(mainServer)
                     var unverified = guild.roles.cache.find(r => r.name == "Unverified") // Unverified role
                     var verified = guild.roles.cache.find(r => r.name == "Verified") // verified
                     console.log(Boolean(message.channel.name == "agree"))
@@ -562,7 +562,7 @@ client.on("guildMemberAdd", (member) => {
     console.log(`${member.user.username} has joined TFDiscord`);
     client.channels.cache.find(c => c.name == "welcome").send(`Welcome ${member.user.username} to the server! Please read the rules in <#${rules}> and type !agree in <#${iAgree}> to agree!`);     
    
-    var unverified = client.guilds.cache.get(server).roles.cache.find(r => r.name == "Unverified") // Unverified role
+    var unverified = client.guilds.cache.get(mainServer).roles.cache.find(r => r.name == "Unverified") // Unverified role
     member.roles.add(unverified)   
     auditLogs.auditMemberJoin(client, member)
 

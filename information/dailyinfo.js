@@ -96,7 +96,7 @@ exports.updateDaily = async (client, mainServer) => {
     var connection = mysql.createConnection(db_config);
     var result1 = await connection.query(`SELECT NumberOfUsersToday FROM serverInfo WHERE Date = ?`, [getDayBeforeYesterday()])
     var b = (result1[0][0]) ? result1[0][0].NumberOfUsersToday : 0    
-    var c = client.guilds.cache.get(server).memberCount
+    var c = client.guilds.cache.get(mainServer).memberCount
     var d = c - b
     var result2 = await connection.query(`SELECT SUM(numberSent) AS messageCount FROM channelInfo`)
     var e = (result2[0][0]) ? result2[0][0].messageCount : 0

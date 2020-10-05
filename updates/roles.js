@@ -49,7 +49,7 @@ function DateInMonth() {
 }
 
 exports.addRole = (client, r, user) => {
-    var guild = client.guilds.cache.get(server)
+    var guild = client.guilds.cache.get(mainServer)
     var channel = guild.channels.cache.find(c => c.name == "roles") // Update this 
     var reactor = guild.members.cache.get(user.id)
     var role;
@@ -109,7 +109,7 @@ exports.addRole = (client, r, user) => {
 }
 
 exports.removeRole = (client, r, user) => {
-    var guild = client.guilds.cache.get(server)
+    var guild = client.guilds.cache.get(mainServer)
     var channel = guild.channels.cache.find(channel => channel.name == "roles")
     var reactor = guild.members.cache.get(user.id)
     var role;
@@ -173,7 +173,7 @@ exports.removeRole = (client, r, user) => {
 exports.activeOne = async (client, mainServer) => {
     var connection = mysql.createConnection(db_config);
 
-    var guild = client.guilds.cache.get(server)
+    var guild = client.guilds.cache.get(mainServer)
     var annchannel = client.channels.cache.find(c => c.name == "announcements")
     var auditlogchannel = client.channels.cache.find(c => c.name == "audit-log")
 
