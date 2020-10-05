@@ -39,7 +39,7 @@ module.exports.server = (message) => {
     var allchannellist = message.guild.channels.cache
     var DateofCreation = new Date(message.guild.createdAt).toDateString()
     var GuildOwner = message.guild.owner.user.username
-
+    var mainServerName = message.guild.name
     var serverIcon = message.guild.iconURL
     var serverName = message.guild.name
     var region = message.guild.region
