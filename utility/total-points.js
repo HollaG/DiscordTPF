@@ -11,7 +11,7 @@ var db_config = {
     charset: "utf8"
 }
 var connection;
-function handleDisconnect() {
+async function handleDisconnect() {
     connection = mysql.createConnection(db_config);
     connection.connect(function (err) {
         if (err) {
@@ -22,13 +22,13 @@ function handleDisconnect() {
     connection.on('error', function (err) {
         console.log('db error in file mybot.js', err);
         if (err.code === 'PROTOCOL_CONNECTION_LOST' || err.code === "ECONNRESET") {
-            handleDisconnect();
+            handleDisconnect()
         } else {
             throw err;
         }
     });
 }
-handleDisconnect();
+handleDisconnect()
 
 exports.totalScore = async (client, message) => {
     var validMonths = []

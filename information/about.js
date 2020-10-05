@@ -21,13 +21,13 @@ function handleDisconnect() {
     connection.on('error', function (err) {
         console.log('db error in file about.js', err);
         if (err.code === 'PROTOCOL_CONNECTION_LOST' || err.code === "ECONNRESET") { 
-            handleDisconnect();                        
+            handleDisconnect()                        
         } else {                                     
             throw err;                                  
         }
     });
 }
-handleDisconnect();
+handleDisconnect()
 const config = require("../configuration/config.json");
 
 function capitalizeFirstLetter(string) {
@@ -36,7 +36,7 @@ function capitalizeFirstLetter(string) {
 
 module.exports.server = (message) => {
     var totalMembers = (message.guild.memberCount + " members")
-    var allchannellist = message.guild.channels
+    var allchannellist = message.guild.channels.cache
     var DateofCreation = new Date(message.guild.createdAt).toDateString()
     var GuildOwner = message.guild.owner.user.username
     var GuildDefaultChannel = message.guild.defaultChannel.name
@@ -46,13 +46,13 @@ module.exports.server = (message) => {
     var rolelist = message.guild.roles.array().toString()
     var channelcount = message.guild.channels.array().length
 
-    var textChannel = allchannellist.findAll("type", "text").toString()
-    var voiceChannel = allchannellist.findAll("type", "voice").toString()
+    var textChannel = allchannellist.map(t => t.type == "text").toString()   
+    var voiceChannel = allchannellist.map(t => t.type == "voice").toString()
 
     function embed() {
         message.channel.send({
             "embed": {
-                "title": "Stats for " + (serverName),
+                "title": "Stats for " + (mainServerName),
                 // "description": ".",
                 "color": 149684,
                 "timestamp": (message.createdAt),
@@ -61,12 +61,12 @@ module.exports.server = (message) => {
                     "text": "Requested by " + (message.author.username)
                 },
                 "thumbnail": {
-                    "url": (serverIcon)
+                    "url": (mainServerIcon)
                 },
                 "author": {
-                    "name": (serverName),
+                    "name": (mainServerName),
                     "url": "",
-                    "icon_url": (serverIcon)
+                    "icon_url": (mainServerIcon)
                 },
                 "fields": [
                     {

@@ -3,7 +3,7 @@ const tokenId = require("../configuration/tokenId.json");
 const Discord = require("discord.js");
 
 exports.auditMessageDelete = (client, message) => { 
-    const auditLogChannel = message.guild.channels.find("name", "audit-log")
+    const auditLogChannel = message.guild.channels.cache.find(c => c.name == "audit-log")
     var messageAuthor = message.author.username
     var deletedChannelID = message.channel.id
     var deletedMessage = message.cleanContent
@@ -21,7 +21,7 @@ exports.auditMessageDelete = (client, message) => {
         return result
      };
       
-    var embed = new Discord.RichEmbed()
+    var embed = new Discord.MessageEmbed()
         .setColor("#d19630")
         .setTitle("Message deleted")
         .setDescription(`\`\`\`${escapeMarkdown(deletedMessage)}\`\`\``)
@@ -35,12 +35,12 @@ exports.auditMessageDelete = (client, message) => {
 }
 
 exports.auditMemberJoin = (client, member) => { 
-    const auditLogChannel = member.guild.channels.find("name", "audit-log")
+    const auditLogChannel = member.guild.channels.cache.find(c => c.name == "audit-log")
     var time = new Date().toString()
     var currentTimestamp = new Date().getTime()
     var createdTimestamp = member.user.createdTimestamp
     var accountAge = Math.round((currentTimestamp - createdTimestamp)/86400000)
-    var embed = new Discord.RichEmbed()
+    var embed = new Discord.MessageEmbed()
         .setColor("#3dba36")
         .setTitle("Member joined.")
         .setDescription(`Members increased from ${member.guild.memberCount - 1} to ${member.guild.memberCount}`)
@@ -53,7 +53,7 @@ exports.auditMemberJoin = (client, member) => {
     auditLogChannel.send(embed)
 
     if (accountAge < 2) { 
-        var admin = member.guild.channels.find("name", "admin-talk")
+        var admin = member.guild.channels.cache.find(c => c.name == "admin-talk")
         console.log(admin)
         admin.send(`User ${member.user.username} joined whose account was created only \`${accountAge}\` days ago. More details found in <#${auditLogChannel.id}>.`)
     }
@@ -61,9 +61,9 @@ exports.auditMemberJoin = (client, member) => {
 }
 
 exports.auditMemberLeave = (client, member) => { 
-    const auditLogChannel = member.guild.channels.find("name", "audit-log")
+    const auditLogChannel = member.guild.channels.cache.find(c => c.name == "audit-log")
     var time = new Date().toString()
-    var embed = new Discord.RichEmbed()
+    var embed = new Discord.MessageEmbed()
         .setColor("#b82828")
         .setTitle("Member left.")
         .setDescription(`Members decreased from ${member.guild.memberCount + 1} to ${member.guild.memberCount}`)

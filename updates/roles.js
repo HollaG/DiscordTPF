@@ -1,7 +1,7 @@
 
 const config = require("../configuration/config.json");
 const tokenId = require("../configuration/tokenId.json");
-const mysql = require("mysql2/promise");
+const mysql = require("mysql");
 var db_config = {
     host: tokenId.host,
     user: "tfbot",
@@ -23,13 +23,13 @@ function handleDisconnect() {
     connection.on('error', function (err) {
         console.log('db error in file roles.js', err);
         if (err.code === 'PROTOCOL_CONNECTION_LOST' || err.code === "ECONNRESET") {
-            handleDisconnect();
+            handleDisconnect()
         } else {
             throw err;
         }
     });
 }
-handleDisconnect();
+handleDisconnect()
 */
 function Month() {
     var monthNames = ["January", "February", "March", "April", "May", "June",
@@ -49,16 +49,16 @@ function DateInMonth() {
 }
 
 exports.addRole = (client, r, user) => {
-    var guild = client.guilds.get("246190532949180417")
-    var channel = guild.channels.find(channel => channel.name == "roles") // Update this 
-    var reactor = guild.members.get(user.id)
+    var guild = client.guilds.cache.get(mainServer)
+    var channel = guild.channels.cache.find(c => c.name == "roles") // Update this 
+    var reactor = guild.members.cache.get(user.id)
     var role;
     switch (r.emoji.name) {
         case "1⃣":   //TpF player
-            role = guild.roles.find(role => role.name == "TpF Player")
+            role = guild.roles.cache,find(r => r.name == "TpF Player")
             try {
-                if (!reactor.roles.has(role.id)) {
-                    reactor.addRole(role).catch(console.error)
+                if (!reactor.roles.cache.has(role.id)) {
+                    reactor.roles.add(role).catch(console.error)
                 } else {
                     channel.send("You already have this role!").then(m => m.delete(1000))
                 }
@@ -67,10 +67,10 @@ exports.addRole = (client, r, user) => {
             }
             break;
         case "2⃣":   // CS player
-            role = guild.roles.find(role => role.name == "C:S Player")
+            role = guild.roles.cache.find(role => role.name == "C:S Player")
             try {
-                if (!reactor.roles.has(role.id)) {
-                    reactor.addRole(role).catch(console.error)
+                if (!reactor.roles.cache.has(role.id)) {
+                    reactor.roles.add(role).catch(console.error)
                 } else {
                     channel.send("You already have this role!").then(m => m.delete(1000))
                 }
@@ -80,10 +80,10 @@ exports.addRole = (client, r, user) => {
             break;
 
         case "3⃣":     // Fact Player
-            role = guild.roles.find(role => role.name == "Factorio Player")
+            role = guild.roles.cache.find(role => role.name == "Factorio Player")
             try {
-                if (!reactor.roles.has(role.id)) {
-                    reactor.addRole(role).catch(console.error)
+                if (!reactor.roles.cache.has(role.id)) {
+                    reactor.roles.add(role).catch(console.error)
                 } else {
                     channel.send("You already have this role!").then(m => m.delete(1000))
                 }
@@ -93,10 +93,10 @@ exports.addRole = (client, r, user) => {
             break;
 
         case "4⃣": // Wantabe modder
-            role = guild.roles.find(role => role.name == "Wantabe Modder")
+            role = guild.roles.cache.find(role => role.name == "Wantabe Modder")
             try {
-                if (!reactor.roles.has(role.id)) {
-                    reactor.addRole(role).catch(console.error)
+                if (!reactor.roles.cache.has(role.id)) {
+                    reactor.roles.add(role).catch(console.error)
                 } else {
                     channel.send("You already have this role!").then(m => m.delete(1000))
                 }
@@ -109,17 +109,17 @@ exports.addRole = (client, r, user) => {
 }
 
 exports.removeRole = (client, r, user) => {
-    var guild = client.guilds.get("246190532949180417")
-    var channel = guild.channels.find(channel => channel.name == "roles")
-    var reactor = guild.members.get(user.id)
+    var guild = client.guilds.cache.get(mainServer)
+    var channel = guild.channels.cache.find(channel => channel.name == "roles")
+    var reactor = guild.members.cache.get(user.id)
     var role;
     switch (r.emoji.name) {
 
         case "1⃣":
-            role = guild.roles.find(role => role.name == "TpF Player")
+            role = guild.roles.cache.find(role => role.name == "TpF Player")
             try {
-                if (reactor.roles.has(role.id)) {
-                    reactor.removeRole(role).catch(console.error)
+                if (reactor.roles.cache.has(role.id)) {
+                    reactor.roles.remove(role).catch(console.error)
                 } else {
                     channel.send("You don't have this role!").then(m => m.delete(1000))
                 }
@@ -128,10 +128,10 @@ exports.removeRole = (client, r, user) => {
             }
             break;
         case "2⃣":
-            role = guild.roles.find(role => role.name == "C:S Player")
+            role = guild.roles.cache.find(role => role.name == "C:S Player")
             try {
-                if (reactor.roles.has(role.id)) {
-                    reactor.removeRole(role).catch(console.error)
+                if (reactor.roles.cache.has(role.id)) {
+                    reactor.roles.remove(role).catch(console.error)
                 } else {
                     channel.send("You don't have this role!").then(m => m.delete(1000))
                 }
@@ -141,10 +141,10 @@ exports.removeRole = (client, r, user) => {
             break;
 
         case "3⃣":
-            role = guild.roles.find(role => role.name == "Factorio Player")
+            role = guild.roles.cache.find(role => role.name == "Factorio Player")
             try {
-                if (reactor.roles.has(role.id)) {
-                    reactor.removeRole(role).catch(console.error)
+                if (reactor.roles.cache.has(role.id)) {
+                    reactor.roles.remove(role).catch(console.error)
                 } else {
                     channel.send("You don't have this role!").then(m => m.delete(1000))
                 }
@@ -154,10 +154,10 @@ exports.removeRole = (client, r, user) => {
             break;
 
         case "4⃣":
-            role = guild.roles.find(role => role.name == "Wantabe Modder")
+            role = guild.roles.cache.find(role => role.name == "Wantabe Modder")
             try {
-                if (reactor.roles.has(role.id)) {
-                    reactor.removeRole(role).catch(console.error)
+                if (reactor.roles.cache.has(role.id)) {
+                    reactor.roles.remove(role).catch(console.error)
                 } else {
                     channel.send("You don't have this role!").then(m => m.delete(1000))
                 }
@@ -171,13 +171,13 @@ exports.removeRole = (client, r, user) => {
 }
 
 exports.activeOne = async (client, mainServer) => {
-    var connection = await mysql.createConnection(db_config);
+    var connection = mysql.createConnection(db_config);
 
-    var guild = client.guilds.get(mainServer)
-    var annchannel = client.channels.find("name", "announcements")
-    var auditlogchannel = client.channels.find("name", "audit-log")
+    var guild = client.guilds.cache.get(mainServer)
+    var annchannel = client.channels.cache.find(c => c.name == "announcements")
+    var auditlogchannel = client.channels.cache.find(c => c.name == "audit-log")
 
-    var role = guild.roles.find("name", "I am active!")
+    var role = guild.roles.cache.find(r => r.name == "I am active!")
 
     // var res1 = await connection.query(`SELECT userId FROM points ORDER BY userId DESC LIMIT 10`)
 
@@ -205,11 +205,11 @@ exports.activeOne = async (client, mainServer) => {
         res.forEach(element => {
             // 1 Check if member is in the guild
             // 2 Stop if not, add if in
-            let person = guild.members.get(element.userId)
+            let person = guild.members.cache.get(element.userId)
             if (!person) { 
                 notInGuild.push(`${element.username}`)
             } else { 
-                person.addRole(newRole)
+                person.roles.add(newRole)
                 inGuild.push(`${element.username} with ${element.points} points!`)
             }
         })
@@ -224,7 +224,7 @@ exports.activeOne = async (client, mainServer) => {
                 if (err) auditlogchannel.send(err, { code : "" })
                 connection.query(`UPDATE points SET ${columnName} = points`, (err, res) => {
                     if (err) auditlogchannel.send(err, { code : "" })
-                    connection.query(`UPDATE points SET points = '0', level = '0'`, (err, res) => {
+                    connection.query(`UPDATE points SET points = '0'`, (err, res) => {
                         auditlogchannel.send("Done!", { code : ""})
                     })
                 })

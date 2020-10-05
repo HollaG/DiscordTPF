@@ -3,7 +3,7 @@ const Discord = require("discord.js");
 // Admin color: RGB = 155 89 182 Mod color: 214 104 14
 
 const createOneLineEmbed = (desc, color) => {
-    var embed = new Discord.RichEmbed()
+    var embed = new Discord.MessageEmbed()
         .setDescription(desc)
         .setColor(color)
     return embed
@@ -49,11 +49,11 @@ exports.purgeMessage = async (client, mainServer, message, args) => {
     }
 
     var channelID = channel.replace(/[^a-zA-Z0-9]/g, "")
-    var channelToDelete = client.channels.get(channelID)
+    var channelToDelete = client.channels.cache.get(channelID)
     console.log(channelID)
     // step 3
     var error = 0
-    if (!message.guild.channels.get(channelID)) {
+    if (!message.guild.channels.cache.get(channelID)) {
         var desc = `**${message.author.username}**, there is no such channel.`
         message.channel.send(createOneLineEmbed(desc, color)).then(m => m.delete(7500))
         error = 1
@@ -76,7 +76,7 @@ exports.purgeMessage = async (client, mainServer, message, args) => {
     var embedMessage = await message.channel.send(createOneLineEmbed(desc, color))
     await embedMessage.react("✔")
     await embedMessage.react("❌")
-    const auditLogChannel = message.guild.channels.find("name", "audit-log")
+    const auditLogChannel = message.guild.channels.cache.find(c => c.name == "audit-log")
     const filter = (reaction, user) => (reaction.emoji.name === '✔' || reaction.emoji.name === '❌') && user.id === message.author.id
     const collector = embedMessage.createReactionCollector(filter, { time: 10000 });
     collector.on("collect", async r => {
@@ -87,7 +87,7 @@ exports.purgeMessage = async (client, mainServer, message, args) => {
 
             channelToDelete.bulkDelete(number)
                 .then(msgs => {
-                    var embed = new Discord.RichEmbed()
+                    var embed = new Discord.MessageEmbed()
                         .setTitle("**Messages bulk deleted**")
                         .setColor(color)
                         .addField("Deletor", message.author.username)

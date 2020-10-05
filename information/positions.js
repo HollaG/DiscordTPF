@@ -24,17 +24,17 @@ function handleDisconnect() {
     connection.on('error', function (err) {
         console.log('db error in file positions.js', err);
         if (err.code === 'PROTOCOL_CONNECTION_LOST' || err.code === "ECONNRESET") {
-            handleDisconnect();
+            handleDisconnect()
         } else {
             throw err;
         }
     });
 }
-handleDisconnect();
-connection.on('error', function (err) {
-    console.log(err.code)
-    connection.query('SELECT 1')
-})
+handleDisconnect()
+// connection.on('error', function (err) {
+//     console.log(err.code)
+//     connection.query('SELECT 1')
+// })
 
 module.exports.capitalizeFirstLetter = (string) => {
     return string.charAt(0).toUpperCase() + string.slice(1);
@@ -44,6 +44,7 @@ module.exports.getTop = (message, page, date) => {
     console.log(page + " page")
     console.log(date + " date")
     var monthNames = {
+
         "jan": "January",
         "feb": "February",
         "mar": "March",
@@ -62,16 +63,20 @@ module.exports.getTop = (message, page, date) => {
         console.log("running")
         date = date
     } else {
-        arrDate = date.split("_") // nov, 2017
-        monthShortForm = arrDate[0]
-        if (monthNames[monthShortForm]) {
-            arrDate.shift() // [2017]        
-            arrDate.unshift("_") // [_, 2017]        
-            arrDate.unshift(monthNames[monthShortForm]) // [November,_ , 2017]        
-            date = arrDate.join("")
-        } else { // if its not part of the accepted dates, send this
-            message.channel.send(`\`${date}\` is not a valid date! Please follow this format: !top [Month(shortform, 3 letters)_Year]. Example: \`!top nov_2017\`. \nFor more information, see \`!help top\``)
-            return date = undefined // set to undefined, return
+        if (date != "all") {
+            arrDate = date.split("_") // nov, 2017
+            monthShortForm = arrDate[0]
+            if (monthNames[monthShortForm]) {
+                arrDate.shift() // [2017]        
+                arrDate.unshift("_") // [_, 2017]        
+                arrDate.unshift(monthNames[monthShortForm]) // [November,_ , 2017]        
+                date = arrDate.join("")
+            } else { // if its not part of the accepted dates, send this
+                message.channel.send(`\`${date}\` is not a valid date! Please follow this format: !top [Month(shortform, 3 letters)_Year]. Example: \`!top nov_2017\`. \nFor more information, see \`!help top\``)
+                return date = undefined // set to undefined, return
+            }
+        } else {
+            date = "total"
         }
     }
 
@@ -79,6 +84,8 @@ module.exports.getTop = (message, page, date) => {
     if (date) { // if date is defined
         pointValue = this.capitalizeFirstLetter(date)
     }
+    if (date == "total") pointValue = "total"
+    
     console.log(pointValue)
 
     var reactedUser = message.author.id
@@ -99,8 +106,8 @@ module.exports.getTop = (message, page, date) => {
             return console.log(err)
         } else {
             connection.query('SELECT ?? FROM points WHERE userId = ?', [pointValue, message.author.id], function (err, result) {
-                if (!result[0]) { 
-                    return message.channel.send("No such period exists in the database!", {code: ""})
+                if (!result[0]) {
+                    return message.channel.send("No such period exists in the database!", { code: "" })
                 }
                 userPoints = result[0][pointValue]
             })
@@ -181,7 +188,7 @@ module.exports.getTop = (message, page, date) => {
 
                         setTimeout(function () {
                             collector.on("collect", r => {
-                                r.remove(reactedUser)
+                                r.users.remove(reactedUser)
                                 lessThanTen = 0
                                 console.log("triggered")
                                 if (r.emoji.name === "◀") { //left arrow, go back
@@ -217,6 +224,7 @@ module.exports.getTop = (message, page, date) => {
                                 if (r.emoji.name === "⏹") {
                                     collector.stop()
                                     console.log("here")
+                                    message.reactions.removeAll()
 
                                 }
                                 if (r.emoji.name === "⏮") {
@@ -255,7 +263,7 @@ module.exports.getTop = (message, page, date) => {
                             try {
                                 console.log(`collection ended`)
                                 deleteMe.edit("Interactive scoreboard ended.")
-                                message.clearReactions()
+                                message.reactions.removeAll()
 
                             } catch (e) {
                                 console.log(e)

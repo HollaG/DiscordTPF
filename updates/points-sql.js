@@ -1,5 +1,6 @@
 const mysql = require("mysql");
 const tokenId = require("../configuration/tokenId.json");
+const baseLevel = 1.25;
 var db_config = {
     host: tokenId.host,
     user: "tfbot",
@@ -10,23 +11,23 @@ var db_config = {
 }
 var connection;
 function handleDisconnect() {
-    connection = mysql.createConnection(db_config); 
-    connection.connect(function (err) {              
-        if (err) {                                   
+    connection = mysql.createConnection(db_config);
+    connection.connect(function (err) {
+        if (err) {
             console.log('error when connecting to db:', err);
-            setTimeout(handleDisconnect, 2000); 
-        }                                    
-    });                            
+            setTimeout(handleDisconnect, 2000);
+        }
+    });
     connection.on('error', function (err) {
         console.log('db error in file points-sql.js', err);
-        if (err.code === 'PROTOCOL_CONNECTION_LOST' || err.code === "ECONNRESET") { 
-            handleDisconnect();                        
-        } else {                                     
-            throw err;                                  
+        if (err.code === 'PROTOCOL_CONNECTION_LOST' || err.code === "ECONNRESET") {
+            handleDisconnect()
+        } else {
+            throw err;
         }
     });
 }
-handleDisconnect();
+handleDisconnect()
 const config = require("../configuration/config.json");
 
 function commitSQL() {
@@ -42,54 +43,53 @@ function commitSQL() {
 }
 
 
-
-
 module.exports.updatePoints = (message) => {
 
     //connection.connect();
-    connection.query('SELECT * FROM points WHERE userId = ?', [message.author.id], function (error, results, fields) {        
+    connection.query('SELECT * FROM points WHERE userId = ?', [message.author.id], function (error, results, fields) {
         if (!results.length) { // if no row
             //console.log(error);
-            
+
             var post = {
                 userId: message.author.id,
                 username: message.author.username,
                 points: 1,
                 level: 0,
+                total: 0,
             }
             connection.query('INSERT INTO points SET ?', post, function (err, results, fields) {
                 if (err) return console.log(err)
                 //connection.end()
             })
 
-
-
-
         } else { // if row
 
             connection.beginTransaction(function (err) {
                 if (err) return console.log(err)
-                connection.query('UPDATE points SET points = ? WHERE userId = ?', [results[0].points + 1, message.author.id], function (err, results) {
+                connection.query('UPDATE points SET points = ?, total = ? WHERE userId = ?', [results[0].points + 1, results[0].total ? results[0].total + 1 : 1, message.author.id], function (err, results) {
                     //connection.end()
                 })
                 //commitSQL()
             })
-            let curLevel = Math.floor(0.1 * Math.sqrt(results[0].points + 1));
+            // let curLevel = Math.floor(0.1 * Math.sqrt(results[0].points + 1));
+            let curLevel = Math.floor(Math.log((results[0].points + 1) / 100) / (Math.log(baseLevel))) + 1;
+            // powers of 100
+            var oldLevel = results[0].level || 0;
+
             if (curLevel > results[0].level) {
                 console.log("level up!")
 
-
-
-                connection.query('UPDATE points SET points = ?, level = ? WHERE userId = ?', [results[0].points + 1, curLevel, message.author.id], function (err) {
+                connection.query('UPDATE points SET level = ? WHERE userId = ?', [curLevel, message.author.id], function (err) {
                     //connection.end()
                 })
-                message.reply(`You've leveled up to level **${curLevel}**! Ain't that dandy?`)
+                if (oldLevel != 0) {
+                    message.reply(`You've leveled up to level **${curLevel}**! Ain't that dandy?`)
+                }
+
                 //commitSQL()
 
-
             }
-
-
+            message.channel.send(results[0].points + 1)
 
         }
     })
@@ -109,14 +109,8 @@ module.exports.updatePoints = (message) => {
         }
     })
 
-
-
-
     //connection.end()
 }
-
-
-
 
 module.exports.checkInformation = (message) => {
     var args = message.content.slice(config.prefix.length).trim().split(/ +/g);
@@ -139,7 +133,6 @@ module.exports.checkInformation = (message) => {
             }
 
         })
-
 
     }
     if (command === "level") {

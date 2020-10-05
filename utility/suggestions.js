@@ -25,14 +25,14 @@ function handleDisconnect() {
     connection.on('error', function (err) {
         console.log('db error in file suggestions.js', err);
         if (err.code === 'PROTOCOL_CONNECTION_LOST' || err.code === "ECONNRESET") {
-            handleDisconnect();
+            handleDisconnect()
         } else {
             throw err;
         }
     });
 }
 handleDisconnect();
-(async () => {
+;(async () => {
     await connection.query(`CREATE DATABASE IF NOT EXISTS requests`)
     await connection.changeUser({ database: "requests" }, (err) => { if (err) console.log(err)})
     await connection.query(`CREATE TABLE IF NOT EXISTS modrequests (
@@ -135,7 +135,7 @@ exports.acceptRequest = async (client, message, args) => {
         copyMessage = async () => {
             return new Promise((resolve, reject) => {
                 connection.query(`INSERT INTO modrequests SET ?`, obj, async (err, res, fields) => {
-                    const embed = new Discord.RichEmbed()
+                    const embed = new Discord.MessageEmbed()
                         .setTitle(`Accepted request by ${m.author.username}`)
                         .setAuthor(message.author.username, message.author.displayAvatarURL)
                         .setDescription(content)
@@ -143,7 +143,7 @@ exports.acceptRequest = async (client, message, args) => {
                         .setColor(color())
                         .setFooter(`ID: ${res.insertId}`)
                         .setTimestamp()
-                    var channel = client.channels.find("name", "accepted-suggestions")
+                    var channel = client.channels.cache.find(c => c.name == "accepted-suggestions")
                     var messageIDs = []
                     channel.send(embed).then(m1 => {
                         messageIDs.push(m1.id)
@@ -191,20 +191,20 @@ exports.completeRequest = async (client, message, args) => {
             message.channel.fetchMessage(e.acceptorMessageID).then(m => {
                 m.delete()
 
-                const embed = new Discord.RichEmbed()
+                const embed = new Discord.MessageEmbed()
                     .setTitle(`Accepted request by ${e.sender}`)
-                    .setAuthor(e.acceptor, client.users.get(e.acceptorID).displayAvatarURL)
+                    .setAuthor(e.acceptor, client.users.cache.get(e.acceptorID).displayAvatarURL)
                     .setDescription(e.content)
                     .setImage(e.attachments)
                     .setColor(color())
                     .setFooter(`ID: ${e.ID}`)
                     .addField("Accepted date", new Date(m.embeds[0].message.createdTimestamp).toDateString())
                     .setTimestamp(new Date())
-                client.channels.find("name", "suggestion-archive").send(embed)
+                client.channels.cache.find(c => c.name == "suggestion-archive").send(embed)
 
             })
             message.channel.send(`Successfully completed ${e.sender}'s request of ID ${e.ID}.`, { code: "css" }).then(m => m.delete(3000))
-            client.users.get(e.senderID).send(`Your request was completed by ${e.acceptor}!`, { code: "css" })
+            client.users.cache.get(e.senderID).send(`Your request was completed by ${e.acceptor}!`, { code: "css" })
 
         })
     })

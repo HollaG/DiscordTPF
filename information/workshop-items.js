@@ -180,10 +180,10 @@ exports.searchWorkshop = async (message, searchString, rawSearch, client) => {
     })
 }
 
-const mysql = require("mysql2/promise");
+const mysql = require("mysql");
 var db_config = {
     host: tokenId.host,
-    user: "express-bot",
+    user: "tfbot",
     password: tokenId.pass,
 
     database: "workshop",
@@ -201,19 +201,19 @@ var db_config = {
 //     connection.on('error', function (err) {
 //         console.log('db error in file workshop-items.js', err);
 //         if (err.code === 'PROTOCOL_CONNECTION_LOST' || err.code === "ECONNRESET") {
-//             handleDisconnect();
+//             handleDisconnect()
 //         } else {
 //             throw err;
 //         }
 //     });
 // }
-// handleDisconnect();
+// handleDisconnect()
 
 exports.storeDB = async (client) => {
-    var connection = await mysql.createConnection(db_config);
+    var connection = mysql.createConnection(db_config);
     try {
         var timeStart = process.hrtime()
-        var channel = client.channels.find("name", "botstuff")
+        var channel = client.channels.cache.find(c => c.name == "botstuff")
         channel.send(`Updating local database, please stand by.`)
 
         var newRows;
@@ -429,7 +429,7 @@ exports.searchUser = async (client, message, searchStr) => {
     (async () => {
         console.log(searchStr, "searchStr")
         var searchText = `%${searchStr}%`
-        var connection = await mysql.createConnection(db_config);
+        var connection = mysql.createConnection(db_config);
         var results = await connection.query(`SELECT * FROM steam_workshop WHERE creatorName LIKE ?`, [searchText])
         try {
             people = new Set()
@@ -554,7 +554,7 @@ exports.searchUser = async (client, message, searchStr) => {
                                     var thingToSelect = arrSelector
                                     setTimeout(() => {
                                         collector.on("collect", r => {
-                                            r.remove(message.author.id)
+                                            r.users.remove(message.author.id)
                                             console.log("collected", r.emoji.name)
                                             if (r.emoji.name === "◀") {
                                                 ; (async () => {
@@ -657,7 +657,7 @@ exports.searchUser = async (client, message, searchStr) => {
                                         })
                                         collector.on("end", collected => {
                                             infoM.edit("Emoji navigation is now disabled.")
-                                            msg.clearReactions()
+                                            msg.reactions.removeAll()
 
                                         })
 
@@ -872,7 +872,7 @@ exports.automaticInfo = async (client, message, mainServer) => {
             var shortDescription = `\`\`\`${description.trim().replace(/(<a href[\s\S]*?>[\s\S]*?)|(\b(http|https):\/\/.*[^ alt]\b)/g, "").replace(/^\s*\n/gm, "").replace(/\[[^\]]*\]/g, "").substring(0, Math.min(description.length, 250))}...\`\`\`Read more at [the mod's workshop page.](${modLink})`
 
             var linkToMessage = message.url
-            var embed = new Discord.RichEmbed()
+            var embed = new Discord.MessageEmbed()
                 .setTitle(`New mod published in the workshop.`)
                 .setDescription(`[See the annoucement message](${linkToMessage})`)
                 .setColor(3447003)
@@ -889,7 +889,7 @@ exports.automaticInfo = async (client, message, mainServer) => {
                 .addField(`Dependencies (${numberOfDependencies})`, dependencies.join("\n"), true)
                 .addField("File size", fileSize)
 
-            var workshopUpdate = client.channels.find("name", "new-mods-preview")
+            var workshopUpdate = client.channels.cache.find(c => c.name == "new-mods-preview")
             workshopUpdate.send(embed)
         } catch (e) {
 

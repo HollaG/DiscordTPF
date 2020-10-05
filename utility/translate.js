@@ -24,14 +24,14 @@ async function createEmbed(client, message, args, originalSentence, translateFro
         to: translateTo
     })    
 
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
         .setAuthor(`Translating from ${translateFrom} to ${translateTo}`, client.user.displayAvatarURL)
         .setColor(randomColor())
         .setTimestamp()            
         .setFooter(`Translation #${data.translateCount}`, client.user.displayAvatarURL)
         .addField(`Original sentence (${translateFrom}):`, `\`\`\`${originalSentence}\`\`\``)
         .addField(`Translated sentence (${translateTo}):`, `\`\`\`${translatedSentence}\`\`\``)
-        .addBlankField()
+        .addField('\u200b', '\u200b')
         .addField("Powered by Yandex.Translate", "http://translate.yandex.com/")
     
     let newCount = data.translateCount + 1

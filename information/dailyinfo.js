@@ -93,10 +93,10 @@ exports.updateDaily = async (client, mainServer) => {
     G: Most active user: [#user(identifier)] with [messagecount]
     */
     var a = getYesterdayDate();
-    var connection = await mysql.createConnection(db_config);
+    var connection = mysql.createConnection(db_config);
     var result1 = await connection.query(`SELECT NumberOfUsersToday FROM serverInfo WHERE Date = ?`, [getDayBeforeYesterday()])
     var b = (result1[0][0]) ? result1[0][0].NumberOfUsersToday : 0    
-    var c = client.guilds.get(mainServer).memberCount
+    var c = client.guilds.cache.get(mainServer).memberCount
     var d = c - b
     var result2 = await connection.query(`SELECT SUM(numberSent) AS messageCount FROM channelInfo`)
     var e = (result2[0][0]) ? result2[0][0].messageCount : 0
@@ -121,13 +121,13 @@ exports.updateDaily = async (client, mainServer) => {
     if (!result5[0][0]) { 
         connection.execute('INSERT INTO serverInfo (Date, NumberOfUsersYesterday, NumberOfUsersToday, NetUserChange, TotalMessagesSent, MostActiveChannel, MostActiveUser) VALUES (?, ?, ?, ?, ?, ?, ?)', [a, b, c, d, e, f, g])
     } else { 
-        client.channels.find("name", "botstuff").send(`Error updating dailyinfo: The database has already been updated with ${getYesterdayDate()}'s information.`)
+        client.channels.cache.find(c => c.name == "botstuff").send(`Error updating dailyinfo: The database has already been updated with ${getYesterdayDate()}'s information.`)
     }
 
     // send the update message 
 
     var stats = client.channels.find("name", "statistics")
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
         .setTitle(`Server statistics for ${getYesterdayDate()}`)
         .setDescription("A compilation of the day's events.")
         .setColor("#5f87ed")
@@ -163,7 +163,7 @@ exports.logSpecificChannel = async (client, message, mainServer) => {
     var channelID = message.channel.id
     var channelName = message.channel.name
 
-    // var connection = await mysql.createConnection(db_config);
+    // var connection = mysql.createConnection(db_config);
     var result = await pool.query(`SELECT * FROM channelInfo WHERE channelID = ${channelID}`)
     try { 
         if (!result[0][0]) { // if no result, add the channel as a new entry
@@ -178,7 +178,7 @@ exports.logSpecificChannel = async (client, message, mainServer) => {
 };
 
 exports.logSpecificUser = async (client, message, mainServer) => { 
-    // var connection = await mysql.createConnection(db_config);
+    // var connection = mysql.createConnection(db_config);
     var result = await pool.query(`SELECT * FROM userInfo WHERE userId = ${message.author.id}`)
     try { 
         if (!result[0][0]) { 
@@ -192,7 +192,7 @@ exports.logSpecificUser = async (client, message, mainServer) => {
 }
 
 exports.checkYesterdayInfo = async (client, message, mainServer) => { 
-    var connection = await mysql.createConnection(db_config);
+    var connection = mysql.createConnection(db_config);
     var result = await connection.query(`SELECT * FROM serverInfo WHERE Date = ?`, [getYesterdayDate()])    
     var a = result[0][0] ? result[0][0].Date : 0
     var b = result[0][0] ? result[0][0].NumberOfUsersYesterday : 0
@@ -201,7 +201,7 @@ exports.checkYesterdayInfo = async (client, message, mainServer) => {
     var e = result[0][0] ? result[0][0].TotalMessagesSent : 0
     var f = result[0][0] ? result[0][0].MostActiveChannel : 0
     var g = result[0][0] ? result[0][0].MostActiveUser : 0
-    const embed = new Discord.RichEmbed()
+    const embed = new Discord.MessageEmbed()
         .setTitle(`Server statistics for ${getYesterdayDate()}`)
         .setDescription("A compilation of the day's events.")
         .setColor("#5f87ed")

@@ -35,7 +35,7 @@ const dailyInfo = require("./information/dailyinfo")
 
 var db_config = {
     host: tokenId.host,
-    user: "express-bot",
+    user: "tfbot",
     password: tokenId.pass,
 
     database: "scores",
@@ -138,7 +138,7 @@ client.login(tokenId.token);
 
 client.on("ready", async() => {
     console.log("I am ready!");
-    client.channels.find("name", "botstuff").send("Bot has restarted on " + new Date().toString())
+    client.channels.cache.find(c => c.name == "botstuff").send("Bot has restarted on " + new Date().toString())
     //client.user.setGame("transportfever.com");
     client.user.setPresence({
         game: {
@@ -146,9 +146,9 @@ client.on("ready", async() => {
             type: 0
         }
     });
-    var rolesChannel = client.channels.find("name", "roles")
-    await rolesChannel.fetchMessage(addroleMsge)
-    await rolesChannel.fetchMessage(removeroleMsge)
+    var rolesChannel = client.channels.cache.find(c => c.name == "welcome")
+    await rolesChannel.messages.fetch(addroleMsge)
+    await rolesChannel.messages.fetch(removeroleMsge)
 
 });
 
@@ -176,7 +176,7 @@ ontime({
     try {
         updateRoles.activeOne(client, mainServer);
     } catch (e) {
-        client.channels.find("name", "botstuff").send(e)
+        client.channels.cache.find(c => c.name =="botstuff").send(e)
     } finally {
         ot.done();
         return
@@ -228,9 +228,11 @@ client.on("message", message => {
 });
 
 client.on("message", message => {
+    
+
     var mclength = message.content.split(" ")
     console.log(`${message.author.username}` + " has sent a message that is " + mclength.length + " words long.");
-    if (!message.content.startsWith(config.prefix) && message.channel.type !== "dm" && message.author.id !== "354834684234170378" && !message.author.bot) {
+    if (!message.content.startsWith(config.prefix) && message.channel.type !== "dm" && message.author.id !== "354834684234170378" && !message.author.bot && message.content.length > 16) {
         pointsSQL.updatePoints(message) // this adds the points for each message
         if (message.channel.name != "admin-talk") { 
             dailyInfo.logSpecificChannel(client, message, mainServer) 
@@ -244,7 +246,7 @@ client.on("message", message => {
     }
     var args = message.content.slice(config.prefix.length).trim().split(/ +/g);
     var command = args.shift().toLowerCase()
-
+   
     if (command === "test") {
         if (message.author.id !== config.ownerID) return;
         doThis(client)
@@ -283,32 +285,6 @@ client.on("message", message => {
         message.channel.send("```Please do NOT use @everyone or @here!```")
     }
 
-    // if (message.content === "!copyDB" && message.author.id === config.ownerID) {
-    //     var numberOfUsers_scores = 0
-    //     sql.all(`SELECT * FROM scores`).then((row) => {
-    //         while (row[numberOfUsers_scores]) {
-    //             numberOfUsers_scores++
-    //             console.log(numberOfUsers_scores)
-    //         }
-    //         setTimeout(function () {
-    //             for (var i = 0; i < numberOfUsers_scores; i++) {
-    //                 connection.query('INSERT INTO points VALUES (?, ?, ?, ?, ?, ?)', [row[i].userId, row[i].username, row[i].points, row[i].level, row[i].November_2017, row[i].December_2017])
-    //             }
-    //         }, 4000)
-    //     })
-    //     var numberOfUsers_links = 0
-    //     sql.all(`SELECT * FROM links`).then((rows) => {
-    //         while (rows[numberOfUsers_links]) {
-    //             numberOfUsers_links++
-    //             console.log(numberOfUsers_links)
-    //         }
-    //         setTimeout(function () {
-    //             for (var i = 0; i < numberOfUsers_links; i++) {
-    //                 connection.query('INSERT INTO links VALUES (?, ?, ?, ?, ?)', [rows[i].userId, rows[i].username, rows[i].twitch, rows[i].youtube, rows[i].steam])
-    //             }
-    //         }, 4000)
-    //     })
-    // }
 
     if (message.channel.name == "new-mods-releases" && message.content.match(`https:\/\/steamcommunity\.com\/sharedfiles\/filedetails\/`)) { // match this specific link
         workshop.automaticInfo(client, message, mainServer)
@@ -317,13 +293,15 @@ client.on("message", message => {
 
     var selector;
     if (message.content.startsWith(config.prefix)) {
-        if (commands[command]) {
+        
+
+        if (commands[command] && commands[command].trim.length != 0) {
             // message reply array, see commands.json
             message.channel.send(commands[command]).catch(e => {})
         }
 
         // admin- and mod- specific commands 
-        if (message.member.roles.some(r => ["AdminZ", "MoDerators"].includes(r.name))) { 
+        if (message.member.roles.cache.some(r => ["AdminZ", "MoDerators"].includes(r.name))) { 
             switch (command) { 
                 case "delete":                     
                     modTools.purgeMessage(client, mainServer, message, args)    
@@ -334,6 +312,7 @@ client.on("message", message => {
         }
         
         // general commands
+        
         switch (command) {
             case "score":
                 totalpoints.totalScore(client, message)
@@ -470,27 +449,29 @@ client.on("message", message => {
                 break;
             case "agree":
                 //try { 
-                    var guild = client.guilds.get(mainServer)
-                    var unverified = guild.roles.find("name", "Unverified") // Unverified role
-                    var verified = guild.roles.find("name", "Verified") // verified
-                        if (message.channel.name == "agree" && message.member.roles.has(unverified.id)) {                     
-                            // message.delete(1000)
-                            message.reply("thank you for agreeing to the rules. The rest of the server will be unlocked. We hope you enjoy your stay.").then(m => { 
-                                // m.delete(1000)    
-                                message.member.addRole(verified).catch(e => { 
-                                    message.reply("error adding. Something went wrong. Please ping @Holla.")
+                    var guild = client.guilds.cache.get(mainServer)
+                    var unverified = guild.roles.cache.find(r => r.name == "Unverified") // Unverified role
+                    var verified = guild.roles.cache.find(r => r.name == "Verified") // verified
+                    console.log(Boolean(message.channel.name == "agree"))
+                    if (message.channel.name == "agree" && message.member.roles.cache.get(unverified.id)) {                               
+                        
+                        // message.delete(1000)
+                        message.reply("thank you for agreeing to the rules. The rest of the server will be unlocked. We hope you enjoy your stay.").then(m => { 
+                            // m.delete(1000)    
+                            message.member.roles.add(verified).catch(e => { 
+                                message.reply("error adding. Something went wrong. Please ping @Holla.")
+                                console.log(e)
+                            })
+                            setTimeout(function(){ 
+                                message.member.roles.remove(unverified).catch(e => { 
                                     console.log(e)
+                                    message.reply("error removing. Something went wrong. Please ping @Holla.")
                                 })
-                                setTimeout(function(){ 
-                                    message.member.removeRole(unverified).catch(e => { 
-                                        console.log(e)
-                                        message.reply("error removing. Something went wrong. Please ping @Holla.")
-                                    })
-                                }, 10000)
-                                
-                            })                  
+                            }, 10000)
                             
-                        }
+                        })                  
+                        
+                    }
                         
                 //} catch (e) { 
                 //     message.reply("unexpected error, please contact @Holla")
@@ -542,9 +523,10 @@ client.on("messageDelete", (message) => {
 // Member join welcome message
 client.on("guildMemberAdd", (member) => {
     console.log(`${member.user.username} has joined TFDiscord`);
-    client.channels.find("name", "welcome").send(`Welcome ${member.user.username} to the server! Please read the rules in <#${rules}> and type !agree in <#${iAgree}> to agree!`);     
-    var unverified = client.guilds.get(mainServer).roles.find("name", "Unverified") // Unverified role
-    member.addRole(unverified)   
+    client.channels.cache.find(c => c.name == "welcome").send(`Welcome ${member.user.username} to the server! Please read the rules in <#${rules}> and type !agree in <#${iAgree}> to agree!`);     
+   
+    var unverified = client.guilds.cache.get(mainServer).roles.cache.find(r => r.name == "Unverified") // Unverified role
+    member.roles.add(unverified)   
     auditLogs.auditMemberJoin(client, member)
 
 });
