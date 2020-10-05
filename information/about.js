@@ -39,20 +39,31 @@ module.exports.server = (message) => {
     var allchannellist = message.guild.channels.cache
     var DateofCreation = new Date(message.guild.createdAt).toDateString()
     var GuildOwner = message.guild.owner.user.username
-    var GuildDefaultChannel = message.guild.defaultChannel.name
+
     var serverIcon = message.guild.iconURL
     var serverName = message.guild.name
     var region = message.guild.region
-    var rolelist = message.guild.roles.array().toString()
-    var channelcount = message.guild.channels.array().length
+    var roles = []
+    var rolelist = Array.from(message.guild.roles.cache)
+    var channelcount = Array.from(message.guild.channels.cache).length
 
-    var textChannel = allchannellist.map(t => t.type == "text").toString()   
-    var voiceChannel = allchannellist.map(t => t.type == "voice").toString()
+    var txtChns = []
+    var textChannel = allchannellist.filter(t => {
+        if (t.type == "text") {
+            txtChns.push(t)
+        }
+    }).toString()  
+    var vchns = [] 
+    var voiceChannel = allchannellist.filter(t => {
+        if (t.type == "voice") {
+            vchns.push(t)
+        }
+    }).toString()
 
     function embed() {
         message.channel.send({
             "embed": {
-                "title": "Stats for " + (mainServerName),
+                "title": "Stats for " + (serverName),
                 // "description": ".",
                 "color": 149684,
                 "timestamp": (message.createdAt),
@@ -61,12 +72,12 @@ module.exports.server = (message) => {
                     "text": "Requested by " + (message.author.username)
                 },
                 "thumbnail": {
-                    "url": (mainServerIcon)
+                    "url": (serverIcon)
                 },
                 "author": {
-                    "name": (mainServerName),
+                    "name": (serverName),
                     "url": "",
-                    "icon_url": (mainServerIcon)
+                    "icon_url": (serverIcon)
                 },
                 "fields": [
                     {
@@ -95,11 +106,11 @@ module.exports.server = (message) => {
                     },
                     {
                         "name": "Available text channels: ",
-                        "value": (textChannel),
+                        "value": (txtChns),
                     },
                     {
                         "name": "Available voice channels: ",
-                        "value": (voiceChannel),
+                        "value": (vchns),
                     },
                     {
                         "name": "Total channel count: ",

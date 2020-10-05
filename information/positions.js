@@ -31,10 +31,10 @@ function handleDisconnect() {
     });
 }
 handleDisconnect()
-// connection.on('error', function (err) {
-//     console.log(err.code)
-//     connection.query('SELECT 1')
-// })
+connection.on('error', function (err) {
+    console.log(err.code)
+    connection.query('SELECT 1')
+})
 
 module.exports.capitalizeFirstLetter = (string) => {
     return string.charAt(0).toUpperCase() + string.slice(1);
@@ -86,7 +86,7 @@ module.exports.getTop = (message, page, date) => {
     }
     if (date == "total") pointValue = "total"
     
-    console.log(pointValue)
+    console.log(pointValue, "dasdas")
 
     var reactedUser = message.author.id
     var arr = []
@@ -119,7 +119,7 @@ module.exports.getTop = (message, page, date) => {
                     return message.reply(`please enter a valid page number between \`1\` and \`${totalPages}\``)
                 }
 
-                async function sendTop(message) {
+                function sendTop(message) {
                     arr = []
                     for (i; i < j; i++) {
                         // this code wouldn't run if there was no error.
@@ -176,7 +176,10 @@ module.exports.getTop = (message, page, date) => {
                     arr.push("Page " + j / 10 + " of " + Math.ceil(numberOfUsers / 10) + " || " + `Column: ${pointValue}` + " || Total recorded users: " + numberOfUsers)
                 }
                 sendTop(message)
+     
                 arr.join("\n")
+             
+            
                 message.channel.send(arr, { code: "xl" }).then(message => {
                     ; (async () => {
                         var deleteMe = await message.channel.send("Click the emojis by the next 30 seconds to go to the next page!")

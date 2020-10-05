@@ -89,8 +89,8 @@ module.exports.updatePoints = (message) => {
                 //commitSQL()
 
             }
-            message.channel.send(results[0].points + 1)
-
+        
+          
         }
     })
     connection.query('SELECT * FROM links WHERE userId = ?', [message.author.id], function (err, results, fields) {
