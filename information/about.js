@@ -45,6 +45,11 @@ module.exports.server = (message) => {
     var region = message.guild.region
     var roles = []
     var rolelist = Array.from(message.guild.roles.cache)
+    rolelist.forEach(role => {
+        
+        
+        roles.push(role[1])
+    })
     var channelcount = Array.from(message.guild.channels.cache).length
 
     var txtChns = []
@@ -102,7 +107,7 @@ module.exports.server = (message) => {
                     },
                     {
                         "name": "List of roles: ",
-                        "value": (rolelist),
+                        "value": (roles),
                     },
                     {
                         "name": "Available text channels: ",
