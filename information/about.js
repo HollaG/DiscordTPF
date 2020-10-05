@@ -159,19 +159,19 @@ module.exports.profile = (message) => {
 
     var role; var joinDate; var userIcon;
     if (message.mentions.users.size >= 1) {
-        if (message.mentions.members.first().highestRole.name == "@everyone") {
+        if (message.mentions.members.first().roles.highest.name == "@everyone") {
             role = "No role for this user!"
         } else {
-            role = message.mentions.members.first().highestRole.name
+            role = message.mentions.members.first().roles.highest.name
         }
         joinDate = new Date(message.mentions.members.first().joinedAt).toDateString()
         userIcon = message.mentions.users.first().displayAvatarURL
 
     } else {
-        if (message.member.highestRole.name == "@everyone") {
+        if (message.member.roles.highest.name == "@everyone") {
             role = "No role for this user!"
         } else {
-            role = message.member.highestRole.name
+            role = message.member.roles.highest.name
         }
         joinDate = new Date(message.member.joinedTimestamp).toDateString()
         userIcon = message.client.user.displayAvatarURL
