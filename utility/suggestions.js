@@ -84,7 +84,7 @@ exports.acceptRequest = async (client, message, args) => {
             var m = await message.channel.fetchMessage(e)
 
         } catch (e) {
-            return message.channel.send("- ERROR: Message ID is wrong! -", { code: "diff" }).then(m => m.delete(5000))
+            return message.channel.send("- ERROR: Message ID is wrong! -", { code: "diff" }).then(m => m.delete({timeout:5000}))
         }
 
         m.react("☑")
@@ -162,10 +162,10 @@ exports.acceptRequest = async (client, message, args) => {
 exports.completeRequest = async (client, message, args) => {
     // args = [array of IDs]
     var cleaned = args.map(e => Number(e))
-    message.delete(2000)
+    message.delete({timeout:2000})
     if (cleaned.some(m => isNaN(m))) {
         return message.channel.send("- Please input only NUMBERS! -", { code: "diff" }).then(msg => {
-            msg.delete(2000)
+            msg.delete({timeout:2000})
         })
 
     }
@@ -182,9 +182,9 @@ exports.completeRequest = async (client, message, args) => {
         var difference = args.filter(e => !IDs.includes(e))
 
         if (difference.length == 1) {
-            message.channel.send(`- The request ID ${difference.join(" ")} was not found in the database! -`, { code: "diff" }).then(m => m.delete(4000))
+            message.channel.send(`- The request ID ${difference.join(" ")} was not found in the database! -`, { code: "diff" }).then(m => m.delete({timeout:4000}))
         } else if (difference.length > 1) {
-            message.channel.send(`- The request IDs ${difference.join(" & ")} were not found in the database! -`, { code: "diff" }).then(m => m.delete(4000))
+            message.channel.send(`- The request IDs ${difference.join(" & ")} were not found in the database! -`, { code: "diff" }).then(m => m.delete({timeout:4000}))
         }
 
         res.forEach(e => {
@@ -203,7 +203,7 @@ exports.completeRequest = async (client, message, args) => {
                 client.channels.cache.find(c => c.name == "suggestion-archive").send(embed)
 
             })
-            message.channel.send(`Successfully completed ${e.sender}'s request of ID ${e.ID}.`, { code: "css" }).then(m => m.delete(3000))
+            message.channel.send(`Successfully completed ${e.sender}'s request of ID ${e.ID}.`, { code: "css" }).then(m => m.delete({timeout:3000}))
             client.users.cache.get(e.senderID).send(`Your request was completed by ${e.acceptor}!`, { code: "css" })
 
         })
@@ -211,12 +211,12 @@ exports.completeRequest = async (client, message, args) => {
 }
 exports.clearRequests = async (client, message) => {
 
-    message.delete(2000)
+    message.delete({timeout:2000})
     connection.query(`SELECT * FROM modrequests WHERE acceptorID = '${message.author.id}' AND completed_status = 'FALSE'`, (err, res, fields) => {
         if (err) console.log(err)
 
         if (res.length == 0) {
-            message.channel.send("Nothing to clear!").then(m => m.delete(2000))
+            message.channel.send("Nothing to clear!").then(m => m.delete({timeout:2000}))
         } else {
 
             (async () => {
@@ -227,7 +227,7 @@ exports.clearRequests = async (client, message) => {
                     })
                     if (i == res.length - 1) {
                         deleteThis.delete()
-                        message.channel.send(`Deletion complete. Deleted ${res.length} requests.`).then(m => m.delete(10000))
+                        message.channel.send(`Deletion complete. Deleted ${res.length} requests.`).then(m => m.delete({timeout:10000}))
 
                     }
                 }
@@ -241,10 +241,10 @@ exports.clearRequests = async (client, message) => {
 
 exports.deleteRequest = (client, message, args) => { 
     var cleaned = args.map(e => Number(e))
-    message.delete(2000)
+    message.delete({timeout:2000})
     if (cleaned.some(m => isNaN(m))) {
         return message.channel.send("- Please input only NUMBERS! -", { code: "diff" }).then(msg => {
-            msg.delete(2000)
+            msg.delete({timeout:2000})
         })
 
     }

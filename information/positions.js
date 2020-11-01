@@ -135,7 +135,7 @@ module.exports.getTop = (message, page, date) => {
                                 i = i + 10
                                 j = j + 10
                                 k = 1
-                                return message.channel.send("No more users!").then(message => message.delete(1000))
+                                return message.channel.send("No more users!").then(message => message.delete({timeout: 1000}))
                             } else {
                                 console.log("else triggered")
 
@@ -221,7 +221,7 @@ module.exports.getTop = (message, page, date) => {
                                     if (k === 0) {
                                         message.edit(arr, { code: "xl" })
                                     } else {
-                                        return message.channel.send("No more members!").then(message => message.delete(1000))
+                                        return message.channel.send("No more members!").then(message => message.delete({timeout: 1000}))
                                     }
                                 }
                                 if (r.emoji.name === "⏹") {

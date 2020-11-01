@@ -55,19 +55,19 @@ exports.purgeMessage = async (client, mainServer, message, args) => {
     var error = 0
     if (!message.guild.channels.cache.get(channelID)) {
         var desc = `**${message.author.username}**, there is no such channel.`
-        message.channel.send(createOneLineEmbed(desc, color)).then(m => m.delete(7500))
+        message.channel.send(createOneLineEmbed(desc, color)).then(m => m.delete({timeout: 7500}))
         error = 1
     }
 
     //step 4
     if (number > 100 || number == 0) {
         var desc = `**${message.author.username}**, please choose a number between 1 and 100. \n\`\`\`Error: ${number} is not in the range.\`\`\``
-        message.channel.send(createOneLineEmbed(desc, color)).then(m => m.delete(7500))
+        message.channel.send(createOneLineEmbed(desc, color)).then(m => m.delete({timeout: 7500}))
         error = 1
     }
 
     if (error) {
-        message.delete(7500)
+        message.delete({timeout: 7500})
         return
     }
 

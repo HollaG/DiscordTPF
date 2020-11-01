@@ -62,10 +62,10 @@ exports.addRole = (client, r, user) => {
                 if (!reactor.roles.cache.has(role.id)) {
                     reactor.roles.add(role).catch(console.error)
                 } else {
-                    channel.send("You already have this role!").then(m => m.delete(1000))
+                    channel.send("You already have this role!").then(m => m.delete({timeout: 1000}))
                 }
             } catch (e) {
-                channel.send("Unexpected error occurred! Contact Holla").then(m => m.delete(1000))
+                channel.send("Unexpected error occurred! Contact Holla").then(m => m.delete({timeout: 1000}))
             }
             break;
         case "2⃣":   // CS player
@@ -74,10 +74,10 @@ exports.addRole = (client, r, user) => {
                 if (!reactor.roles.cache.has(role.id)) {
                     reactor.roles.add(role).catch(console.error)
                 } else {
-                    channel.send("You already have this role!").then(m => m.delete(1000))
+                    channel.send("You already have this role!").then(m => m.delete({timeout: 1000}))
                 }
             } catch (e) {
-                channel.send("Unexpected error occurred! Contact Holla").then(m => m.delete(1000))
+                channel.send("Unexpected error occurred! Contact Holla").then(m => m.delete({timeout: 1000}))
             }
             break;
 
@@ -87,10 +87,10 @@ exports.addRole = (client, r, user) => {
                 if (!reactor.roles.cache.has(role.id)) {
                     reactor.roles.add(role).catch(console.error)
                 } else {
-                    channel.send("You already have this role!").then(m => m.delete(1000))
+                    channel.send("You already have this role!").then(m => m.delete({timeout: 1000}))
                 }
             } catch (e) {
-                channel.send("Unexpected error occurred! Contact Holla").then(m => m.delete(1000))
+                channel.send("Unexpected error occurred! Contact Holla").then(m => m.delete({timeout: 1000}))
             }
             break;
 
@@ -100,10 +100,10 @@ exports.addRole = (client, r, user) => {
                 if (!reactor.roles.cache.has(role.id)) {
                     reactor.roles.add(role).catch(console.error)
                 } else {
-                    channel.send("You already have this role!").then(m => m.delete(1000))
+                    channel.send("You already have this role!").then(m => m.delete({timeout: 1000}))
                 }
             } catch (e) {
-                channel.send("Unexpected error occurred! Contact Holla").then(m => m.delete(1000))
+                channel.send("Unexpected error occurred! Contact Holla").then(m => m.delete({timeout: 1000}))
             }
             break;
     }
@@ -123,10 +123,10 @@ exports.removeRole = (client, r, user) => {
                 if (reactor.roles.cache.has(role.id)) {
                     reactor.roles.remove(role).catch(console.error)
                 } else {
-                    channel.send("You don't have this role!").then(m => m.delete(1000))
+                    channel.send("You don't have this role!").then(m => m.delete({timeout: 1000}))
                 }
             } catch (e) {
-                channel.send("Unexpected error occurred! Contact Holla").then(m => m.delete(1000))
+                channel.send("Unexpected error occurred! Contact Holla").then(m => m.delete({timeout: 1000}))
             }
             break;
         case "2⃣":
@@ -135,10 +135,10 @@ exports.removeRole = (client, r, user) => {
                 if (reactor.roles.cache.has(role.id)) {
                     reactor.roles.remove(role).catch(console.error)
                 } else {
-                    channel.send("You don't have this role!").then(m => m.delete(1000))
+                    channel.send("You don't have this role!").then(m => m.delete({timeout: 1000}))
                 }
             } catch (e) {
-                channel.send("Unexpected error occurred! Contact Holla").then(m => m.delete(1000))
+                channel.send("Unexpected error occurred! Contact Holla").then(m => m.delete({timeout: 1000}))
             }
             break;
 
@@ -148,10 +148,10 @@ exports.removeRole = (client, r, user) => {
                 if (reactor.roles.cache.has(role.id)) {
                     reactor.roles.remove(role).catch(console.error)
                 } else {
-                    channel.send("You don't have this role!").then(m => m.delete(1000))
+                    channel.send("You don't have this role!").then(m => m.delete({timeout: 1000}))
                 }
             } catch (e) {
-                channel.send("Unexpected error occurred! Contact Holla").then(m => m.delete(1000))
+                channel.send("Unexpected error occurred! Contact Holla").then(m => m.delete({timeout: 1000}))
             }
             break;
 
@@ -161,10 +161,10 @@ exports.removeRole = (client, r, user) => {
                 if (reactor.roles.cache.has(role.id)) {
                     reactor.roles.remove(role).catch(console.error)
                 } else {
-                    channel.send("You don't have this role!").then(m => m.delete(1000))
+                    channel.send("You don't have this role!").then(m => m.delete({timeout: 1000}))
                 }
             } catch (e) {
-                channel.send("Unexpected error occurred! Contact Holla").then(m => m.delete(1000))
+                channel.send("Unexpected error occurred! Contact Holla").then(m => m.delete({timeout: 1000}))
             }
             break;
 

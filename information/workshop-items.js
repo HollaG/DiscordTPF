@@ -561,7 +561,7 @@ exports.searchUser = async (client, message, searchStr) => {
 
                                                     thingToSelect = thingToSelect - 1
                                                     if (thingToSelect < 0) {
-                                                        message.channel.send("No more items!").then(m => m.delete(1000))
+                                                        message.channel.send("No more items!").then(m => m.delete({timeout: 1000}))
                                                         thingToSelect = thingToSelect + 1
                                                     } else {
                                                         var res = await request.post(
@@ -592,7 +592,7 @@ exports.searchUser = async (client, message, searchStr) => {
                                                     console.log(arrayOfResults.length, "length")
                                                     thingToSelect = thingToSelect + 1
                                                     if (!arrayOfResults[thingToSelect]) {
-                                                        message.channel.send("No more items!").then(m => m.delete(1000))
+                                                        message.channel.send("No more items!").then(m => m.delete({timeout: 1000}))
                                                         thingToSelect = thingToSelect - 1
                                                     } else {
                                                         var res = await request.post(

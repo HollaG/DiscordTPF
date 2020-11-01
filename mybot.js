@@ -492,9 +492,9 @@ client.on("message", message => {
                     console.log(Boolean(message.channel.name == "agree"))
                     if (message.channel.name == "agree" && message.member.roles.cache.get(unverified.id)) {                               
                         
-                        // message.delete(1000)
+                        // message.delete({timeout: 1000})
                         message.reply("thank you for agreeing to the rules. The rest of the server will be unlocked. We hope you enjoy your stay.").then(m => { 
-                            // m.delete(1000)    
+                            // m.delete({timeout: 1000})    
                             message.member.roles.add(verified).catch(e => { 
                                 message.reply("error adding. Something went wrong. Please ping @Holla.")
                                 console.log(e)
@@ -560,7 +560,7 @@ client.on("messageDelete", (message) => {
 // Member join welcome message
 client.on("guildMemberAdd", (member) => {
     console.log(`${member.user.username} has joined TFDiscord`);
-    client.channels.cache.find(c => c.name == "welcome").send(`Welcome ${member.user.username} to the server! Please read the rules in <#${rules}> and type !agree in <#${iAgree}> to agree!`);     
+    client.channels.cache.find(c => c.name == "welcome").send(`Welcome ${member.user} to the server! Please read the rules in <#${rules}> and type !agree in <#${iAgree}> to agree!`);     
    
     var unverified = client.guilds.cache.get(mainServer).roles.cache.find(r => r.name == "Unverified") // Unverified role
     member.roles.add(unverified)   
