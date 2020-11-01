@@ -55,9 +55,10 @@ exports.addRole = (client, r, user) => {
     var channel = guild.channels.cache.find(c => c.name == "roles") // Update this 
     var reactor = guild.members.cache.get(user.id)
     var role;
+    console.log(r.emoji.name)
     switch (r.emoji.name) {
         case "1⃣":   //TpF player
-            role = guild.roles.cache,find(r => r.name == "TpF Player")
+            role = guild.roles.cache.find(r => r.name == "TpF Player")
             try {
                 if (!reactor.roles.cache.has(role.id)) {
                     reactor.roles.add(role).catch(console.error)

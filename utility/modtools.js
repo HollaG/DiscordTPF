@@ -99,7 +99,7 @@ exports.purgeMessage = async (client, mainServer, message, args) => {
                 .catch(e => {
                     console.log(e)
                     var desc = `**Error**: ${e.message}`
-                    message.channel.send(createOneLineEmbed(desc, color)).then(m => m.delete(5000))
+                    message.channel.send(createOneLineEmbed(desc, color)).then(m => m.delete({timeout:5000}))
                 })
         }
         if (r.emoji.name === '❌') {
@@ -111,8 +111,8 @@ exports.purgeMessage = async (client, mainServer, message, args) => {
 
     // deletes the command and question automatically
 
-    embedMessage.delete(10000).catch(e => { })
-    message.delete(10000).catch(e => { })
+    embedMessage.delete({timeout:10000}).catch(e => { })
+    message.delete({timeout:10000}).catch(e => { })
 
 }
 
