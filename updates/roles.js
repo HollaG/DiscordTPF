@@ -48,6 +48,8 @@ function DateInMonth() {
     return new Date().getDate()
 }
 
+var mainServer = "246190532949180417"
+
 exports.addRole = (client, r, user) => {
     var guild = client.guilds.cache.get(mainServer)
     var channel = guild.channels.cache.find(c => c.name == "roles") // Update this 
